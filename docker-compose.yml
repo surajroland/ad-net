@@ -1,0 +1,186 @@
+# ADNet Docker Compose Configuration
+# Multi-service setup for development, training, research, and API deployment
+# Uses environment variables from .env for configuration
+
+services:
+  # ==============================================================================
+  # DEVELOPMENT SERVICE - Primary development environment
+  # ==============================================================================
+  adnet-dev:
+    build:
+      context: .                    # Build context is current directory
+      target: development           # Multi-stage build target
+    image: adnet-dev:${VERSION}
+    container_name: adnet-dev
+
+    # Volume mounts for development workflow
+    volumes:
+      - .:/workspace                              # Mount project directory
+      - ~/.ssh:/root/.ssh:ro                      # SSH keys (read-only)
+      - ~/.gitconfig:/root/.gitconfig:ro          # Git configuration
+      - bash-history:/root                        # Persist bash history
+      - adnet-data:/workspace/data             # Project data
+      - adnet-logs:/workspace/logs             # Application logs
+      - adnet-models:/workspace/models         # ML models
+      - adnet-cache:/root/.cache               # Cache directory
+      - vscode-server:/root/.vscode-server        # VS Code server files
+      - /var/run/docker.sock:/var/run/docker.sock # Docker-in-Docker
+
+    # Port mappings for development services
+    ports:
+      - "${JUPYTER_PORT:-8888}:8888"              # Jupyter Lab
+      - "${TENSORBOARD_PORT:-6006}:6006"          # TensorBoard
+      - "${WANDB_PORT:-8097}:8097"                # Weights & Biases
+      - "${API_PORT:-8000}:8000"                  # FastAPI
+      - "${GRADIO_PORT:-7860}:7860"               # Gradio UI
+      - "${VISUALIZATION_PORT:-8080}:8080"        # 3D Visualization Server
+
+    # Environment variables for development
+    environment:
+      - NODE_ENV=development                       # Node.js environment
+      - PYTHONPATH=/workspace/src                  # Python module path
+      - HYDRA_FULL_ERROR=1                        # Hydra debug mode
+      - GITHUB_TOKEN=${GITHUB_TOKEN}              # GitHub API access
+      - HF_TOKEN=${HF_TOKEN}                      # Hugging Face API
+      - WANDB_API_KEY=${WANDB_API_KEY}            # Weights & Biases API
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+      - PYTORCH_CUDA_ALLOC_CONF=${PYTORCH_CUDA_ALLOC_CONF:-max_split_size_mb:512}
+
+    # Startup command with service initialization
+    command: >
+      bash -c "
+        echo '🚀 Starting ADNet Development Environment'
+        echo '🐚 Shell: Bash with Starship prompt'
+        echo ''
+        echo '📊 Jupyter Lab: http://localhost:${JUPYTER_PORT:-8888}'
+        echo '📈 TensorBoard: http://localhost:${TENSORBOARD_PORT:-6006}'
+        echo '🔍 Wandb: http://localhost:${WANDB_PORT:-8097}'
+        echo '🎥 3D Viz: http://localhost:${VISUALIZATION_PORT:-8080}'
+        echo ''
+        jupyter lab --ip=0.0.0.0 --port=${JUPYTER_PORT:-8888} --no-browser --allow-root &
+        tensorboard --logdir=outputs/logs --host=0.0.0.0 --port=${TENSORBOARD_PORT:-6006} &
+        exec bash
+      "
+
+    # Container configuration
+    stdin_open: true                     # Keep STDIN open
+    tty: true                           # Allocate pseudo-TTY
+    restart: unless-stopped             # Restart policy
+
+    # Health monitoring
+    healthcheck:
+      test: ["CMD", "python", "-c", "import torch; assert torch.cuda.is_available()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+    # GPU resource allocation
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # ==============================================================================
+  # TRAINING SERVICE - Optimized for ML training workloads
+  # ==============================================================================
+  adnet-train:
+    build:
+      context: .
+      target: training                   # Training-optimized stage
+    image: adnet-train:${VERSION}
+    container_name: adnet-train
+    extends: adnet-dev               # Inherit from dev service
+
+    # Training-specific environment
+    environment:
+      - TORCH_CUDNN_BENCHMARK=1         # Enable cuDNN benchmarking
+      - NCCL_DEBUG=WARN                 # NCCL debug level
+
+    # Training entry point
+    command: python scripts/training/train.py
+    profiles: ["training"]              # Only start with --profile training
+
+  # ==============================================================================
+  # RESEARCH SERVICE - Jupyter-only environment for experimentation
+  # ==============================================================================
+  adnet-research:
+    build:
+      context: .
+      target: development                # Use development stage
+    image: adnet-dev:${VERSION}
+    container_name: adnet-research
+    extends: adnet-dev               # Inherit configuration
+
+    # Only expose Jupyter port
+    ports:
+      - "${JUPYTER_PORT:-8888}:8888"
+
+    # Jupyter-only command
+    command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root
+    profiles: ["research"]              # Only start with --profile research
+
+  # ==============================================================================
+  # API SERVICE - Production API deployment
+  # ==============================================================================
+  adnet-api:
+    build:
+      context: .
+      target: production                 # Production-optimized stage
+    image: adnet-api:${VERSION}
+    container_name: adnet-api
+    extends: adnet-dev               # Inherit base configuration
+
+    # API-specific port mapping
+    ports:
+      - "${API_PORT:-8000}:8000"
+
+    # Production API server
+    command: uvicorn adnet.api:app --host 0.0.0.0 --port 8000
+    profiles: ["api"]                   # Only start with --profile api
+
+    # GPU allocation for inference
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # ==============================================================================
+  # VISUALIZATION SERVICE - 3D rendering and export
+  # ==============================================================================
+  adnet-viz:
+    build:
+      context: .
+      target: development
+    image: adnet-dev:${VERSION}
+    container_name: adnet-viz
+    extends: adnet-dev
+
+    # Visualization-specific ports
+    ports:
+      - "${VISUALIZATION_PORT:-8080}:8080"
+
+    # 3D visualization server
+    command: python scripts/visualization/viz_server.py --host 0.0.0.0 --port 8080
+    profiles: ["viz"]
+
+# ==============================================================================
+# PERSISTENT VOLUMES - Data persistence across container restarts
+# ==============================================================================
+volumes:
+  adnet-data:    # Project datasets and files
+  adnet-logs:    # Application and training logs
+  adnet-models:  # Trained model artifacts
+  adnet-cache:   # Cache for faster rebuilds
+  bash-history:     # Shell command history
+  vscode-server:    # VS Code server files
+
+# Network configuration
+networks:
+  default:
+    name: adnet-network

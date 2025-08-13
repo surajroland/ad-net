@@ -1,0 +1,50 @@
+# Pre-commit hooks for code quality and consistency
+
+repos:
+# Standard pre-commit hooks
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+    -   id: trailing-whitespace     # Remove trailing whitespace
+    -   id: end-of-file-fixer       # Ensure files end with newline
+    -   id: check-yaml              # Validate YAML syntax
+    -   id: check-added-large-files # Prevent large file commits
+        args: ["--maxkb=2048"]      # Allow files up to 2MB
+    -   id: check-merge-conflict    # Detect merge conflict markers
+    -   id: debug-statements        # Find debug statements
+
+# Code formatting with Black
+-   repo: https://github.com/psf/black
+    rev: 25.1.0
+    hooks:
+    -   id: black
+        language_version: python3
+
+# Import sorting with isort
+-   repo: https://github.com/pycqa/isort
+    rev: 6.0.1
+    hooks:
+    -   id: isort
+        args: ["--profile", "black"]
+
+# Linting with Ruff
+-   repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.12.1
+    hooks:
+    -   id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+
+# Type checking with mypy
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.16.1
+    hooks:
+    -   id: mypy
+        additional_dependencies: [
+            types-requests,
+            types-PyYAML,
+            types-setuptools,
+            torch,
+            numpy
+        ]
+        args: [--ignore-missing-imports, --strict-optional]
+        exclude: ^(tests/|scripts/|examples/)

@@ -1,0 +1,164 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# Environment variables
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+#.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific
+outputs/
+multirun/
+.hydra/
+data/raw/
+data/processed/
+data/harmonized/
+data/cross_dataset/
+data/export_formats/
+data/cache/
+logs/
+models/
+wandb/
+mlruns/
+
+# Secrets and private configs
+conf/data/private/
+conf/infrastructure/storage/private/
+*.key
+*.pem
+secrets.yaml
+
+# Model checkpoints and artifacts
+checkpoints/
+*.ckpt
+*.pth
+*.pt
+*.bin
+*.safetensors
+*.onnx
+
+# Documentation
+docs/_build/
+docs/build/
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# ruff
+.ruff_cache/
+
+# Docker and Development
+.env.local
+.env.*.local
+
+# GPU and monitoring
+gpu_stats.json
+monitoring_logs/
+
+# Development caches
+.devcontainer/.vscode/
+.devcontainer/.cache/
+node_modules/
+.npm/
+
+# Temporary files
+*.log
+*.bak
+*.tmp
+*.temp
+
+# Computer Vision specific
+*.jpg
+*.jpeg
+*.png
+*.tiff
+*.bmp
+*.gif
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# Large dataset files
+*.zip
+*.tar
+*.tar.gz
+*.7z
+
+# CUDA/GPU related
+*.cubin
+*.fatbin
+
+# nuScenes and other datasets
+nuscenes/
+waymo/
+kitti/
+argoverse/
+
+# Visualization exports
+vis_exports/
+carla_exports/
+omniverse_exports/
+rviz_exports/
+
+# C++ build artifacts
+cpp_engine/build/
+cpp_engine/cmake-build-*/
+cpp_engine/*.o
+cpp_engine/*.a
+cpp_engine/*.so
+
+# Backup files
+*.backup
+*~

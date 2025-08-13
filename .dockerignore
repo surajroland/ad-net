@@ -1,0 +1,77 @@
+# Docker ignore for optimized builds
+
+# Python artifacts
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.mypy_cache
+**/*.egg-info
+
+# Build artifacts
+**/dist
+**/build
+**/cpp_engine/build
+
+# Version control
+**/.git
+**/.gitignore
+
+# Documentation
+**/README.md
+**/LICENSE
+
+# Docker files
+**/Dockerfile*
+**/docker-compose*
+**/.dockerignore
+
+# Node.js
+**/node_modules
+**/npm-debug.log
+
+# Testing and coverage
+**/coverage
+**/.coverage
+**/.pytest_cache
+
+# ML/AI outputs
+**/outputs
+**/multirun
+**/.hydra
+**/wandb
+**/logs
+
+# Environment files
+**/.env
+**/.venv
+**/venv
+**/env
+**/requirements.txt
+
+# IDE and system files
+**/.DS_Store
+**/*.swp
+**/*.swo
+*~
+**/.idea
+**/.vscode
+
+# Data and models
+**/data/raw
+**/data/processed
+**/data/harmonized
+**/models/checkpoints
+**/vis_exports
+
+# Large files
+**/*.zip
+**/*.tar
+**/*.tar.gz
+**/*.7z
+
+# Dataset directories
+**/nuscenes
+**/waymo
+**/kitti
+**/argoverse

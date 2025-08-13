@@ -1,0 +1,41 @@
+# Visualization dependencies for Sparse4D v3
+
+# 3D Visualization Core
+open3d>=0.17.0
+trimesh>=3.23.0
+pyvista>=0.42.0
+vtk>=9.2.0
+vispy>=0.12.0
+
+# Point Cloud & Mesh Processing
+plyfile>=0.9.0
+pymeshlab>=2023.12
+meshio>=5.3.0
+
+# Web Visualization
+plotly>=5.15.0
+dash>=2.12.0
+streamlit>=1.25.0
+bokeh>=3.2.0
+
+# 2D Plotting
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Video & Animation
+imageio>=2.31.0
+imageio-ffmpeg>=0.4.8
+moviepy>=1.0.3
+av>=10.0.0
+
+# Interactive Widgets
+ipyvolume>=0.6.0
+pythreejs>=2.4.0
+
+# Color Schemes
+colorcet>=3.0.0
+cmocean>=3.0.0
+
+# Export Formats
+zarr>=2.15.0
+tifffile>=2023.7.0
