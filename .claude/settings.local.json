@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker stop:*)",
+      "Bash(docker rm:*)",
+      "Bash(rsync:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh repo create:*)"
+    ],
+    "deny": [],
+    "defaultMode": "acceptEdits"
+  }
+}
