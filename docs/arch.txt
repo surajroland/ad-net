@@ -1,0 +1,102 @@
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                                SPARSE4D v3 ARCHITECTURE                                 │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│ ┌─────────────────────────────────────────────────────────────────────────────────────┐ │
+│ │                              ENCODER SIDE (Spatial Processing)                      │ │
+│ │                                                                                     │ │
+│ │ ┌─────────────┐    ┌─────────────┐    ┌─────────────────────────────┐               │ │
+│ │ │Multi-view   │───►│ResNet+FPN   │───►│13-point Keypoint Sampling   │               │ │
+│ │ │Images       │    │Backbone     │    │• 7 fixed + 6 learnable      │               │ │
+│ │ │[B,6,3,H,W]  │    │P2,P3,P4,P5  │    │• Project 3D→2D→Sample       │               │ │
+│ │ └─────────────┘    │[B,256,Hi,Wi]│    │• 6 cameras × 4 scales       │               │ │
+│ │                    └─────────────┘    └─────────────────────────────┘               │ │
+│ │                                                      │                              │ │
+│ │                                                      ▼                              │ │
+│ │                                         ┌─────────────────────────────┐             │ │
+│ │                                         │Image Features               │             │ │
+│ │                                         │[B, 900, 13, 256]            │             │ │
+│ │                                         │(Spatial Information)        │             │ │
+│ │                                         └─────────────────────────────┘             │ │
+│ └─────────────────────────────────────────────────────────────────────────────────────┘ │
+│                                                      │                                  │
+│                                                      │                                  │
+│ ┌─────────────────────────────────────────────────────────────────────────────────────┐ │
+│ │                              DECODER SIDE (Temporal-Spatial Fusion)                 │ │
+│ │                                                                                     │ │
+│ │ ┌─────────────────────────────┐                   │                                 │ │
+│ │ │TEMPORAL MEMORY:             │                   │                                 │ │
+│ │ │┌─────────────────────────┐  │                   │                                 │ │
+│ │ ││Instance Bank            │  │                   │                                 │ │
+│ │ ││• 600 temporal instances │  │                   ▼                                 │ │
+│ │ ││• From previous frame    │  │       ┌─────────────────────────────┐               │ │
+│ │ ││• Motion compensated     │  │       │Object Queries               │               │ │
+│ │ ││• Age & confidence       │  │       │[B, 900, 256]                │               │ │
+│ │ │└─────────────────────────┘  │       │• 600 temporal + 300 single  │               │ │
+│ │ │                             │       │• + positional encoding      │               │ │
+│ │ │┌─────────────────────────┐  │       └─────────────────────────────┘               │ │
+│ │ ││Single-frame Queries     │  │                   │                                 │ │
+│ │ ││• 300 learnable templates│  │                   │                                 │ │
+│ │ ││• For new object detection│ │                   │                                 │ │
+│ │ │└─────────────────────────┘  │                   ▼                                 │ │
+│ │ └─────────────────────────────┘        ┌─────────────────────────────┐              │ │
+│ │                                        │TRANSFORMER DECODER LAYERS   │              │ │
+│ │                                        │                             │              │ │
+│ │                                        │ Layer 1 (Non-temporal):     │              │ │
+│ │                                        │ ┌─────────────────────────┐ │              │ │
+│ │                                        │ │SELF-ATTENTION:          │ │              │ │
+│ │                                        │ │Queries ↔ Queries        │ │              │ │
+│ │                                        │ │[900×900] interactions   │ │              │ │
+│ │                                        │ └─────────────────────────┘ │              │ │
+│ │                                        │           │                 │              │ │
+│ │                                        │           ▼                 │              │ │
+│ │                                        │ ┌─────────────────────────┐ │              │ │
+│ │                                        │ │CROSS-ATTENTION:         │ │              │ │
+│ │    Image Features ─────────────────────┼─┤Queries → Image Features │ │              │ │
+│ │    [B,900,13,256]                      │ │[900×11700] attention    │ │              │ │
+│ │    (Flattened: [B,11700,256])          │ │13-point deformable      │ │              │ │
+│ │                                        │ └─────────────────────────┘ │              │ │
+│ │                                        │           │                 │              │ │
+│ │                                        │           ▼                 │              │ │
+│ │                                        │ ┌─────────────────────────┐ │              │ │
+│ │                                        │ │FEED-FORWARD NETWORK     │ │              │ │
+│ │                                        │ └─────────────────────────┘ │              │ │
+│ │                                        │                             │              │ │
+│ │                                        │ Layers 2-6 (Temporal):      │              │ │
+│ │                                        │ • Same structure as Layer 1 │              │ │
+│ │                                        │ • Enhanced temporal context │              │ │
+│ │                                        │ • Motion compensation aware │              │ │
+│ │                                        └─────────────────────────────┘              │ │
+│ │                                                    │                                │ │
+│ │                                                    ▼                                │ │
+│ │                                        ┌─────────────────────────────┐              │ │
+│ │                                        │PREDICTION HEADS (5):        │              │ │
+│ │                                        │• Classification [900, 11]   │              │ │
+│ │                                        │• Regression [900, 9]        │              │ │
+│ │                                        │• Velocity [900, 3]          │              │ │
+│ │                                        │• Quality [900, 2] (v3)      │              │ │
+│ │                                        │• Tracking [900, 256]        │              │ │
+│ │                                        └─────────────────────────────┘              │ │
+│ │                                                    │                                │ │
+│ │                                                    ▼                                │ │
+│ │                                        ┌─────────────────────────────┐              │ │
+│ │                                        │3D OBJECT PREDICTIONS        │              │ │
+│ │                                        │• Boxes: [x,y,z,w,l,h,θ,v]   │              │ │
+│ │                                        │• Classes: [car,ped,bike...] │              │ │
+│ │                                        │• Quality scores (centerness)│              │ │
+│ │                                        │• Tracking IDs               │              │ │
+│ │                                        └─────────────────────────────┘              │ │
+│ └─────────────────────────────────────────────────────────────────────────────────────┘ │
+│                                                                                         │
+│ KEY DATA FLOWS:                                                                         │
+│ ←─────── Temporal Info (Past) ────────┐     ┌────── Spatial Info (Present) ──────→      │
+│ Instance Bank → Temporal Queries      │     │     Images → Features → Attention         │
+│ (What was there)                      │     │     (What is there)                       │
+│                                       ▼     ▼                                           │
+│                            TEMPORAL-SPATIAL FUSION                                      │
+│                        (Cross-attention: Past knowledge + Current view)                 │
+│                                       │                                                 │
+│                                       ▼                                                 │
+│                              SPATIAL PREDICTIONS                                        │
+│                            (Where objects are NOW)                                      │
+└─────────────────────────────────────────────────────────────────────────────────────────┘

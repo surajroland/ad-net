@@ -1,0 +1,2390 @@
+Sparse4D/
+├── .dockerignore
+├── .env
+├── .gitignore
+├── .pre-commit-config.yaml
+├── Dockerfile
+├── LICENSE
+├── Makefile
+├── README.md
+├── docker-compose.yml
+├── pyproject.toml
+├── setup.py
+├── conf/
+│   ├── config.yaml
+│   ├── pipeline/
+│   │   ├── training_pipeline.yaml
+│   │   ├── evaluation_pipeline.yaml
+│   │   ├── inference_pipeline.yaml
+│   │   ├── optimization_pipeline.yaml
+│   │   ├── dataset_harmonization.yaml
+│   │   ├── multi_dataset_training.yaml
+│   │   ├── cross_platform_export.yaml
+│   │   └── schema.py
+│   ├── model/
+│   │   ├── backbone/
+│   │   │   ├── base.yaml
+│   │   │   ├── resnet_fpn.yaml
+│   │   │   ├── efficientnet.yaml
+│   │   │   ├── swin_transformer.yaml
+│   │   │   └── schema.py
+│   │   ├── neck/
+│   │   │   ├── base.yaml
+│   │   │   ├── temporal_neck.yaml
+│   │   │   ├── multi_view_neck.yaml
+│   │   │   └── schema.py
+│   │   ├── head/
+│   │   │   ├── base.yaml
+│   │   │   ├── detection_head.yaml
+│   │   │   ├── tracking_head.yaml
+│   │   │   ├── temporal_head.yaml
+│   │   │   ├── occupancy_head.yaml
+│   │   │   ├── motion_head.yaml
+│   │   │   ├── depth_head.yaml
+│   │   │   ├── unified_multi_task.yaml
+│   │   │   └── schema.py
+│   │   ├── deformable_attention/
+│   │   │   ├── base.yaml
+│   │   │   ├── deformable_config.yaml
+│   │   │   └── schema.py
+│   │   ├── temporal_propagation/
+│   │   │   ├── base.yaml
+│   │   │   ├── motion_model.yaml
+│   │   │   ├── kalman_filter.yaml
+│   │   │   └── schema.py
+│   │   ├── base_model.yaml
+│   │   └── schema.py
+│   ├── optimization/
+│   │   ├── base.yaml
+│   │   ├── quantization/
+│   │   │   ├── base.yaml
+│   │   │   ├── qat.yaml
+│   │   │   ├── ptq.yaml
+│   │   │   ├── int8.yaml
+│   │   │   └── schema.py
+│   │   ├── pruning/
+│   │   │   ├── base.yaml
+│   │   │   ├── structured.yaml
+│   │   │   ├── unstructured.yaml
+│   │   │   ├── attention_pruning.yaml
+│   │   │   └── schema.py
+│   │   ├── distillation/
+│   │   │   ├── base.yaml
+│   │   │   ├── teacher_student.yaml
+│   │   │   ├── feature_distillation.yaml
+│   │   │   └── schema.py
+│   │   ├── nas/
+│   │   │   ├── base.yaml
+│   │   │   ├── evolutionary.yaml
+│   │   │   ├── differentiable.yaml
+│   │   │   └── schema.py
+│   │   └── schema.py
+│   ├── hardware/
+│   │   ├── base.yaml
+│   │   ├── cpu/
+│   │   │   ├── base.yaml
+│   │   │   ├── x86_64.yaml
+│   │   │   ├── arm64.yaml
+│   │   │   └── schema.py
+│   │   ├── gpu/
+│   │   │   ├── base.yaml
+│   │   │   ├── cuda.yaml
+│   │   │   ├── tensorrt.yaml
+│   │   │   ├── amd_rocm.yaml
+│   │   │   └── schema.py
+│   │   ├── edge/
+│   │   │   ├── base.yaml
+│   │   │   ├── horizon_bpu.yaml
+│   │   │   ├── arm_neon.yaml
+│   │   │   ├── apple_silicon.yaml
+│   │   │   └── schema.py
+│   │   ├── tpu/
+│   │   │   ├── base.yaml
+│   │   │   ├── google_tpu.yaml
+│   │   │   └── schema.py
+│   │   └── schema.py
+│   ├── training/
+│   │   ├── base.yaml
+│   │   ├── experiments/
+│   │   │   ├── baseline.yaml
+│   │   │   ├── ablation_study.yaml
+│   │   │   ├── multi_scale.yaml
+│   │   │   ├── temporal_analysis.yaml
+│   │   │   ├── multi_dataset.yaml
+│   │   │   ├── cross_domain.yaml
+│   │   │   └── hardware_optimization.yaml
+│   │   ├── optimizer/
+│   │   │   ├── base.yaml
+│   │   │   ├── adamw.yaml
+│   │   │   ├── sgd.yaml
+│   │   │   ├── lamb.yaml
+│   │   │   └── schema.py
+│   │   ├── scheduler/
+│   │   │   ├── base.yaml
+│   │   │   ├── cosine_annealing.yaml
+│   │   │   ├── multi_step.yaml
+│   │   │   ├── onecycle.yaml
+│   │   │   └── schema.py
+│   │   ├── loss/
+│   │   │   ├── base.yaml
+│   │   │   ├── focal_loss.yaml
+│   │   │   ├── iou_loss.yaml
+│   │   │   ├── temporal_loss.yaml
+│   │   │   ├── multi_task_loss.yaml
+│   │   │   ├── cross_dataset_loss.yaml
+│   │   │   └── schema.py
+│   │   ├── trainer.yaml
+│   │   └── schema.py
+│   ├── data/
+│   │   ├── base.yaml
+│   │   ├── nuscenes.yaml
+│   │   ├── waymo.yaml
+│   │   ├── kitti.yaml
+│   │   ├── argoverse.yaml
+│   │   ├── custom_dataset.yaml
+│   │   ├── multi_dataset.yaml
+│   │   ├── dataset_harmonization.yaml
+│   │   ├── cross_dataset_validation.yaml
+│   │   └── schema.py
+│   ├── inference/
+│   │   ├── base.yaml
+│   │   ├── batch_inference.yaml
+│   │   ├── streaming_inference.yaml
+│   │   ├── real_time.yaml
+│   │   ├── edge_deployment.yaml
+│   │   └── schema.py
+│   ├── evaluation/
+│   │   ├── base.yaml
+│   │   ├── metrics/
+│   │   │   ├── detection_metrics.yaml
+│   │   │   ├── tracking_metrics.yaml
+│   │   │   ├── temporal_metrics.yaml
+│   │   │   ├── occupancy_metrics.yaml
+│   │   │   ├── cross_dataset_metrics.yaml
+│   │   │   └── schema.py
+│   │   ├── benchmarks.yaml
+│   │   └── schema.py
+│   ├── visualization/
+│   │   ├── base.yaml
+│   │   ├── 3d_rendering.yaml
+│   │   ├── multi_view_display.yaml
+│   │   ├── temporal_tracks.yaml
+│   │   ├── debug_visualization.yaml
+│   │   ├── cross_platform_export.yaml
+│   │   ├── exporters/
+│   │   │   ├── nuscenes_exporter.yaml
+│   │   │   ├── carla_exporter.yaml
+│   │   │   ├── omniverse_exporter.yaml
+│   │   │   ├── rviz_exporter.yaml
+│   │   │   ├── open3d_exporter.yaml
+│   │   │   ├── foxglove_exporter.yaml
+│   │   │   ├── unity_exporter.yaml
+│   │   │   └── schema.py
+│   │   └── schema.py
+│   ├── safety/
+│   │   ├── iso26262/
+│   │   │   ├── base.yaml
+│   │   │   ├── asil_levels.yaml
+│   │   │   ├── safety_requirements.yaml
+│   │   │   ├── verification_tests.yaml
+│   │   │   ├── hazard_analysis.yaml
+│   │   │   ├── fmea_config.yaml
+│   │   │   └── schema.py
+│   │   ├── monitoring/
+│   │   │   ├── runtime_monitors.yaml
+│   │   │   ├── watchdog_timers.yaml
+│   │   │   ├── redundancy_checks.yaml
+│   │   │   ├── performance_monitors.yaml
+│   │   │   └── schema.py
+│   │   ├── fail_safe/
+│   │   │   ├── safe_modes.yaml
+│   │   │   ├── degradation_strategies.yaml
+│   │   │   ├── emergency_protocols.yaml
+│   │   │   └── schema.py
+│   │   └── schema.py
+│   └── deployment/
+│       ├── base.yaml
+│       ├── docker/
+│       │   ├── development.yaml
+│       │   ├── production.yaml
+│       │   ├── edge.yaml
+│       │   └── schema.py
+│       ├── kubernetes/
+│       │   ├── cluster.yaml
+│       │   ├── scaling.yaml
+│       │   └── schema.py
+│       ├── cloud/
+│       │   ├── aws.yaml
+│       │   ├── gcp.yaml
+│       │   ├── azure.yaml
+│       │   └── schema.py
+│       └── schema.py
+├── data/
+│   ├── raw/
+│   │   ├── nuscenes/
+│   │   │   ├── v1.0-mini/
+│   │   │   ├── v1.0-trainval/
+│   │   │   └── v1.0-test/
+│   │   ├── waymo/
+│   │   │   ├── training/
+│   │   │   ├── validation/
+│   │   │   └── testing/
+│   │   ├── kitti/
+│   │   │   ├── training/
+│   │   │   └── testing/
+│   │   ├── argoverse/
+│   │   │   ├── train/
+│   │   │   ├── val/
+│   │   │   └── test/
+│   │   └── custom_datasets/
+│   │       ├── dataset_1/
+│   │       ├── dataset_2/
+│   │       └── templates/
+│   ├── harmonized/
+│   │   ├── coordinate_normalized/
+│   │   │   ├── train/
+│   │   │   ├── val/
+│   │   │   └── test/
+│   │   ├── class_mapped/
+│   │   │   ├── unified_taxonomy.json
+│   │   │   ├── mapping_tables/
+│   │   │   └── confidence_scores/
+│   │   ├── temporal_aligned/
+│   │   │   ├── synchronized_sequences/
+│   │   │   ├── interpolated_frames/
+│   │   │   └── timing_metadata/
+│   │   └── multimodal_synced/
+│   │       ├── camera_lidar_sync/
+│   │       ├── radar_sync/
+│   │       └── timestamp_alignment/
+│   ├── cross_dataset/
+│   │   ├── train/
+│   │   │   ├── nuscenes_subset/
+│   │   │   ├── waymo_subset/
+│   │   │   ├── kitti_subset/
+│   │   │   └── argoverse_subset/
+│   │   ├── val/
+│   │   │   ├── nuscenes_subset/
+│   │   │   ├── waymo_subset/
+│   │   │   ├── kitti_subset/
+│   │   │   └── argoverse_subset/
+│   │   └── test/
+│   │       ├── nuscenes_subset/
+│   │       ├── waymo_subset/
+│   │       ├── kitti_subset/
+│   │       └── argoverse_subset/
+│   ├── export_formats/
+│   │   ├── nuscenes_format/
+│   │   │   ├── scenes/
+│   │   │   ├── samples/
+│   │   │   └── annotations/
+│   │   ├── carla_format/
+│   │   │   ├── actors/
+│   │   │   ├── scenarios/
+│   │   │   └── trajectories/
+│   │   ├── omniverse_usd/
+│   │   │   ├── scenes/
+│   │   │   ├── materials/
+│   │   │   └── animations/
+│   │   ├── rviz_format/
+│   │   │   ├── markers/
+│   │   │   ├── point_clouds/
+│   │   │   └── transforms/
+│   │   ├── open3d_format/
+│   │   │   ├── geometries/
+│   │   │   ├── point_clouds/
+│   │   │   └── meshes/
+│   │   └── foxglove_mcap/
+│   │       ├── messages/
+│   │       ├── schemas/
+│   │       └── metadata/
+│   ├── processed/
+│   │   ├── train/
+│   │   │   ├── images/
+│   │   │   ├── point_clouds/
+│   │   │   └── annotations/
+│   │   ├── val/
+│   │   │   ├── images/
+│   │   │   ├── point_clouds/
+│   │   │   └── annotations/
+│   │   └── test/
+│   │       ├── images/
+│   │       ├── point_clouds/
+│   │       └── annotations/
+│   ├── annotations/
+│   │   ├── 3d_boxes/
+│   │   │   ├── train/
+│   │   │   ├── val/
+│   │   │   └── test/
+│   │   ├── tracking/
+│   │   │   ├── tracks/
+│   │   │   ├── trajectories/
+│   │   │   └── associations/
+│   │   ├── temporal/
+│   │   │   ├── sequences/
+│   │   │   ├── motion_vectors/
+│   │   │   └── temporal_annotations/
+│   │   ├── occupancy/
+│   │   │   ├── voxel_grids/
+│   │   │   ├── occupancy_maps/
+│   │   │   └── free_space/
+│   │   └── unified_taxonomy/
+│   │       ├── class_definitions/
+│   │       ├── attribute_mappings/
+│   │       └── confidence_thresholds/
+│   ├── cache/
+│   │   ├── preprocessed/
+│   │   ├── augmented/
+│   │   ├── harmonized/
+│   │   └── exported/
+│   ├── sample/
+│   │   ├── demo_sequences/
+│   │   ├── test_cases/
+│   │   ├── visualization_samples/
+│   │   └── benchmark_data/
+│   └── quality_metrics/
+│       ├── dataset_statistics/
+│       │   ├── class_distributions/
+│       │   ├── temporal_coverage/
+│       │   ├── spatial_coverage/
+│       │   └── annotation_quality/
+│       ├── annotation_quality/
+│       │   ├── consistency_checks/
+│       │   ├── accuracy_metrics/
+│       │   ├── completeness_analysis/
+│       │   └── error_detection/
+│       └── cross_dataset_analysis/
+│           ├── bias_analysis/
+│           ├── domain_gaps/
+│           ├── harmonization_quality/
+│           └── generalization_metrics/
+├── docs/
+│   ├── api/
+│   │   ├── models.md
+│   │   ├── data.md
+│   │   ├── training.md
+│   │   ├── optimization.md
+│   │   ├── visualization.md
+│   │   ├── safety.md
+│   │   ├── deployment.md
+│   │   └── cross_platform.md
+│   ├── arch/
+│   │   ├── sparse4d_architecture.dot
+│   │   ├── sparse4d_architecture.png
+│   │   ├── temporal_propagation.dot
+│   │   ├── temporal_propagation.png
+│   │   ├── pytorch_framework.dot
+│   │   ├── pytorch_framework.png
+│   │   ├── dataset_harmonization.dot
+│   │   ├── dataset_harmonization.png
+│   │   ├── safety_architecture.dot
+│   │   ├── safety_architecture.png
+│   │   ├── visualization_pipeline.dot
+│   │   ├── visualization_pipeline.png
+│   │   └── architecture_overview.md
+│   ├── hardware/
+│   │   ├── gpu_optimization.md
+│   │   ├── edge_deployment.md
+│   │   ├── tpu_acceleration.md
+│   │   ├── cpu_optimization.md
+│   │   └── performance_benchmarks.md
+│   ├── optimization/
+│   │   ├── quantization_guide.md
+│   │   ├── pruning_strategies.md
+│   │   ├── distillation_recipes.md
+│   │   ├── nas_experiments.md
+│   │   └── multi_objective_optimization.md
+│   ├── deployment/
+│   │   ├── docker_guide.md
+│   │   ├── kubernetes_deployment.md
+│   │   ├── cloud_deployment.md
+│   │   ├── edge_deployment.md
+│   │   └── production_checklist.md
+│   ├── safety/
+│   │   ├── iso26262_compliance.md
+│   │   ├── safety_requirements.md
+│   │   ├── hazard_analysis.md
+│   │   ├── verification_testing.md
+│   │   ├── fail_safe_mechanisms.md
+│   │   └── certification_guide.md
+│   ├── visualization/
+│   │   ├── 3d_rendering_guide.md
+│   │   ├── carla_integration.md
+│   │   ├── omniverse_setup.md
+│   │   ├── rviz_configuration.md
+│   │   ├── cross_platform_export.md
+│   │   └── interactive_debugging.md
+│   ├── datasets/
+│   │   ├── dataset_harmonization.md
+│   │   ├── multi_dataset_training.md
+│   │   ├── cross_dataset_validation.md
+│   │   ├── custom_dataset_integration.md
+│   │   └── data_quality_assessment.md
+│   ├── tutorials/
+│   │   ├── quickstart.md
+│   │   ├── custom_dataset.md
+│   │   ├── model_training.md
+│   │   ├── inference_optimization.md
+│   │   ├── production_deployment.md
+│   │   ├── multi_dataset_setup.md
+│   │   ├── 3d_visualization.md
+│   │   ├── safety_validation.md
+│   │   └── pytorch_optimization.md
+│   └── research/
+│       ├── temporal_modeling.md
+│       ├── deformable_attention.md
+│       ├── multi_view_fusion.md
+│       ├── occupancy_prediction.md
+│       ├── cross_dataset_learning.md
+│       ├── safety_critical_ai.md
+│       └── benchmarking_results.md
+├── examples/
+│   ├── notebooks/
+│   │   ├── data_exploration.ipynb
+│   │   ├── model_training.ipynb
+│   │   ├── inference_demo.ipynb
+│   │   ├── optimization_showcase.ipynb
+│   │   ├── deployment_tutorial.ipynb
+│   │   ├── multi_dataset_training.ipynb
+│   │   ├── cross_platform_visualization.ipynb
+│   │   ├── dataset_harmonization.ipynb
+│   │   ├── 3d_visualization_demo.ipynb
+│   │   ├── carla_integration.ipynb
+│   │   ├── omniverse_export.ipynb
+│   │   ├── safety_validation.ipynb
+│   │   ├── temporal_analysis.ipynb
+│   │   ├── occupancy_prediction.ipynb
+│   │   └── real_time_inference.ipynb
+│   ├── scripts/
+│   │   ├── train_baseline.py
+│   │   ├── evaluate_model.py
+│   │   ├── optimize_model.py
+│   │   ├── deploy_model.py
+│   │   ├── benchmark_performance.py
+│   │   ├── multi_dataset_example.py
+│   │   ├── cross_platform_export.py
+│   │   ├── 3d_visualization_example.py
+│   │   ├── carla_demo.py
+│   │   ├── omniverse_demo.py
+│   │   ├── safety_demo.py
+│   │   ├── temporal_tracking_demo.py
+│   │   ├── occupancy_demo.py
+│   │   └── real_time_inference.py
+│   └── configs/
+│       ├── quick_start.yaml
+│       ├── full_training.yaml
+│       ├── edge_deployment.yaml
+│       ├── cloud_deployment.yaml
+│       ├── multi_dataset_training.yaml
+│       ├── cross_platform_viz.yaml
+│       ├── safety_compliant.yaml
+│       ├── research_baseline.yaml
+│       ├── carla_integration.yaml
+│       ├── omniverse_export.yaml
+│       └── temporal_analysis.yaml
+├── logs/
+│   ├── training/
+│   │   ├── single_dataset/
+│   │   ├── multi_dataset/
+│   │   ├── cross_domain/
+│   │   └── experiments/
+│   ├── evaluation/
+│   │   ├── benchmarks/
+│   │   ├── ablations/
+│   │   ├── cross_dataset/
+│   │   └── temporal_analysis/
+│   ├── optimization/
+│   │   ├── quantization/
+│   │   ├── pruning/
+│   │   ├── distillation/
+│   │   └── nas/
+│   ├── safety/
+│   │   ├── validation_reports/
+│   │   ├── fault_injection/
+│   │   ├── stress_tests/
+│   │   └── certification/
+│   └── deployment/
+│       ├── docker_builds/
+│       ├── kubernetes_deployments/
+│       ├── edge_deployments/
+│       └── production_monitoring/
+├── models/
+│   ├── checkpoints/
+│   │   ├── pytorch/
+│   │   │   ├── baseline_models/
+│   │   │   ├── multi_dataset_models/
+│   │   │   ├── temporal_models/
+│   │   │   └── occupancy_models/
+│   ├── optimized/
+│   │   ├── quantized/
+│   │   │   ├── int8/
+│   │   │   ├── fp16/
+│   │   │   └── mixed_precision/
+│   │   ├── pruned/
+│   │   │   ├── structured/
+│   │   │   ├── unstructured/
+│   │   │   └── attention_pruned/
+│   │   └── distilled/
+│   │       ├── teacher_student/
+│   │       ├── feature_distilled/
+│   │       └── progressive_distilled/
+│   ├── exported/
+│   │   ├── onnx/
+│   │   │   ├── fp32/
+│   │   │   ├── fp16/
+│   │   │   └── int8/
+│   │   ├── tensorrt/
+│   │   │   ├── fp32/
+│   │   │   ├── fp16/
+│   │   │   └── int8/
+│   │   ├── torchscript/
+│   │   │   ├── fp32/
+│   │   │   ├── fp16/
+│   │   │   └── int8/
+│   │   ├── openvino/
+│   │   │   ├── fp32/
+│   │   │   ├── fp16/
+│   │   │   └── int8/
+│   │   └── edge/
+│   │       ├── horizon_bpu/
+│   │       ├── arm_neon/
+│   │       └── apple_neural_engine/
+│   ├── safety_validated/
+│   │   ├── iso26262_compliant/
+│   │   ├── fault_tolerant/
+│   │   ├── redundant_models/
+│   │   └── fail_safe_versions/
+│   └── configs/
+│       ├── model_architectures/
+│       ├── training_configs/
+│       ├── optimization_configs/
+│       └── deployment_configs/
+├── outputs/
+│   ├── experiments/
+│   │   ├── baseline_results/
+│   │   ├── ablation_studies/
+│   │   ├── multi_dataset_results/
+│   │   ├── temporal_analysis/
+│   │   └── occupancy_results/
+│   ├── evaluations/
+│   │   ├── nuscenes_results/
+│   │   ├── waymo_results/
+│   │   ├── kitti_results/
+│   │   ├── argoverse_results/
+│   │   ├── cross_dataset_results/
+│   │   └── temporal_benchmarks/
+│   ├── optimizations/
+│   │   ├── quantization_results/
+│   │   ├── pruning_results/
+│   │   ├── distillation_results/
+│   │   └── nas_results/
+│   ├── visualizations/
+│   │   ├── 3d_renders/
+│   │   ├── video_exports/
+│   │   ├── interactive_demos/
+│   │   ├── carla_exports/
+│   │   ├── omniverse_exports/
+│   │   └── debug_visualizations/
+│   ├── safety/
+│   │   ├── validation_reports/
+│   │   ├── certification_artifacts/
+│   │   ├── fault_analysis/
+│   │   └── safety_metrics/
+│   └── benchmarks/
+│       ├── performance_benchmarks/
+│       ├── accuracy_benchmarks/
+│       ├── latency_benchmarks/
+│       ├── memory_benchmarks/
+│       └── hardware_benchmarks/
+├── requirements/
+│   ├── base.txt
+│   ├── training.txt
+│   ├── inference.txt
+│   ├── optimization.txt
+│   ├── deployment.txt
+│   ├── visualization.txt
+│   ├── safety.txt
+│   ├── dev.txt
+│   └── edge.txt
+├── scripts/
+│   ├── ci/
+│   │   ├── run_tests.sh
+│   │   ├── build_docker.sh
+│   │   ├── deploy_staging.sh
+│   │   ├── performance_check.sh
+│   │   ├── safety_validation.sh
+│   │   ├── pytorch_tests.sh
+│   │   └── regression_tests.sh
+│   ├── data/
+│   │   ├── download_datasets.py
+│   │   ├── preprocess_data.py
+│   │   ├── validate_data.py
+│   │   ├── augment_data.py
+│   │   ├── harmonize_datasets.py
+│   │   ├── convert_formats.py
+│   │   ├── cross_dataset_analysis.py
+│   │   ├── quality_assessment.py
+│   │   ├── temporal_alignment.py
+│   │   └── multimodal_sync.py
+│   ├── training/
+│   │   ├── train.py
+│   │   ├── resume_training.py
+│   │   ├── multi_gpu_train.py
+│   │   ├── distributed_train.py
+│   │   ├── multi_dataset_train.py
+│   │   ├── cross_domain_train.py
+│   │   ├── temporal_train.py
+│   │   └── occupancy_train.py
+│   ├── optimization/
+│   │   ├── quantize_model.py
+│   │   ├── prune_model.py
+│   │   ├── distill_model.py
+│   │   ├── nas_search.py
+│   │   ├── multi_objective_optimize.py
+│   │   └── hardware_optimize.py
+│   ├── deployment/
+│   │   ├── export_model.py
+│   │   ├── optimize_inference.py
+│   │   ├── deploy_docker.py
+│   │   ├── deploy_kubernetes.py
+│   │   ├── edge_deployment.py
+│   │   ├── cloud_deployment.py
+│   │   └── production_deploy.py
+│   ├── visualization/
+│   │   ├── render_3d_scene.py
+│   │   ├── export_to_carla.py
+│   │   ├── export_to_omniverse.py
+│   │   ├── export_to_rviz.py
+│   │   ├── export_to_open3d.py
+│   │   ├── export_to_foxglove.py
+│   │   ├── create_demo_video.py
+│   │   ├── interactive_viewer.py
+│   │   ├── debug_visualizer.py
+│   │   └── cross_platform_export.py
+│   ├── safety/
+│   │   ├── iso26262_validation.py
+│   │   ├── safety_test_runner.py
+│   │   ├── fault_injection.py
+│   │   ├── stress_test.py
+│   │   ├── redundancy_validation.py
+│   │   ├── fail_safe_testing.py
+│   │   └── certification_report.py
+│   ├── benchmarking/
+│   │   ├── benchmark_model.py
+│   │   ├── benchmark_hardware.py
+│   │   ├── profile_memory.py
+│   │   ├── analyze_performance.py
+│   │   ├── cross_dataset_benchmark.py
+│   │   ├── visualization_benchmark.py
+│   │   ├── temporal_benchmark.py
+│   │   └── safety_benchmark.py
+│   └── utils/
+│       ├── convert_formats.py
+│       ├── visualize_results.py
+│       ├── monitor_system.py
+│       ├── validate_installation.py
+│       ├── dataset_harmonization.py
+│       ├── pytorch_tools.py
+│       ├── safety_monitors.py
+│       ├── coordinate_transforms.py
+│       └── temporal_utilities.py
+├── cpp_engine/
+│   ├── include/
+│   │   ├── sparse4d/
+│   │   │   ├── core/
+│   │   │   │   ├── tensor.hpp
+│   │   │   │   ├── memory_pool.hpp
+│   │   │   │   ├── device_context.hpp
+│   │   │   │   ├── config.hpp
+│   │   │   │   ├── coordinate_transform.hpp
+│   │   │   │   ├── safety_monitor.hpp
+│   │   │   │   └── utils.hpp
+│   │   │   ├── models/
+│   │   │   │   ├── sparse4d_model.hpp
+│   │   │   │   ├── backbone.hpp
+│   │   │   │   ├── neck.hpp
+│   │   │   │   ├── head.hpp
+│   │   │   │   ├── occupancy_head.hpp
+│   │   │   │   ├── temporal_head.hpp
+│   │   │   │   └── layer_interface.hpp
+│   │   │   ├── attention/
+│   │   │   │   ├── deformable_attention.hpp
+│   │   │   │   ├── multi_scale_attention.hpp
+│   │   │   │   ├── temporal_attention.hpp
+│   │   │   │   └── attention_utils.hpp
+│   │   │   ├── temporal/
+│   │   │   │   ├── motion_model.hpp
+│   │   │   │   ├── kalman_filter.hpp
+│   │   │   │   ├── temporal_propagation.hpp
+│   │   │   │   ├── tracking.hpp
+│   │   │   │   └── sequence_buffer.hpp
+│   │   │   ├── geometry/
+│   │   │   │   ├── camera_model.hpp
+│   │   │   │   ├── coordinate_transform.hpp
+│   │   │   │   ├── multi_view_geometry.hpp
+│   │   │   │   ├── projection.hpp
+│   │   │   │   └── occupancy_grid.hpp
+│   │   │   ├── operators/
+│   │   │   │   ├── conv_ops.hpp
+│   │   │   │   ├── attention_ops.hpp
+│   │   │   │   ├── nms_ops.hpp
+│   │   │   │   ├── interpolation_ops.hpp
+│   │   │   │   ├── temporal_ops.hpp
+│   │   │   │   └── reduction_ops.hpp
+│   │   │   ├── hardware/
+│   │   │   │   ├── cpu/
+│   │   │   │   │   ├── cpu_ops.hpp
+│   │   │   │   │   ├── simd_utils.hpp
+│   │   │   │   │   └── threading.hpp
+│   │   │   │   ├── gpu/
+│   │   │   │   │   ├── cuda_ops.hpp
+│   │   │   │   │   ├── cublas_wrapper.hpp
+│   │   │   │   │   ├── cudnn_wrapper.hpp
+│   │   │   │   │   ├── tensorrt_wrapper.hpp
+│   │   │   │   │   └── memory_manager.hpp
+│   │   │   │   ├── edge/
+│   │   │   │   │   ├── arm_neon.hpp
+│   │   │   │   │   ├── horizon_bpu.hpp
+│   │   │   │   │   ├── apple_neural_engine.hpp
+│   │   │   │   │   └── mobile_optimizer.hpp
+│   │   │   │   └── tpu/
+│   │   │   │       ├── tpu_ops.hpp
+│   │   │   │       └── xla_integration.hpp
+│   │   │   ├── inference/
+│   │   │   │   ├── inference_engine.hpp
+│   │   │   │   ├── batch_processor.hpp
+│   │   │   │   ├── streaming_processor.hpp
+│   │   │   │   ├── memory_allocator.hpp
+│   │   │   │   ├── temporal_processor.hpp
+│   │   │   │   └── performance_profiler.hpp
+│   │   │   ├── data/
+│   │   │   │   ├── image_processor.hpp
+│   │   │   │   ├── multi_view_loader.hpp
+│   │   │   │   ├── temporal_buffer.hpp
+│   │   │   │   ├── occupancy_processor.hpp
+│   │   │   │   └── data_types.hpp
+│   │   │   ├── safety/
+│   │   │   │   ├── safety_monitor.hpp
+│   │   │   │   ├── watchdog_timer.hpp
+│   │   │   │   ├── redundancy_checker.hpp
+│   │   │   │   ├── fail_safe_handler.hpp
+│   │   │   │   └── iso26262_compliance.hpp
+│   │   │   ├── visualization/
+│   │   │   │   ├── renderer.hpp
+│   │   │   │   ├── exporter_interface.hpp
+│   │   │   │   ├── carla_exporter.hpp
+│   │   │   │   ├── omniverse_exporter.hpp
+│   │   │   │   └── rviz_exporter.hpp
+│   │   │   └── export/
+│   │   │       ├── onnx_exporter.hpp
+│   │   │       ├── tensorrt_exporter.hpp
+│   │   │       ├── torchscript_exporter.hpp
+│   │   │       ├── openvino_exporter.hpp
+│   │   │       └── mobile_exporter.hpp
+│   │   └── third_party/
+│   │       ├── eigen/
+│   │       ├── opencv/
+│   │       ├── tensorrt/
+│   │       ├── onnxruntime/
+│   │       └── openvino/
+│   ├── src/
+│   │   ├── core/
+│   │   │   ├── tensor.cpp
+│   │   │   ├── memory_pool.cpp
+│   │   │   ├── device_context.cpp
+│   │   │   ├── config.cpp
+│   │   │   ├── coordinate_transform.cpp
+│   │   │   ├── safety_monitor.cpp
+│   │   │   └── utils.cpp
+│   │   ├── models/
+│   │   │   ├── sparse4d_model.cpp
+│   │   │   ├── backbone/
+│   │   │   │   ├── resnet_fpn.cpp
+│   │   │   │   ├── efficientnet.cpp
+│   │   │   │   └── swin_transformer.cpp
+│   │   │   ├── neck/
+│   │   │   │   ├── temporal_neck.cpp
+│   │   │   │   ├── multi_view_neck.cpp
+│   │   │   │   └── deformable_neck.cpp
+│   │   │   └── head/
+│   │   │       ├── detection_head.cpp
+│   │   │       ├── tracking_head.cpp
+│   │   │       ├── temporal_head.cpp
+│   │   │       └── occupancy_head.cpp
+│   │   ├── attention/
+│   │   │   ├── deformable_attention.cpp
+│   │   │   ├── multi_scale_attention.cpp
+│   │   │   ├── temporal_attention.cpp
+│   │   │   └── attention_utils.cpp
+│   │   ├── temporal/
+│   │   │   ├── motion_model.cpp
+│   │   │   ├── kalman_filter.cpp
+│   │   │   ├── temporal_propagation.cpp
+│   │   │   ├── tracking.cpp
+│   │   │   └── sequence_buffer.cpp
+│   │   ├── geometry/
+│   │   │   ├── camera_model.cpp
+│   │   │   ├── coordinate_transform.cpp
+│   │   │   ├── multi_view_geometry.cpp
+│   │   │   ├── projection.cpp
+│   │   │   └── occupancy_grid.cpp
+│   │   ├── operators/
+│   │   │   ├── cpu/
+│   │   │   │   ├── conv_ops_cpu.cpp
+│   │   │   │   ├── attention_ops_cpu.cpp
+│   │   │   │   ├── nms_ops_cpu.cpp
+│   │   │   │   ├── temporal_ops_cpu.cpp
+│   │   │   │   └── simd_kernels.cpp
+│   │   │   ├── gpu/
+│   │   │   │   ├── conv_ops_cuda.cu
+│   │   │   │   ├── attention_ops_cuda.cu
+│   │   │   │   ├── nms_ops_cuda.cu
+│   │   │   │   ├── deformable_attention_cuda.cu
+│   │   │   │   ├── temporal_ops_cuda.cu
+│   │   │   │   ├── occupancy_ops_cuda.cu
+│   │   │   │   └── flash_attention_cuda.cu
+│   │   │   ├── edge/
+│   │   │   │   ├── arm_neon_ops.cpp
+│   │   │   │   ├── horizon_bpu_ops.cpp
+│   │   │   │   └── mobile_optimized_ops.cpp
+│   │   │   └── tpu/
+│   │   │       ├── tpu_ops.cpp
+│   │   │       └── xla_kernels.cpp
+│   │   ├── hardware/
+│   │   │   ├── cpu/
+│   │   │   │   ├── cpu_backend.cpp
+│   │   │   │   ├── threading_manager.cpp
+│   │   │   │   └── memory_optimizer.cpp
+│   │   │   ├── gpu/
+│   │   │   │   ├── cuda_backend.cpp
+│   │   │   │   ├── tensorrt_backend.cpp
+│   │   │   │   ├── memory_manager.cpp
+│   │   │   │   └── stream_manager.cpp
+│   │   │   ├── edge/
+│   │   │   │   ├── arm_backend.cpp
+│   │   │   │   ├── horizon_backend.cpp
+│   │   │   │   └── mobile_backend.cpp
+│   │   │   └── tpu/
+│   │   │       ├── tpu_backend.cpp
+│   │   │       └── distributed_backend.cpp
+│   │   ├── inference/
+│   │   │   ├── inference_engine.cpp
+│   │   │   ├── batch_processor.cpp
+│   │   │   ├── streaming_processor.cpp
+│   │   │   ├── memory_allocator.cpp
+│   │   │   ├── temporal_processor.cpp
+│   │   │   └── performance_profiler.cpp
+│   │   ├── data/
+│   │   │   ├── image_processor.cpp
+│   │   │   ├── multi_view_loader.cpp
+│   │   │   ├── temporal_buffer.cpp
+│   │   │   ├── occupancy_processor.cpp
+│   │   │   └── data_converter.cpp
+│   │   ├── safety/
+│   │   │   ├── safety_monitor.cpp
+│   │   │   ├── watchdog_timer.cpp
+│   │   │   ├── redundancy_checker.cpp
+│   │   │   ├── fail_safe_handler.cpp
+│   │   │   └── iso26262_compliance.cpp
+│   │   ├── visualization/
+│   │   │   ├── renderer.cpp
+│   │   │   ├── carla_exporter.cpp
+│   │   │   ├── omniverse_exporter.cpp
+│   │   │   ├── rviz_exporter.cpp
+│   │   │   └── open3d_exporter.cpp
+│   │   ├── export/
+│   │   │   ├── onnx_exporter.cpp
+│   │   │   ├── tensorrt_exporter.cpp
+│   │   │   ├── torchscript_exporter.cpp
+│   │   │   ├── openvino_exporter.cpp
+│   │   │   └── mobile_exporter.cpp
+│   │   └── main.cpp
+│   ├── python_bindings/
+│   │   ├── pybind/
+│   │   │   ├── __init__.py
+│   │   │   ├── core_bindings.cpp
+│   │   │   ├── model_bindings.cpp
+│   │   │   ├── inference_bindings.cpp
+│   │   │   ├── hardware_bindings.cpp
+│   │   │   ├── temporal_bindings.cpp
+│   │   │   ├── safety_bindings.cpp
+│   │   │   ├── visualization_bindings.cpp
+│   │   │   └── utils_bindings.cpp
+│   │   ├── setup.py
+│   │   └── CMakeLists.txt
+│   ├── tests/
+│   │   ├── gtest_main.cpp
+│   │   ├── CMakeLists.txt
+│   │   ├── test_config.json
+│   │   ├── unit/
+│   │   │   ├── CMakeLists.txt
+│   │   │   ├── test_core/
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── test_tensor.cpp
+│   │   │   │   ├── test_tensor_ops.cpp
+│   │   │   │   ├── test_tensor_cuda.cpp
+│   │   │   │   ├── test_memory_pool.cpp
+│   │   │   │   ├── test_memory_allocator.cpp
+│   │   │   │   ├── test_device_context.cpp
+│   │   │   │   ├── test_config.cpp
+│   │   │   │   ├── test_utils.cpp
+│   │   │   │   ├── test_coordinate_transform.cpp
+│   │   │   │   ├── test_thread_safety.cpp
+│   │   │   │   └── test_error_handling.cpp
+│   │   │   ├── test_models/
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── test_sparse4d_model.cpp
+│   │   │   │   ├── backbone/
+│   │   │   │   │   ├── test_resnet_fpn.cpp
+│   │   │   │   │   ├── test_efficientnet.cpp
+│   │   │   │   │   ├── test_swin_transformer.cpp
+│   │   │   │   │   ├── test_backbone_interface.cpp
+│   │   │   │   │   └── test_feature_extraction.cpp
+│   │   │   │   ├── neck/
+│   │   │   │   │   ├── test_temporal_neck.cpp
+│   │   │   │   │   ├── test_multi_view_neck.cpp
+│   │   │   │   │   ├── test_deformable_neck.cpp
+│   │   │   │   │   ├── test_neck_interface.cpp
+│   │   │   │   │   └── test_feature_fusion.cpp
+│   │   │   │   ├── head/
+│   │   │   │   │   ├── test_detection_head.cpp
+│   │   │   │   │   ├── test_tracking_head.cpp
+│   │   │   │   │   ├── test_temporal_head.cpp
+│   │   │   │   │   ├── test_occupancy_head.cpp
+│   │   │   │   │   ├── test_head_interface.cpp
+│   │   │   │   │   └── test_prediction_decoding.cpp
+│   │   │   │   ├── attention/
+│   │   │   │   │   ├── test_deformable_attention.cpp
+│   │   │   │   │   ├── test_multi_scale_attention.cpp
+│   │   │   │   │   ├── test_temporal_attention.cpp
+│   │   │   │   │   ├── test_attention_utils.cpp
+│   │   │   │   │   ├── test_attention_cuda.cpp
+│   │   │   │   │   ├── test_flash_attention.cpp
+│   │   │   │   │   └── test_attention_memory.cpp
+│   │   │   │   └── temporal/
+│   │   │   │       ├── test_motion_model.cpp
+│   │   │   │       ├── test_kalman_filter.cpp
+│   │   │   │       ├── test_temporal_propagation.cpp
+│   │   │   │       ├── test_tracking.cpp
+│   │   │   │       ├── test_temporal_buffer.cpp
+│   │   │   │       └── test_state_management.cpp
+│   │   │   ├── test_geometry/
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── test_camera_model.cpp
+│   │   │   │   ├── test_coordinate_transform.cpp
+│   │   │   │   ├── test_multi_view_geometry.cpp
+│   │   │   │   ├── test_projection.cpp
+│   │   │   │   ├── test_occupancy_grid.cpp
+│   │   │   │   ├── test_geometry_utils.cpp
+│   │   │   │   └── test_calibration.cpp
+│   │   │   ├── test_operators/
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── cpu/
+│   │   │   │   │   ├── test_conv_ops_cpu.cpp
+│   │   │   │   │   ├── test_attention_ops_cpu.cpp
+│   │   │   │   │   ├── test_nms_ops_cpu.cpp
+│   │   │   │   │   ├── test_temporal_ops_cpu.cpp
+│   │   │   │   │   ├── test_simd_kernels.cpp
+│   │   │   │   │   ├── test_vectorization.cpp
+│   │   │   │   │   └── test_threading.cpp
+│   │   │   │   ├── gpu/
+│   │   │   │   │   ├── test_conv_ops_cuda.cpp
+│   │   │   │   │   ├── test_attention_ops_cuda.cpp
+│   │   │   │   │   ├── test_nms_ops_cuda.cpp
+│   │   │   │   │   ├── test_deformable_attention_cuda.cpp
+│   │   │   │   │   ├── test_temporal_ops_cuda.cpp
+│   │   │   │   │   ├── test_occupancy_ops_cuda.cpp
+│   │   │   │   │   ├── test_flash_attention_cuda.cpp
+│   │   │   │   │   ├── test_cuda_memory.cpp
+│   │   │   │   │   ├── test_cuda_streams.cpp
+│   │   │   │   │   └── test_kernel_fusion.cpp
+│   │   │   │   ├── edge/
+│   │   │   │   │   ├── test_arm_neon_ops.cpp
+│   │   │   │   │   ├── test_horizon_bpu_ops.cpp
+│   │   │   │   │   ├── test_mobile_optimized_ops.cpp
+│   │   │   │   │   ├── test_quantized_ops.cpp
+│   │   │   │   │   └── test_low_precision.cpp
+│   │   │   │   ├── tpu/
+│   │   │   │   │   ├── test_tpu_ops.cpp
+│   │   │   │   │   ├── test_xla_kernels.cpp
+│   │   │   │   │   └── test_tpu_memory.cpp
+│   │   │   │   ├── test_interpolation_ops.cpp
+│   │   │   │   ├── test_reduction_ops.cpp
+│   │   │   │   └── test_custom_ops.cpp
+│   │   │   ├── test_hardware/
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── cpu/
+│   │   │   │   │   ├── test_cpu_backend.cpp
+│   │   │   │   │   ├── test_threading_manager.cpp
+│   │   │   │   │   ├── test_memory_optimizer.cpp
+│   │   │   │   │   ├── test_simd_detection.cpp
+│   │   │   │   │   ├── test_cache_optimization.cpp
+│   │   │   │   │   └── test_numa_support.cpp
+│   │   │   │   ├── gpu/
+│   │   │   │   │   ├── test_cuda_backend.cpp
+│   │   │   │   │   ├── test_tensorrt_backend.cpp
+│   │   │   │   │   ├── test_memory_manager.cpp
+│   │   │   │   │   ├── test_stream_manager.cpp
+│   │   │   │   │   ├── test_device_management.cpp
+│   │   │   │   │   ├── test_multi_gpu.cpp
+│   │   │   │   │   └── test_gpu_memory.cpp
+│   │   │   │   ├── edge/
+│   │   │   │   │   ├── test_arm_backend.cpp
+│   │   │   │   │   ├── test_horizon_backend.cpp
+│   │   │   │   │   ├── test_mobile_backend.cpp
+│   │   │   │   │   ├── test_power_management.cpp
+│   │   │   │   │   ├── test_thermal_management.cpp
+│   │   │   │   │   └── test_resource_constraints.cpp
+│   │   │   │   ├── tpu/
+│   │   │   │   │   ├── test_tpu_backend.cpp
+│   │   │   │   │   ├── test_distributed_backend.cpp
+│   │   │   │   │   ├── test_xla_compilation.cpp
+│   │   │   │   │   └── test_tpu_topology.cpp
+│   │   │   │   └── test_hardware_detection.cpp
+│   │   │   ├── test_inference/
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── test_inference_engine.cpp
+│   │   │   │   ├── test_batch_processor.cpp
+│   │   │   │   ├── test_streaming_processor.cpp
+│   │   │   │   ├── test_memory_allocator.cpp
+│   │   │   │   ├── test_temporal_processor.cpp
+│   │   │   │   ├── test_performance_profiler.cpp
+│   │   │   │   ├── test_scheduler.cpp
+│   │   │   │   ├── test_pipeline_execution.cpp
+│   │   │   │   └── test_inference_cache.cpp
+│   │   │   ├── test_data/
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── test_image_processor.cpp
+│   │   │   │   ├── test_multi_view_loader.cpp
+│   │   │   │   ├── test_temporal_buffer.cpp
+│   │   │   │   ├── test_occupancy_processor.cpp
+│   │   │   │   ├── test_data_converter.cpp
+│   │   │   │   ├── test_data_types.cpp
+│   │   │   │   ├── test_format_conversion.cpp
+│   │   │   │   └── test_data_validation.cpp
+│   │   │   ├── test_safety/
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── test_safety_monitor.cpp
+│   │   │   │   ├── test_watchdog_timer.cpp
+│   │   │   │   ├── test_redundancy_checker.cpp
+│   │   │   │   ├── test_fail_safe_handler.cpp
+│   │   │   │   ├── test_iso26262_compliance.cpp
+│   │   │   │   └── test_safety_validation.cpp
+│   │   │   ├── test_visualization/
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── test_renderer.cpp
+│   │   │   │   ├── test_carla_exporter.cpp
+│   │   │   │   ├── test_omniverse_exporter.cpp
+│   │   │   │   ├── test_rviz_exporter.cpp
+│   │   │   │   └── test_open3d_exporter.cpp
+│   │   │   ├── test_export/
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── test_onnx_exporter.cpp
+│   │   │   │   ├── test_tensorrt_exporter.cpp
+│   │   │   │   ├── test_torchscript_exporter.cpp
+│   │   │   │   ├── test_openvino_exporter.cpp
+│   │   │   │   ├── test_mobile_exporter.cpp
+│   │   │   │   ├── test_model_serialization.cpp
+│   │   │   │   └── test_format_compatibility.cpp
+│   │   │   └── test_utils/
+│   │   │       ├── CMakeLists.txt
+│   │   │       ├── test_logging.cpp
+│   │   │       ├── test_timing.cpp
+│   │   │       ├── test_math_utils.cpp
+│   │   │       ├── test_string_utils.cpp
+│   │   │       ├── test_file_utils.cpp
+│   │   │       └── test_debugging.cpp
+│   │   ├── integration/
+│   │   │   ├── CMakeLists.txt
+│   │   │   ├── test_inference_pipeline.cpp
+│   │   │   ├── test_temporal_propagation.cpp
+│   │   │   ├── test_multi_view_processing.cpp
+│   │   │   ├── test_hardware_acceleration.cpp
+│   │   │   ├── test_end_to_end_detection.cpp
+│   │   │   ├── test_occupancy_prediction.cpp
+│   │   │   ├── test_memory_management.cpp
+│   │   │   ├── test_model_loading.cpp
+│   │   │   ├── test_optimization_pipeline.cpp
+│   │   │   ├── test_quantization_integration.cpp
+│   │   │   ├── test_tensorrt_integration.cpp
+│   │   │   ├── test_torchscript_integration.cpp
+│   │   │   ├── test_streaming_inference.cpp
+│   │   │   ├── test_batch_inference.cpp
+│   │   │   ├── test_concurrent_inference.cpp
+│   │   │   ├── test_safety_integration.cpp
+│   │   │   ├── test_visualization_integration.cpp
+│   │   │   ├── test_error_recovery.cpp
+│   │   │   └── test_resource_management.cpp
+│   │   ├── performance/
+│   │   │   ├── CMakeLists.txt
+│   │   │   ├── latency/
+│   │   │   │   ├── benchmark_attention.cpp
+│   │   │   │   ├── benchmark_temporal.cpp
+│   │   │   │   ├── benchmark_inference.cpp
+│   │   │   │   ├── benchmark_backbone.cpp
+│   │   │   │   ├── benchmark_neck.cpp
+│   │   │   │   ├── benchmark_head.cpp
+│   │   │   │   ├── benchmark_occupancy.cpp
+│   │   │   │   ├── benchmark_operators.cpp
+│   │   │   │   └── benchmark_end_to_end.cpp
+│   │   │   ├── throughput/
+│   │   │   │   ├── benchmark_batch_processing.cpp
+│   │   │   │   ├── benchmark_streaming.cpp
+│   │   │   │   ├── benchmark_concurrent.cpp
+│   │   │   │   ├── benchmark_scalability.cpp
+│   │   │   │   └── benchmark_hardware_limits.cpp
+│   │   │   ├── memory/
+│   │   │   │   ├── memory_benchmark.cpp
+│   │   │   │   ├── memory_leak_test.cpp
+│   │   │   │   ├── memory_fragmentation_test.cpp
+│   │   │   │   ├── gpu_memory_benchmark.cpp
+│   │   │   │   ├── temporal_memory_benchmark.cpp
+│   │   │   │   └── memory_optimization_test.cpp
+│   │   │   ├── accuracy/
+│   │   │   │   ├── precision_benchmark.cpp
+│   │   │   │   ├── quantization_accuracy.cpp
+│   │   │   │   ├── optimization_accuracy.cpp
+│   │   │   │   ├── temporal_accuracy.cpp
+│   │   │   │   └── hardware_accuracy.cpp
+│   │   │   ├── hardware_specific/
+│   │   │   │   ├── cpu_benchmark.cpp
+│   │   │   │   ├── gpu_benchmark.cpp
+│   │   │   │   ├── edge_benchmark.cpp
+│   │   │   │   ├── tpu_benchmark.cpp
+│   │   │   │   └── comparative_benchmark.cpp
+│   │   │   ├── safety/
+│   │   │   │   ├── safety_benchmark.cpp
+│   │   │   │   ├── fail_safe_benchmark.cpp
+│   │   │   │   ├── redundancy_benchmark.cpp
+│   │   │   │   └── monitoring_benchmark.cpp
+│   │   │   ├── stress/
+│   │   │   │   ├── stress_test_memory.cpp
+│   │   │   │   ├── stress_test_compute.cpp
+│   │   │   │   ├── stress_test_temporal.cpp
+│   │   │   │   ├── stress_test_concurrent.cpp
+│   │   │   │   └── stress_test_duration.cpp
+│   │   │   └── regression/
+│   │   │       ├── performance_regression.cpp
+│   │   │       ├── accuracy_regression.cpp
+│   │   │       ├── memory_regression.cpp
+│   │   │       └── hardware_regression.cpp
+│   │   ├── compatibility/
+│   │   │   ├── CMakeLists.txt
+│   │   │   ├── test_compiler_compatibility.cpp
+│   │   │   ├── test_cuda_versions.cpp
+│   │   │   ├── test_tensorrt_versions.cpp
+│   │   │   ├── test_os_compatibility.cpp
+│   │   │   ├── test_hardware_compatibility.cpp
+│   │   │   └── test_dependency_versions.cpp
+│   │   ├── security/
+│   │   │   ├── CMakeLists.txt
+│   │   │   ├── test_buffer_safety.cpp
+│   │   │   ├── test_memory_safety.cpp
+│   │   │   ├── test_thread_safety.cpp
+│   │   │   ├── test_input_validation.cpp
+│   │   │   ├── test_resource_limits.cpp
+│   │   │   └── test_exception_safety.cpp
+│   │   ├── data/
+│   │   │   ├── sample_images/
+│   │   │   │   ├── nuscenes_samples/
+│   │   │   │   ├── waymo_samples/
+│   │   │   │   ├── kitti_samples/
+│   │   │   │   ├── synthetic_data/
+│   │   │   │   ├── edge_test_data/
+│   │   │   │   └── stress_test_data/
+│   │   │   ├── test_configs/
+│   │   │   │   ├── unit_test_configs/
+│   │   │   │   ├── performance_configs/
+│   │   │   │   ├── hardware_configs/
+│   │   │   │   ├── safety_configs/
+│   │   │   │   └── edge_configs/
+│   │   │   ├── reference_outputs/
+│   │   │   │   ├── detection_outputs/
+│   │   │   │   ├── temporal_outputs/
+│   │   │   │   ├── occupancy_outputs/
+│   │   │   │   ├── attention_outputs/
+│   │   │   │   └── performance_baselines/
+│   │   │   ├── models/
+│   │   │   │   ├── test_weights/
+│   │   │   │   ├── quantized_models/
+│   │   │   │   ├── optimized_models/
+│   │   │   │   └── edge_models/
+│   │   │   └── hardware_profiles/
+│   │   │       ├── cpu_profiles/
+│   │   │       ├── gpu_profiles/
+│   │   │       ├── edge_profiles/
+│   │   │       └── tpu_profiles/
+│   │   ├── tools/
+│   │   │   ├── CMakeLists.txt
+│   │   │   ├── test_runner.cpp
+│   │   │   ├── benchmark_runner.cpp
+│   │   │   ├── memory_analyzer.cpp
+│   │   │   ├── performance_analyzer.cpp
+│   │   │   ├── coverage_analyzer.cpp
+│   │   │   ├── safety_analyzer.cpp
+│   │   │   ├── regression_detector.cpp
+│   │   │   ├── report_generator.cpp
+│   │   │   └── test_orchestrator.cpp
+│   │   └── scripts/
+│   │       ├── run_unit_tests.sh
+│   │       ├── run_integration_tests.sh
+│   │       ├── run_performance_tests.sh
+│   │       ├── run_stress_tests.sh
+│   │       ├── run_security_tests.sh
+│   │       ├── run_safety_tests.sh
+│   │       ├── run_compatibility_tests.sh
+│   │       ├── run_all_tests.sh
+│   │       ├── generate_coverage.sh
+│   │       ├── performance_analysis.sh
+│   │       ├── memory_analysis.sh
+│   │       ├── safety_analysis.sh
+│   │       ├── regression_check.sh
+│   │       ├── benchmark_hardware.sh
+│   │       ├── profile_performance.sh
+│   │       └── cleanup_tests.sh
+│   ├── benchmarks/
+│   │   ├── latency_benchmark.cpp
+│   │   ├── throughput_benchmark.cpp
+│   │   ├── memory_benchmark.cpp
+│   │   ├── accuracy_benchmark.cpp
+│   │   ├── temporal_benchmark.cpp
+│   │   ├── occupancy_benchmark.cpp
+│   │   ├── safety_benchmark.cpp
+│   │   └── hardware_comparison.cpp
+│   ├── examples/
+│   │   ├── simple_inference.cpp
+│   │   ├── batch_processing.cpp
+│   │   ├── streaming_demo.cpp
+│   │   ├── temporal_demo.cpp
+│   │   ├── occupancy_demo.cpp
+│   │   ├── safety_demo.cpp
+│   │   ├── hardware_optimization.cpp
+│   │   ├── model_conversion.cpp
+│   │   └── visualization_export.cpp
+│   ├── scripts/
+│   │   ├── build.sh
+│   │   ├── test.sh
+│   │   ├── benchmark.sh
+│   │   ├── install_dependencies.sh
+│   │   ├── cross_compile.sh
+│   │   ├── safety_validation.sh
+│   │   └── visualization_export.sh
+│   ├── docs/
+│   │   ├── api/
+│   │   │   ├── core_api.md
+│   │   │   ├── models_api.md
+│   │   │   ├── inference_api.md
+│   │   │   ├── safety_api.md
+│   │   │   └── visualization_api.md
+│   │   ├── tutorials/
+│   │   │   ├── getting_started.md
+│   │   │   ├── model_optimization.md
+│   │   │   ├── hardware_acceleration.md
+│   │   │   ├── safety_integration.md
+│   │   │   └── visualization_export.md
+│   │   ├── hardware_guides/
+│   │   │   ├── cpu_optimization.md
+│   │   │   ├── gpu_acceleration.md
+│   │   │   ├── edge_deployment.md
+│   │   │   └── tpu_integration.md
+│   │   └── performance_optimization/
+│   │       ├── memory_optimization.md
+│   │       ├── compute_optimization.md
+│   │       ├── parallel_processing.md
+│   │       └── benchmarking.md
+│   ├── cmake/
+│   │   ├── FindCUDA.cmake
+│   │   ├── FindTensorRT.cmake
+│   │   ├── FindOpenVINO.cmake
+│   │   ├── FindOpenCV.cmake
+│   │   ├── HardwareDetection.cmake
+│   │   ├── SafetyCompliance.cmake
+│   │   └── CompilerFlags.cmake
+│   ├── third_party/
+│   │   ├── eigen/
+│   │   ├── opencv/
+│   │   ├── json/
+│   │   ├── pybind11/
+│   │   ├── tensorrt/
+│   │   └── openvino/
+│   ├── CMakeLists.txt
+│   ├── conanfile.txt
+│   ├── Dockerfile.cpp
+│   └── README.md
+├── utils/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── device.py
+│   ├── logging.py
+│   ├── io.py
+│   ├── reproducibility.py
+│   ├── profiling.py
+│   ├── visualization.py
+│   ├── metrics.py
+│   ├── deployment.py
+│   ├── hardware_detection.py
+│   ├── experiment_tracking.py
+│   ├── dataset_harmonization.py
+│   ├── coordinate_transforms.py
+│   ├── class_mapping.py
+│   ├── temporal_alignment.py
+│   ├── cross_platform_export.py
+│   ├── safety_monitoring.py
+│   └── occupancy_utils.py
+├── src/
+│   └── sparse4d/
+│       ├── __init__.py
+│       ├── cli.py
+│       ├── api.py
+│       ├── interfaces/
+│       │   ├── __init__.py
+│       │   ├── backend/
+│       │   │   ├── __init__.py
+│       │   │   ├── backend_manager.py
+│       │   │   ├── tensor_interface.py
+│       │   │   ├── model_interface.py
+│       │   │   └── hardware_interface.py
+│       │   ├── models/
+│       │   │   ├── __init__.py
+│       │   │   ├── model.py
+│       │   │   ├── backbone.py
+│       │   │   ├── neck.py
+│       │   │   ├── head.py
+│       │   │   ├── component.py
+│       │   │   └── layer.py
+│       │   ├── data/
+│       │   │   ├── __init__.py
+│       │   │   ├── dataset.py
+│       │   │   ├── dataloader.py
+│       │   │   ├── transform.py
+│       │   │   ├── sampler.py
+│       │   │   └── preprocessor.py
+│       │   ├── training/
+│       │   │   ├── __init__.py
+│       │   │   ├── trainer.py
+│       │   │   ├── optimizer.py
+│       │   │   ├── scheduler.py
+│       │   │   ├── callback.py
+│       │   │   └── checkpoint.py
+│       │   ├── optimization/
+│       │   │   ├── __init__.py
+│       │   │   ├── quantizer.py
+│       │   │   ├── pruner.py
+│       │   │   ├── distiller.py
+│       │   │   └── nas.py
+│       │   ├── hardware/
+│       │   │   ├── __init__.py
+│       │   │   ├── accelerator.py
+│       │   │   ├── profiler.py
+│       │   │   └── optimizer.py
+│       │   ├── losses/
+│       │   │   ├── __init__.py
+│       │   │   ├── loss.py
+│       │   │   ├── temporal_loss.py
+│       │   │   └── regularizer.py
+│       │   ├── evaluation/
+│       │   │   ├── __init__.py
+│       │   │   ├── evaluator.py
+│       │   │   ├── metric.py
+│       │   │   └── benchmark.py
+│       │   ├── inference/
+│       │   │   ├── __init__.py
+│       │   │   ├── predictor.py
+│       │   │   ├── postprocessor.py
+│       │   │   └── tracker.py
+│       │   ├── safety/
+│       │   │   ├── __init__.py
+│       │   │   ├── monitor.py
+│       │   │   ├── validator.py
+│       │   │   └── compliance.py
+│       │   ├── visualization/
+│       │   │   ├── __init__.py
+│       │   │   ├── renderer.py
+│       │   │   ├── exporter.py
+│       │   │   └── interactive.py
+│       │   └── deployment/
+│       │       ├── __init__.py
+│       │       ├── exporter.py
+│       │       ├── optimizer.py
+│       │       └── server.py
+│       ├── models/
+│       │   ├── __init__.py
+│       │   ├── sparse4d_model.py
+│       │   ├── backbone/
+│       │   │   ├── __init__.py
+│       │   │   ├── resnet_fpn.py
+│       │   │   ├── efficientnet.py
+│       │   │   └── swin_transformer.py
+│       │   ├── neck/
+│       │   │   ├── __init__.py
+│       │   │   ├── temporal_neck.py
+│       │   │   ├── multi_view_neck.py
+│       │   │   └── deformable_neck.py
+│       │   ├── head/
+│       │   │   ├── __init__.py
+│       │   │   ├── detection_head.py
+│       │   │   ├── tracking_head.py
+│       │   │   ├── temporal_head.py
+│       │   │   ├── occupancy_head.py
+│       │   │   ├── motion_head.py
+│       │   │   └── depth_head.py
+│       │   ├── attention/
+│       │   │   ├── __init__.py
+│       │   │   ├── deformable_attention.py
+│       │   │   ├── multi_scale_attention.py
+│       │   │   └── temporal_attention.py
+│       │   └── temporal/
+│       │       ├── __init__.py
+│       │       ├── motion_model.py
+│       │       ├── kalman_filter.py
+│       │       └── temporal_propagation.py
+│       ├── data/
+│       │   ├── __init__.py
+│       │   ├── datasets/
+│       │   │   ├── __init__.py
+│       │   │   ├── nuscenes_dataset.py
+│       │   │   ├── waymo_dataset.py
+│       │   │   ├── kitti_dataset.py
+│       │   │   ├── argoverse_dataset.py
+│       │   │   ├── base_dataset.py
+│       │   │   ├── multi_dataset_loader.py
+│       │   │   └── cross_dataset_validator.py
+│       │   ├── harmonization/
+│       │   │   ├── __init__.py
+│       │   │   ├── coordinate_normalizer.py
+│       │   │   ├── class_taxonomy_mapper.py
+│       │   │   ├── temporal_aligner.py
+│       │   │   ├── multimodal_synchronizer.py
+│       │   │   ├── quality_validator.py
+│       │   │   └── format_converter.py
+│       │   ├── transforms/
+│       │   │   ├── __init__.py
+│       │   │   ├── image_transforms.py
+│       │   │   ├── temporal_transforms.py
+│       │   │   ├── cross_dataset_transforms.py
+│       │   │   └── augmentation.py
+│       │   └── loaders/
+│       │       ├── __init__.py
+│       │       ├── multi_view_loader.py
+│       │       ├── temporal_loader.py
+│       │       ├── streaming_loader.py
+│       │       └── cross_dataset_sampler.py
+│       ├── optimization/
+│       │   ├── __init__.py
+│       │   ├── quantization/
+│       │   │   ├── __init__.py
+│       │   │   ├── qat.py
+│       │   │   ├── ptq.py
+│       │   │   ├── calibration.py
+│       │   │   └── int8_ops.py
+│       │   ├── pruning/
+│       │   │   ├── __init__.py
+│       │   │   ├── structured_pruning.py
+│       │   │   ├── unstructured_pruning.py
+│       │   │   ├── attention_pruning.py
+│       │   │   └── magnitude_pruning.py
+│       │   ├── distillation/
+│       │   │   ├── __init__.py
+│       │   │   ├── teacher_student.py
+│       │   │   ├── feature_distillation.py
+│       │   │   ├── attention_distillation.py
+│       │   │   └── progressive_distillation.py
+│       │   └── nas/
+│       │       ├── __init__.py
+│       │       ├── search_space.py
+│       │       ├── evolutionary_nas.py
+│       │       ├── differentiable_nas.py
+│       │       └── hardware_aware_nas.py
+│       ├── hardware/
+│       │   ├── __init__.py
+│       │   ├── cpu/
+│       │   │   ├── __init__.py
+│       │   │   ├── x86_optimizer.py
+│       │   │   ├── arm_optimizer.py
+│       │   │   └── simd_ops.py
+│       │   ├── gpu/
+│       │   │   ├── __init__.py
+│       │   │   ├── cuda_kernels.py
+│       │   │   ├── tensorrt_optimizer.py
+│       │   │   ├── memory_optimizer.py
+│       │   │   └── stream_manager.py
+│       │   ├── edge/
+│       │   │   ├── __init__.py
+│       │   │   ├── horizon_bpu.py
+│       │   │   ├── arm_neon.py
+│       │   │   ├── apple_neural_engine.py
+│       │   │   └── mobile_optimizer.py
+│       │   └── tpu/
+│       │       ├── __init__.py
+│       │       ├── tpu_optimizer.py
+│       │       ├── xla_compiler.py
+│       │       └── distributed_tpu.py
+│       ├── training/
+│       │   ├── __init__.py
+│       │   ├── trainer.py
+│       │   ├── distributed_trainer.py
+│       │   ├── multi_dataset_trainer.py
+│       │   ├── cross_domain_trainer.py
+│       │   ├── callbacks/
+│       │   │   ├── __init__.py
+│       │   │   ├── early_stopping.py
+│       │   │   ├── model_checkpoint.py
+│       │   │   ├── learning_rate_monitor.py
+│       │   │   ├── performance_monitor.py
+│       │   │   └── safety_monitor.py
+│       │   ├── schedulers/
+│       │   │   ├── __init__.py
+│       │   │   ├── cosine_annealing.py
+│       │   │   ├── multi_step.py
+│       │   │   └── custom_schedulers.py
+│       │   └── losses/
+│       │       ├── __init__.py
+│       │       ├── focal_loss.py
+│       │       ├── iou_loss.py
+│       │       ├── temporal_loss.py
+│       │       ├── multi_task_loss.py
+│       │       └── cross_dataset_loss.py
+│       ├── evaluation/
+│       │   ├── __init__.py
+│       │   ├── evaluator.py
+│       │   ├── cross_dataset_evaluator.py
+│       │   ├── temporal_evaluator.py
+│       │   ├── metrics/
+│       │   │   ├── __init__.py
+│       │   │   ├── detection_metrics.py
+│       │   │   ├── tracking_metrics.py
+│       │   │   ├── temporal_metrics.py
+│       │   │   ├── occupancy_metrics.py
+│       │   │   ├── performance_metrics.py
+│       │   │   └── cross_dataset_metrics.py
+│       │   └── benchmarks/
+│       │       ├── __init__.py
+│       │       ├── nuscenes_benchmark.py
+│       │       ├── waymo_benchmark.py
+│       │       ├── kitti_benchmark.py
+│       │       ├── argoverse_benchmark.py
+│       │       └── performance_benchmark.py
+│       ├── inference/
+│       │   ├── __init__.py
+│       │   ├── predictor.py
+│       │   ├── streaming_predictor.py
+│       │   ├── batch_predictor.py
+│       │   ├── postprocessing/
+│       │   │   ├── __init__.py
+│       │   │   ├── nms.py
+│       │   │   ├── tracking.py
+│       │   │   ├── temporal_filtering.py
+│       │   │   └── occupancy_postprocess.py
+│       │   └── deployment/
+│       │       ├── __init__.py
+│       │       ├── onnx_runtime.py
+│       │       ├── tensorrt_runtime.py
+│       │       ├── torchscript_runtime.py
+│       │       └── openvino_runtime.py
+│       ├── visualization/
+│       │   ├── __init__.py
+│       │   ├── core/
+│       │   │   ├── __init__.py
+│       │   │   ├── scene_renderer.py
+│       │   │   ├── camera_controller.py
+│       │   │   ├── coordinate_systems.py
+│       │   │   └── rendering_engine.py
+│       │   ├── renderers/
+│       │   │   ├── __init__.py
+│       │   │   ├── bbox_renderer.py
+│       │   │   ├── track_renderer.py
+│       │   │   ├── occupancy_renderer.py
+│       │   │   ├── point_cloud_renderer.py
+│       │   │   ├── temporal_renderer.py
+│       │   │   └── multi_view_renderer.py
+│       │   ├── exporters/
+│       │   │   ├── __init__.py
+│       │   │   ├── nuscenes_format_exporter.py
+│       │   │   ├── carla_objects_exporter.py
+│       │   │   ├── omniverse_usd_exporter.py
+│       │   │   ├── rviz_markers_exporter.py
+│       │   │   ├── open3d_format_exporter.py
+│       │   │   ├── foxglove_mcap_exporter.py
+│       │   │   ├── unity_bridge_exporter.py
+│       │   │   └── web_viewer_exporter.py
+│       │   ├── frameworks/
+│       │   │   ├── __init__.py
+│       │   │   ├── open3d_backend.py
+│       │   │   ├── pytorch3d_backend.py
+│       │   │   ├── pyvista_backend.py
+│       │   │   ├── matplotlib_backend.py
+│       │   │   └── plotly_backend.py
+│       │   ├── interactive/
+│       │   │   ├── __init__.py
+│       │   │   ├── jupyter_widget.py
+│       │   │   ├── web_viewer.py
+│       │   │   ├── qt_application.py
+│       │   │   └── streamlit_dashboard.py
+│       │   ├── video/
+│       │   │   ├── __init__.py
+│       │   │   ├── animation_generator.py
+│       │   │   ├── video_exporter.py
+│       │   │   ├── gif_creator.py
+│       │   │   └── sequence_renderer.py
+│       │   └── debug/
+│       │       ├── __init__.py
+│       │       ├── attention_visualizer.py
+│       │       ├── feature_map_viewer.py
+│       │       ├── temporal_flow_viewer.py
+│       │       └── model_introspection.py
+│       ├── safety/
+│       │   ├── __init__.py
+│       │   ├── iso26262/
+│       │   │   ├── __init__.py
+│       │   │   ├── compliance_checker.py
+│       │   │   ├── safety_requirements.py
+│       │   │   ├── hazard_analysis.py
+│       │   │   ├── verification_tests.py
+│       │   │   ├── fmea_analyzer.py
+│       │   │   └── asil_validator.py
+│       │   ├── monitoring/
+│       │   │   ├── __init__.py
+│       │   │   ├── runtime_monitor.py
+│       │   │   ├── watchdog_timer.py
+│       │   │   ├── redundancy_checker.py
+│       │   │   ├── performance_monitor.py
+│       │   │   └── degradation_detector.py
+│       │   ├── fail_safe/
+│       │   │   ├── __init__.py
+│       │   │   ├── safe_mode_handler.py
+│       │   │   ├── graceful_degradation.py
+│       │   │   ├── emergency_stop.py
+│       │   │   └── backup_systems.py
+│       │   └── validation/
+│       │       ├── __init__.py
+│       │       ├── fault_injection.py
+│       │       ├── stress_testing.py
+│       │       ├── safety_test_suite.py
+│       │       └── certification_helpers.py
+│       └── deployment/
+│           ├── __init__.py
+│           ├── exporters/
+│           │   ├── __init__.py
+│           │   ├── onnx_exporter.py
+│           │   ├── tensorrt_exporter.py
+│           │   ├── torchscript_exporter.py
+│           │   ├── openvino_exporter.py
+│           │   └── mobile_exporter.py
+│           ├── visualization_exporters/
+│           │   ├── __init__.py
+│           │   ├── nuscenes_exporter.py
+│           │   ├── carla_exporter.py
+│           │   ├── omniverse_exporter.py
+│           │   ├── rviz_exporter.py
+│           │   ├── open3d_exporter.py
+│           │   ├── foxglove_exporter.py
+│           │   └── web_viewer_exporter.py
+│           ├── servers/
+│           │   ├── __init__.py
+│           │   ├── grpc_server.py
+│           │   ├── rest_server.py
+│           │   ├── streaming_server.py
+│           │   └── edge_server.py
+│           ├── containers/
+│           │   ├── __init__.py
+│           │   ├── docker_builder.py
+│           │   ├── kubernetes_deployer.py
+│           │   └── edge_deployer.py
+│           └── safety/
+│               ├── __init__.py
+│               ├── iso26262_compliance.py
+│               ├── runtime_monitors.py
+│               ├── safety_validators.py
+│               └── fail_safe_handlers.py
+└── tests/
+    ├── __init__.py
+    ├── conftest.py
+    ├── pytest.ini
+    ├── requirements_test.txt
+    ├── fixtures/
+    │   ├── __init__.py
+    │   ├── model_fixtures.py
+    │   ├── data_fixtures.py
+    │   ├── config_fixtures.py
+    │   ├── hardware_fixtures.py
+    │   ├── cpp_fixtures.py
+    │   ├── temporal_fixtures.py
+    │   ├── camera_fixtures.py
+    │   ├── safety_fixtures.py
+    │   ├── visualization_fixtures.py
+    │   ├── occupancy_fixtures.py
+    │   └── benchmark_fixtures.py
+    ├── test_data/
+    │   ├── images/
+    │   │   ├── nuscenes_samples/
+    │   │   ├── waymo_samples/
+    │   │   ├── kitti_samples/
+    │   │   ├── argoverse_samples/
+    │   │   ├── synthetic_sequences/
+    │   │   ├── multi_view_test/
+    │   │   ├── temporal_sequences/
+    │   │   └── occupancy_samples/
+    │   ├── annotations/
+    │   │   ├── 3d_boxes/
+    │   │   ├── tracking_gt/
+    │   │   ├── temporal_sequences/
+    │   │   ├── occupancy_gt/
+    │   │   └── multi_task_annotations/
+    │   ├── models/
+    │   │   ├── reference_weights/
+    │   │   ├── quantized_models/
+    │   │   ├── edge_models/
+    │   │   ├── safety_validated_models/
+    │   │   └── temporal_models/
+    │   ├── configs/
+    │   │   ├── test_configs/
+    │   │   ├── hardware_configs/
+    │   │   ├── optimization_configs/
+    │   │   ├── safety_configs/
+    │   │   ├── visualization_configs/
+    │   │   └── multi_dataset_configs/
+    │   ├── reference_outputs/
+    │   │   ├── detection_outputs/
+    │   │   ├── tracking_outputs/
+    │   │   ├── temporal_outputs/
+    │   │   ├── occupancy_outputs/
+    │   │   ├── visualization_outputs/
+    │   │   └── performance_baselines/
+    │   └── harmonized_data/
+    │       ├── coordinate_normalized/
+    │       ├── class_mapped/
+    │       ├── temporal_aligned/
+    │       └── export_formats/
+    ├── unit/
+    │   ├── __init__.py
+    │   ├── interfaces/
+    │   │   ├── __init__.py
+    │   │   ├── test_backend_manager.py
+    │   │   ├── test_tensor_interface.py
+    │   │   ├── test_model_interface.py
+    │   │   ├── test_hardware_interface.py
+    │   │   ├── test_data_interface.py
+    │   │   ├── test_training_interface.py
+    │   │   ├── test_safety_interface.py
+    │   │   ├── test_visualization_interface.py
+    │   │   └── test_deployment_interface.py
+    │   ├── models/
+    │   │   ├── __init__.py
+    │   │   ├── test_sparse4d_model.py
+    │   │   ├── backbone/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_resnet_fpn.py
+    │   │   │   ├── test_efficientnet.py
+    │   │   │   └── test_swin_transformer.py
+    │   │   ├── neck/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_temporal_neck.py
+    │   │   │   ├── test_multi_view_neck.py
+    │   │   │   └── test_deformable_neck.py
+    │   │   ├── head/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_detection_head.py
+    │   │   │   ├── test_tracking_head.py
+    │   │   │   ├── test_temporal_head.py
+    │   │   │   ├── test_occupancy_head.py
+    │   │   │   ├── test_motion_head.py
+    │   │   │   └── test_depth_head.py
+    │   │   ├── attention/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_deformable_attention.py
+    │   │   │   ├── test_multi_scale_attention.py
+    │   │   │   ├── test_temporal_attention.py
+    │   │   │   └── test_attention_ops.py
+    │   │   └── temporal/
+    │   │       ├── __init__.py
+    │   │       ├── test_motion_model.py
+    │   │       ├── test_kalman_filter.py
+    │   │       ├── test_temporal_propagation.py
+    │   │       └── test_tracking_logic.py
+    │   ├── data/
+    │   │   ├── __init__.py
+    │   │   ├── datasets/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_nuscenes_dataset.py
+    │   │   │   ├── test_waymo_dataset.py
+    │   │   │   ├── test_kitti_dataset.py
+    │   │   │   ├── test_argoverse_dataset.py
+    │   │   │   ├── test_base_dataset.py
+    │   │   │   ├── test_custom_dataset.py
+    │   │   │   ├── test_multi_dataset_loader.py
+    │   │   │   └── test_cross_dataset_validator.py
+    │   │   ├── harmonization/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_coordinate_normalizer.py
+    │   │   │   ├── test_class_taxonomy_mapper.py
+    │   │   │   ├── test_temporal_aligner.py
+    │   │   │   ├── test_multimodal_synchronizer.py
+    │   │   │   ├── test_quality_validator.py
+    │   │   │   └── test_format_converter.py
+    │   │   ├── transforms/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_image_transforms.py
+    │   │   │   ├── test_temporal_transforms.py
+    │   │   │   ├── test_augmentation.py
+    │   │   │   ├── test_geometric_transforms.py
+    │   │   │   ├── test_photometric_transforms.py
+    │   │   │   └── test_cross_dataset_transforms.py
+    │   │   └── loaders/
+    │   │       ├── __init__.py
+    │   │       ├── test_multi_view_loader.py
+    │   │       ├── test_temporal_loader.py
+    │   │       ├── test_streaming_loader.py
+    │   │       ├── test_batch_loader.py
+    │   │       ├── test_distributed_loader.py
+    │   │       └── test_cross_dataset_sampler.py
+    │   ├── optimization/
+    │   │   ├── __init__.py
+    │   │   ├── quantization/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_qat.py
+    │   │   │   ├── test_ptq.py
+    │   │   │   ├── test_calibration.py
+    │   │   │   ├── test_int8_ops.py
+    │   │   │   ├── test_dynamic_quantization.py
+    │   │   │   └── test_mixed_precision.py
+    │   │   ├── pruning/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_structured_pruning.py
+    │   │   │   ├── test_unstructured_pruning.py
+    │   │   │   ├── test_attention_pruning.py
+    │   │   │   ├── test_magnitude_pruning.py
+    │   │   │   ├── test_gradual_pruning.py
+    │   │   │   └── test_channel_pruning.py
+    │   │   ├── distillation/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_teacher_student.py
+    │   │   │   ├── test_feature_distillation.py
+    │   │   │   ├── test_attention_distillation.py
+    │   │   │   ├── test_progressive_distillation.py
+    │   │   │   └── test_online_distillation.py
+    │   │   └── nas/
+    │   │       ├── __init__.py
+    │   │       ├── test_search_space.py
+    │   │       ├── test_evolutionary_nas.py
+    │   │       ├── test_differentiable_nas.py
+    │   │       ├── test_hardware_aware_nas.py
+    │   │       └── test_progressive_shrinking.py
+    │   ├── hardware/
+    │   │   ├── __init__.py
+    │   │   ├── cpu/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_x86_optimizer.py
+    │   │   │   ├── test_arm_optimizer.py
+    │   │   │   ├── test_simd_ops.py
+    │   │   │   ├── test_threading.py
+    │   │   │   ├── test_memory_layout.py
+    │   │   │   └── test_vectorization.py
+    │   │   ├── gpu/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_cuda_kernels.py
+    │   │   │   ├── test_tensorrt_optimizer.py
+    │   │   │   ├── test_memory_optimizer.py
+    │   │   │   ├── test_stream_manager.py
+    │   │   │   ├── test_cublas_ops.py
+    │   │   │   ├── test_cudnn_ops.py
+    │   │   │   └── test_flash_attention.py
+    │   │   ├── edge/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_horizon_bpu.py
+    │   │   │   ├── test_arm_neon.py
+    │   │   │   ├── test_apple_neural_engine.py
+    │   │   │   ├── test_mobile_optimizer.py
+    │   │   │   ├── test_quantized_inference.py
+    │   │   │   └── test_memory_constraints.py
+    │   │   └── tpu/
+    │   │       ├── __init__.py
+    │   │       ├── test_tpu_optimizer.py
+    │   │       ├── test_xla_compiler.py
+    │   │       ├── test_distributed_tpu.py
+    │   │       └── test_tpu_memory.py
+    │   ├── training/
+    │   │   ├── __init__.py
+    │   │   ├── test_trainer.py
+    │   │   ├── test_distributed_trainer.py
+    │   │   ├── test_mixed_precision_trainer.py
+    │   │   ├── test_multi_dataset_trainer.py
+    │   │   ├── test_cross_domain_trainer.py
+    │   │   ├── callbacks/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_early_stopping.py
+    │   │   │   ├── test_model_checkpoint.py
+    │   │   │   ├── test_learning_rate_monitor.py
+    │   │   │   ├── test_performance_monitor.py
+    │   │   │   ├── test_safety_monitor.py
+    │   │   │   └── test_wandb_logger.py
+    │   │   ├── schedulers/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_cosine_annealing.py
+    │   │   │   ├── test_multi_step.py
+    │   │   │   ├── test_onecycle.py
+    │   │   │   └── test_custom_schedulers.py
+    │   │   └── losses/
+    │   │       ├── __init__.py
+    │   │       ├── test_focal_loss.py
+    │   │       ├── test_iou_loss.py
+    │   │       ├── test_temporal_loss.py
+    │   │       ├── test_multi_task_loss.py
+    │   │       ├── test_balanced_loss.py
+    │   │       └── test_cross_dataset_loss.py
+    │   ├── evaluation/
+    │   │   ├── __init__.py
+    │   │   ├── test_evaluator.py
+    │   │   ├── test_distributed_evaluator.py
+    │   │   ├── test_cross_dataset_evaluator.py
+    │   │   ├── test_temporal_evaluator.py
+    │   │   ├── metrics/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_detection_metrics.py
+    │   │   │   ├── test_tracking_metrics.py
+    │   │   │   ├── test_temporal_metrics.py
+    │   │   │   ├── test_occupancy_metrics.py
+    │   │   │   ├── test_performance_metrics.py
+    │   │   │   ├── test_coco_metrics.py
+    │   │   │   ├── test_nuscenes_metrics.py
+    │   │   │   └── test_cross_dataset_metrics.py
+    │   │   └── benchmarks/
+    │   │       ├── __init__.py
+    │   │       ├── test_nuscenes_benchmark.py
+    │   │       ├── test_waymo_benchmark.py
+    │   │       ├── test_kitti_benchmark.py
+    │   │       ├── test_argoverse_benchmark.py
+    │   │       ├── test_performance_benchmark.py
+    │   │       └── test_unified_benchmark.py
+    │   ├── inference/
+    │   │   ├── __init__.py
+    │   │   ├── test_predictor.py
+    │   │   ├── test_streaming_predictor.py
+    │   │   ├── test_batch_predictor.py
+    │   │   ├── test_distributed_predictor.py
+    │   │   ├── postprocessing/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_nms.py
+    │   │   │   ├── test_tracking.py
+    │   │   │   ├── test_temporal_filtering.py
+    │   │   │   ├── test_occupancy_postprocess.py
+    │   │   │   └── test_multi_view_fusion.py
+    │   │   └── deployment/
+    │   │       ├── __init__.py
+    │   │       ├── test_onnx_runtime.py
+    │   │       ├── test_tensorrt_runtime.py
+    │   │       ├── test_torchscript_runtime.py
+    │   │       ├── test_openvino_runtime.py
+    │   │       └── test_mobile_runtime.py
+    │   ├── visualization/
+    │   │   ├── __init__.py
+    │   │   ├── core/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_scene_renderer.py
+    │   │   │   ├── test_camera_controller.py
+    │   │   │   ├── test_coordinate_systems.py
+    │   │   │   └── test_rendering_engine.py
+    │   │   ├── renderers/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_bbox_renderer.py
+    │   │   │   ├── test_track_renderer.py
+    │   │   │   ├── test_occupancy_renderer.py
+    │   │   │   ├── test_point_cloud_renderer.py
+    │   │   │   ├── test_temporal_renderer.py
+    │   │   │   └── test_multi_view_renderer.py
+    │   │   ├── exporters/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_nuscenes_format_exporter.py
+    │   │   │   ├── test_carla_objects_exporter.py
+    │   │   │   ├── test_omniverse_usd_exporter.py
+    │   │   │   ├── test_rviz_markers_exporter.py
+    │   │   │   ├── test_open3d_format_exporter.py
+    │   │   │   ├── test_foxglove_mcap_exporter.py
+    │   │   │   ├── test_unity_bridge_exporter.py
+    │   │   │   └── test_web_viewer_exporter.py
+    │   │   ├── frameworks/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_open3d_backend.py
+    │   │   │   ├── test_pytorch3d_backend.py
+    │   │   │   ├── test_pyvista_backend.py
+    │   │   │   ├── test_matplotlib_backend.py
+    │   │   │   └── test_plotly_backend.py
+    │   │   ├── interactive/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_jupyter_widget.py
+    │   │   │   ├── test_web_viewer.py
+    │   │   │   ├── test_qt_application.py
+    │   │   │   └── test_streamlit_dashboard.py
+    │   │   ├── video/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_animation_generator.py
+    │   │   │   ├── test_video_exporter.py
+    │   │   │   ├── test_gif_creator.py
+    │   │   │   └── test_sequence_renderer.py
+    │   │   └── debug/
+    │   │       ├── __init__.py
+    │   │       ├── test_attention_visualizer.py
+    │   │       ├── test_feature_map_viewer.py
+    │   │       ├── test_temporal_flow_viewer.py
+    │   │       └── test_model_introspection.py
+    │   ├── safety/
+    │   │   ├── __init__.py
+    │   │   ├── iso26262/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_compliance_checker.py
+    │   │   │   ├── test_safety_requirements.py
+    │   │   │   ├── test_hazard_analysis.py
+    │   │   │   ├── test_verification_tests.py
+    │   │   │   ├── test_fmea_analyzer.py
+    │   │   │   └── test_asil_validator.py
+    │   │   ├── monitoring/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_runtime_monitor.py
+    │   │   │   ├── test_watchdog_timer.py
+    │   │   │   ├── test_redundancy_checker.py
+    │   │   │   ├── test_performance_monitor.py
+    │   │   │   └── test_degradation_detector.py
+    │   │   ├── fail_safe/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_safe_mode_handler.py
+    │   │   │   ├── test_graceful_degradation.py
+    │   │   │   ├── test_emergency_stop.py
+    │   │   │   └── test_backup_systems.py
+    │   │   └── validation/
+    │   │       ├── __init__.py
+    │   │       ├── test_fault_injection.py
+    │   │       ├── test_stress_testing.py
+    │   │       ├── test_safety_test_suite.py
+    │   │       └── test_certification_helpers.py
+    │   ├── deployment/
+    │   │   ├── __init__.py
+    │   │   ├── exporters/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_onnx_exporter.py
+    │   │   │   ├── test_tensorrt_exporter.py
+    │   │   │   ├── test_torchscript_exporter.py
+    │   │   │   ├── test_openvino_exporter.py
+    │   │   │   ├── test_mobile_exporter.py
+    │   │   │   └── test_cross_platform_exporter.py
+    │   │   ├── visualization_exporters/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_nuscenes_exporter.py
+    │   │   │   ├── test_carla_exporter.py
+    │   │   │   ├── test_omniverse_exporter.py
+    │   │   │   ├── test_rviz_exporter.py
+    │   │   │   ├── test_open3d_exporter.py
+    │   │   │   ├── test_foxglove_exporter.py
+    │   │   │   └── test_web_viewer_exporter.py
+    │   │   ├── servers/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_grpc_server.py
+    │   │   │   ├── test_rest_server.py
+    │   │   │   ├── test_streaming_server.py
+    │   │   │   └── test_edge_server.py
+    │   │   ├── containers/
+    │   │   │   ├── __init__.py
+    │   │   │   ├── test_docker_builder.py
+    │   │   │   ├── test_kubernetes_deployer.py
+    │   │   │   └── test_edge_deployer.py
+    │   │   └── safety/
+    │   │       ├── __init__.py
+    │   │       ├── test_iso26262_compliance.py
+    │   │       ├── test_runtime_monitors.py
+    │   │       ├── test_safety_validators.py
+    │   │       └── test_fail_safe_handlers.py
+    │   └── utils/
+    │       ├── __init__.py
+    │       ├── test_config.py
+    │       ├── test_device.py
+    │       ├── test_logging.py
+    │       ├── test_io.py
+    │       ├── test_reproducibility.py
+    │       ├── test_profiling.py
+    │       ├── test_visualization.py
+    │       ├── test_metrics.py
+    │       ├── test_hardware_detection.py
+    │       ├── test_experiment_tracking.py
+    │       ├── test_dataset_harmonization.py
+    │       ├── test_coordinate_transforms.py
+    │       ├── test_class_mapping.py
+    │       ├── test_temporal_alignment.py
+    │       ├── test_cross_platform_export.py
+    │       ├── test_safety_monitoring.py
+    │       └── test_occupancy_utils.py
+    ├── integration/
+    │   ├── __init__.py
+    │   ├── test_training_pipeline.py
+    │   ├── test_evaluation_pipeline.py
+    │   ├── test_inference_pipeline.py
+    │   ├── test_optimization_pipeline.py
+    │   ├── test_deployment_pipeline.py
+    │   ├── test_hardware_acceleration.py
+    │   ├── test_temporal_propagation.py
+    │   ├── test_multi_view_fusion.py
+    │   ├── test_occupancy_prediction.py
+    │   ├── test_end_to_end_detection.py
+    │   ├── test_end_to_end_tracking.py
+    │   ├── test_data_pipeline.py
+    │   ├── test_dataset_harmonization.py
+    │   ├── test_multi_dataset_training.py
+    │   ├── test_cross_dataset_validation.py
+    │   ├── test_model_conversion.py
+    │   ├── test_quantization_pipeline.py
+    │   ├── test_pruning_pipeline.py
+    │   ├── test_distillation_pipeline.py
+    │   ├── test_nas_pipeline.py
+    │   ├── test_distributed_training.py
+    │   ├── test_mixed_precision.py
+    │   ├── test_gradient_checkpointing.py
+    │   ├── test_memory_optimization.py
+    │   ├── test_safety_pipeline.py
+    │   ├── test_visualization_pipeline.py
+    │   ├── test_cross_platform_export.py
+    │   └── test_production_deployment.py
+    ├── performance/
+    │   ├── __init__.py
+    │   ├── latency/
+    │   │   ├── __init__.py
+    │   │   ├── test_inference_latency.py
+    │   │   ├── test_temporal_latency.py
+    │   │   ├── test_attention_latency.py
+    │   │   ├── test_backbone_latency.py
+    │   │   ├── test_occupancy_latency.py
+    │   │   ├── test_postprocessing_latency.py
+    │   │   ├── test_visualization_latency.py
+    │   │   └── test_end_to_end_latency.py
+    │   ├── throughput/
+    │   │   ├── __init__.py
+    │   │   ├── test_batch_throughput.py
+    │   │   ├── test_streaming_throughput.py
+    │   │   ├── test_hardware_throughput.py
+    │   │   ├── test_optimization_throughput.py
+    │   │   ├── test_multi_dataset_throughput.py
+    │   │   └── test_scalability_throughput.py
+    │   ├── memory/
+    │   │   ├── __init__.py
+    │   │   ├── test_gpu_memory.py
+    │   │   ├── test_cpu_memory.py
+    │   │   ├── test_memory_leaks.py
+    │   │   ├── test_memory_fragmentation.py
+    │   │   ├── test_temporal_memory.py
+    │   │   ├── test_occupancy_memory.py
+    │   │   └── test_optimization_memory.py
+    │   ├── accuracy/
+    │   │   ├── __init__.py
+    │   │   ├── test_detection_accuracy.py
+    │   │   ├── test_tracking_accuracy.py
+    │   │   ├── test_temporal_accuracy.py
+    │   │   ├── test_occupancy_accuracy.py
+    │   │   ├── test_optimization_accuracy.py
+    │   │   ├── test_cross_dataset_accuracy.py
+    │   │   └── test_hardware_accuracy.py
+    │   ├── scalability/
+    │   │   ├── __init__.py
+    │   │   ├── test_batch_scaling.py
+    │   │   ├── test_sequence_scaling.py
+    │   │   ├── test_hardware_scaling.py
+    │   │   ├── test_distributed_scaling.py
+    │   │   ├── test_multi_gpu_scaling.py
+    │   │   └── test_dataset_scaling.py
+    │   ├── regression/
+    │   │   ├── __init__.py
+    │   │   ├── test_performance_regression.py
+    │   │   ├── test_accuracy_regression.py
+    │   │   ├── test_memory_regression.py
+    │   │   ├── test_hardware_regression.py
+    │   │   └── test_safety_regression.py
+    │   └── comparative/
+    │       ├── __init__.py
+    │       ├── test_optimization_comparison.py
+    │       ├── test_hardware_comparison.py
+    │       ├── test_dataset_comparison.py
+    │       └── test_baseline_comparison.py
+    ├── stress/
+    │   ├── __init__.py
+    │   ├── test_memory_stress.py
+    │   ├── test_compute_stress.py
+    │   ├── test_temporal_stress.py
+    │   ├── test_batch_stress.py
+    │   ├── test_duration_stress.py
+    │   ├── test_hardware_stress.py
+    │   ├── test_concurrent_stress.py
+    │   ├── test_safety_stress.py
+    │   ├── test_visualization_stress.py
+    │   └── test_resource_limits.py
+    ├── security/
+    │   ├── __init__.py
+    │   ├── test_input_validation.py
+    │   ├── test_memory_safety.py
+    │   ├── test_buffer_overflow.py
+    │   ├── test_thread_safety.py
+    │   ├── test_resource_limits.py
+    │   ├── test_adversarial_inputs.py
+    │   ├── test_safety_vulnerabilities.py
+    │   └── test_data_privacy.py
+    ├── compatibility/
+    │   ├── __init__.py
+    │   ├── test_python_versions.py
+    │   ├── test_pytorch_versions.py
+    │   ├── test_hardware_compatibility.py
+    │   ├── test_os_compatibility.py
+    │   ├── test_driver_compatibility.py
+    │   ├── test_dependency_compatibility.py
+    │   ├── test_visualization_compatibility.py
+    │   └── test_safety_compatibility.py
+    ├── datasets/
+    │   ├── __init__.py
+    │   ├── test_nuscenes_integration.py
+    │   ├── test_waymo_integration.py
+    │   ├── test_kitti_integration.py
+    │   ├── test_argoverse_integration.py
+    │   ├── test_custom_dataset_integration.py
+    │   ├── test_multi_dataset_training.py
+    │   ├── test_dataset_compatibility.py
+    │   ├── test_harmonization_integration.py
+    │   └── test_cross_dataset_validation.py
+    ├── deployment/
+    │   ├── __init__.py
+    │   ├── docker/
+    │   │   ├── __init__.py
+    │   │   ├── test_docker_build.py
+    │   │   ├── test_docker_runtime.py
+    │   │   ├── test_multi_stage_build.py
+    │   │   ├── test_gpu_docker.py
+    │   │   ├── test_edge_docker.py
+    │   │   ├── test_safety_docker.py
+    │   │   └── test_docker_security.py
+    │   ├── kubernetes/
+    │   │   ├── __init__.py
+    │   │   ├── test_k8s_deployment.py
+    │   │   ├── test_k8s_scaling.py
+    │   │   ├── test_k8s_monitoring.py
+    │   │   ├── test_k8s_gpu_support.py
+    │   │   ├── test_k8s_safety_compliance.py
+    │   │   └── test_k8s_edge_deployment.py
+    │   ├── cloud/
+    │   │   ├── __init__.py
+    │   │   ├── test_aws_deployment.py
+    │   │   ├── test_gcp_deployment.py
+    │   │   ├── test_azure_deployment.py
+    │   │   ├── test_cloud_scaling.py
+    │   │   ├── test_cloud_safety.py
+    │   │   └── test_cloud_monitoring.py
+    │   ├── edge/
+    │   │   ├── __init__.py
+    │   │   ├── test_edge_deployment.py
+    │   │   ├── test_mobile_deployment.py
+    │   │   ├── test_automotive_deployment.py
+    │   │   ├── test_iot_deployment.py
+    │   │   ├── test_safety_edge_deployment.py
+    │   │   └── test_resource_constraints.py
+    │   └── visualization/
+    │       ├── __init__.py
+    │       ├── test_carla_deployment.py
+    │       ├── test_omniverse_deployment.py
+    │       ├── test_rviz_deployment.py
+    │       ├── test_web_viewer_deployment.py
+    │       └── test_cross_platform_deployment.py
+    ├── e2e/
+    │   ├── __init__.py
+    │   ├── test_full_training.py
+    │   ├── test_full_inference.py
+    │   ├── test_full_optimization.py
+    │   ├── test_full_deployment.py
+    │   ├── test_multi_dataset_e2e.py
+    │   ├── test_safety_e2e.py
+    │   ├── test_visualization_e2e.py
+    │   ├── test_production_ready.py
+    │   ├── test_real_world_scenarios.py
+    │   ├── test_multi_camera_scenarios.py
+    │   ├── test_temporal_scenarios.py
+    │   ├── test_occupancy_scenarios.py
+    │   ├── test_edge_scenarios.py
+    │   ├── test_cloud_scenarios.py
+    │   └── test_hybrid_scenarios.py
+    ├── ci/
+    │   ├── __init__.py
+    │   ├── test_ci_pipeline.py
+    │   ├── test_build_matrix.py
+    │   ├── test_test_coverage.py
+    │   ├── test_performance_gates.py
+    │   ├── test_regression_detection.py
+    │   ├── test_safety_gates.py
+    │   └── test_deployment_gates.py
+    ├── benchmarks/
+    │   ├── __init__.py
+    │   ├── detection_benchmarks.py
+    │   ├── tracking_benchmarks.py
+    │   ├── temporal_benchmarks.py
+    │   ├── occupancy_benchmarks.py
+    │   ├── hardware_benchmarks.py
+    │   ├── optimization_benchmarks.py
+    │   ├── memory_benchmarks.py
+    │   ├── accuracy_benchmarks.py
+    │   ├── safety_benchmarks.py
+    │   ├── visualization_benchmarks.py
+    │   ├── comparative_benchmarks.py
+    │   └── regression_benchmarks.py
+    ├── coverage/
+    │   ├── __init__.py
+    │   ├── generate_coverage.py
+    │   ├── coverage_analysis.py
+    │   ├── cpp_coverage.py
+    │   ├── python_coverage.py
+    │   ├── integration_coverage.py
+    │   ├── safety_coverage.py
+    │   └── coverage_reports.py
+    ├── profiling/
+    │   ├── __init__.py
+    │   ├── performance_profiling.py
+    │   ├── memory_profiling.py
+    │   ├── cpu_profiling.py
+    │   ├── gpu_profiling.py
+    │   ├── temporal_profiling.py
+    │   ├── safety_profiling.py
+    │   └── comparative_profiling.py
+    ├── automation/
+    │   ├── __init__.py
+    │   ├── test_generation.py
+    │   ├── data_generation.py
+    │   ├── config_generation.py
+    │   ├── report_generation.py
+    │   ├── artifact_management.py
+    │   ├── safety_test_generation.py
+    │   └── cleanup_automation.py
+    ├── monitoring/
+    │   ├── __init__.py
+    │   ├── test_monitoring_setup.py
+    │   ├── test_metrics_collection.py
+    │   ├── test_alerting.py
+    │   ├── test_performance_tracking.py
+    │   ├── test_error_tracking.py
+    │   ├── test_safety_monitoring.py
+    │   └── test_health_checks.py
+    ├── tools/
+    │   ├── __init__.py
+    │   ├── test_runner.py
+    │   ├── benchmark_runner.py
+    │   ├── performance_analyzer.py
+    │   ├── memory_analyzer.py
+    │   ├── coverage_analyzer.py
+    │   ├── regression_detector.py
+    │   ├── safety_analyzer.py
+    │   ├── visualization_analyzer.py
+    │   ├── report_generator.py
+    │   └── test_orchestrator.py
+    └── scripts/
+        ├── run_all_tests.sh
+        ├── run_unit_tests.sh
+        ├── run_integration_tests.sh
+        ├── run_performance_tests.sh
+        ├── run_stress_tests.sh
+        ├── run_safety_tests.sh
+        ├── run_visualization_tests.sh
+        ├── run_benchmarks.sh
+        ├── generate_coverage.sh
+        ├── performance_analysis.sh
+        ├── memory_analysis.sh
+        ├── safety_analysis.sh
+        ├── regression_check.sh
+        ├── cleanup_tests.sh
+        └── ci_test_runner.sh
