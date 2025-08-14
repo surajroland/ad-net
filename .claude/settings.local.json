@@ -29,7 +29,8 @@
       "Bash(python -m pytest tests/data/datasets/test_cross_dataset_validator.py::TestDatasetStatisticsAnalyzer::test_dataset_analysis_structure -v)",
       "Bash(git reset:*)",
       "Bash(git checkout:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(git branch:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",
