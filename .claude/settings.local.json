@@ -30,7 +30,11 @@
       "Bash(git reset:*)",
       "Bash(git checkout:*)",
       "Bash(git merge:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(python:*)",
+      "Bash(black:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",

@@ -116,7 +116,7 @@ jobs:
         verbose: true
         
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: test-results-${{ matrix.python-version }}
@@ -163,14 +163,23 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Run Bandit security linter
-      uses: py-actions/bandit@v1
+    - name: Set up Python
+      uses: actions/setup-python@v4
       with:
-        path: "src/"
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit[toml] safety
+        
+    - name: Run Bandit security linter
+      run: |
+        bandit -r src/ -f json -o bandit-report.json || true
+        bandit -r src/
         
     - name: Run Safety check for vulnerabilities
       run: |
-        pip install safety
         safety check --json
 
   # Documentation Build
@@ -198,7 +207,7 @@ jobs:
         sphinx-build -b html . _build/html
         
     - name: Upload documentation
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: documentation
         path: docs/_build/html/
@@ -230,7 +239,7 @@ jobs:
         pytest tests/ -k "benchmark" --benchmark-json=benchmark.json
         
     - name: Upload benchmark results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: benchmark-results
         path: benchmark.json
@@ -283,7 +292,7 @@ jobs:
         python -m build
         
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dist
         path: dist/
