@@ -1,4 +1,4 @@
-# API deployment dependencies for Sparse4D v3
+# API deployment dependencies for ADNet
 
 # Web Framework
 fastapi>=0.103.0
