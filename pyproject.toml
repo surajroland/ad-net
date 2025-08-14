@@ -20,7 +20,7 @@ classifiers = [
 ]
 
 [project.urls]
-Repository = "https://github.com/surajroland/adnet"
+Repository = "https://github.com/surajroland/ad-net"
 
 [project.scripts]
 adnet = "adnet.cli:main"

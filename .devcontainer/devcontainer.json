@@ -79,7 +79,7 @@
         "pkief.material-icon-theme",
         "gruntfuggly.todo-tree",
         "wayou.vscode-todo-highlight",
-		"ms-vscode.vscode-speech",
+		    "ms-vscode.vscode-speech",
 
         // C++ Development (for cpp_engine)
         "ms-vscode.cpptools",
@@ -183,10 +183,10 @@
         "cmake.configureOnOpen": false,
         "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
 	
-	// ML/AI Specific Settings
+	      // ML/AI Specific Settings
         "tensorBoard.logDirectory": "${workspaceFolder}/outputs/logs",
 
-	// Task Configuration
+	      // Task Configuration
         "task.showDecorations": true,
         "task.quickOpen.history": 10,
 
