@@ -1,4 +1,4 @@
-# Training dependencies for Sparse4D v3
+# Training dependencies for ADNet
 
 # 3D Detection Frameworks (Critical)
 mmcv>=2.1.0

@@ -1,0 +1,188 @@
+name: Dataset Integration Tests
+
+on:
+  schedule:
+    # Run nightly at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      dataset:
+        description: 'Dataset to test (nuscenes, waymo, kitti, all)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - nuscenes
+          - waymo
+          - kitti
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  dataset-tests:
+    name: Dataset Tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dataset: 
+          - nuscenes
+          - waymo 
+          - kitti
+          - argoverse
+        exclude:
+          - dataset: ${{ github.event.inputs.dataset != 'all' && github.event.inputs.dataset || 'none' }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Free up disk space
+      run: |
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf "/usr/local/share/boost"
+        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements/*.txt') }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements/base.txt
+        pip install -r requirements/training.txt
+        pip install -e .
+        
+    - name: Download sample dataset
+      run: |
+        # Download mini dataset samples for testing
+        case "${{ matrix.dataset }}" in
+          "nuscenes")
+            echo "Downloading nuScenes mini dataset..."
+            # Add download commands for nuScenes mini
+            ;;
+          "waymo")
+            echo "Downloading Waymo sample data..."
+            # Add download commands for Waymo samples
+            ;;
+          "kitti")
+            echo "Downloading KITTI sample data..."
+            # Add download commands for KITTI samples
+            ;;
+          "argoverse")
+            echo "Downloading Argoverse sample data..."
+            # Add download commands for Argoverse samples
+            ;;
+        esac
+        
+    - name: Test dataset loading
+      run: |
+        pytest tests/data/datasets/test_${{ matrix.dataset }}_dataset.py -v --tb=short
+        
+    - name: Test multi-dataset harmonization
+      if: matrix.dataset == 'nuscenes'
+      run: |
+        pytest tests/data/datasets/test_multi_dataset_loader.py -v --tb=short
+        
+    - name: Test cross-dataset validation
+      if: matrix.dataset == 'nuscenes'
+      run: |
+        pytest tests/data/datasets/test_cross_dataset_validator.py -v --tb=short
+        
+    - name: Performance benchmark
+      run: |
+        python -c "
+        import time
+        import adnet
+        from adnet.data.datasets.${matrix.dataset}_dataset import *
+        
+        print('Dataset loading performance test')
+        start_time = time.time()
+        # Add performance test code here
+        end_time = time.time()
+        print(f'Test completed in {end_time - start_time:.2f} seconds')
+        "
+        
+    - name: Memory usage test
+      run: |
+        python -c "
+        import psutil
+        import gc
+        process = psutil.Process()
+        print(f'Memory usage: {process.memory_info().rss / 1024 / 1024:.2f} MB')
+        "
+
+  dataset-compatibility:
+    name: Cross-Dataset Compatibility
+    runs-on: ubuntu-latest
+    needs: dataset-tests
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements/base.txt
+        pip install -e .
+        
+    - name: Test unified taxonomy
+      run: |
+        python -c "
+        from adnet.data.datasets.multi_dataset_loader import UnifiedTaxonomy
+        taxonomy = UnifiedTaxonomy()
+        
+        # Test class mappings across datasets
+        datasets = ['nuscenes', 'waymo', 'kitti', 'argoverse']
+        for dataset in datasets:
+            print(f'Testing {dataset} taxonomy mapping...')
+            # Add taxonomy validation tests
+        "
+        
+    - name: Test coordinate harmonization
+      run: |
+        python -c "
+        from adnet.data.datasets.multi_dataset_loader import CoordinateHarmonizer
+        harmonizer = CoordinateHarmonizer()
+        
+        # Test coordinate transformations
+        print('Testing coordinate harmonization...')
+        # Add coordinate transformation tests
+        "
+
+  report:
+    name: Generate Test Report
+    runs-on: ubuntu-latest
+    needs: [dataset-tests, dataset-compatibility]
+    if: always()
+    
+    steps:
+    - name: Generate report
+      run: |
+        echo "## Dataset Integration Test Report" >> $GITHUB_STEP_SUMMARY
+        echo "| Dataset | Status | Duration |" >> $GITHUB_STEP_SUMMARY
+        echo "|---------|--------|----------|" >> $GITHUB_STEP_SUMMARY
+        
+        # Add test results to summary
+        if [ "${{ needs.dataset-tests.result }}" == "success" ]; then
+          echo "| All Datasets | ✅ Passed | - |" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "| All Datasets | ❌ Failed | - |" >> $GITHUB_STEP_SUMMARY
+        fi

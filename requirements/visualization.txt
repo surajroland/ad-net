@@ -1,4 +1,4 @@
-# Visualization dependencies for Sparse4D v3
+# Visualization dependencies for ADNet
 
 # 3D Visualization Core
 open3d>=0.17.0

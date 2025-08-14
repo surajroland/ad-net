@@ -1,0 +1,103 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for ADNet
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature! 🚀
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Prerequisites
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues and discussions
+          required: true
+        - label: This feature is not already implemented
+          required: true
+        - label: This feature aligns with ADNet's goals
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve?
+      placeholder: I'm frustrated when...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe your proposed solution
+      placeholder: I would like to see...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      description: What category does this feature belong to?
+      options:
+        - Dataset Support
+        - Data Transforms
+        - Temporal Processing
+        - Multi-dataset Harmonization
+        - Performance Optimization
+        - Documentation
+        - CLI/API
+        - Testing
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: Have you considered any alternative solutions?
+      placeholder: Alternative approaches could be...
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Use Case
+      description: Describe a specific use case for this feature
+      placeholder: This feature would be useful for...
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: complexity
+    attributes:
+      label: Implementation Complexity
+      description: How complex do you think this feature is?
+      options:
+        - label: Simple - Can be implemented quickly
+        - label: Medium - Requires moderate effort
+        - label: Complex - Significant development effort
+        - label: Very Complex - Major architectural changes
+
+  - type: checkboxes
+    id: priority
+    attributes:
+      label: Priority Level
+      description: How important is this feature?
+      options:
+        - label: Critical - Essential for project success
+        - label: High - Important for many users
+        - label: Medium - Nice to have
+        - label: Low - Minor improvement
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context or screenshots about the feature request
+      placeholder: Additional information...

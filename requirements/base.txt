@@ -1,4 +1,4 @@
-# Core dependencies for Sparse4D v3
+# Core dependencies for ADNet
 
 # Deep Learning Framework
 torch==2.8.0

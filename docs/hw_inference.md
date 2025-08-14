@@ -180,7 +180,7 @@ What ISPs do
 Which ARM SoCs commonly have built-in ISPs
 The capabilities of these integrated ISPs
 How they compare to discrete ISP solutions
-Considerations for their use case (HR's sparse4d v3 variant)
+Considerations for their use case (HR's ADNet variant)
 
 This is a straightforward technical question that doesn't require web search since ISP integration in ARM SoCs is well-established technology that hasn't changed dramatically recently.Yes, exactly! Most modern ARM SoCs targeting camera applications have integrated ISPs. Here's the breakdown:
 Common ARM SoCs with Built-in ISPs

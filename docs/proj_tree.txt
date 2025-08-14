@@ -369,8 +369,8 @@ Sparse4D/
 │   │   ├── deployment.md
 │   │   └── cross_platform.md
 │   ├── arch/
-│   │   ├── sparse4d_architecture.dot
-│   │   ├── sparse4d_architecture.png
+│   │   ├── adnet_architecture.dot
+│   │   ├── adnet_architecture.png
 │   │   ├── temporal_propagation.dot
 │   │   ├── temporal_propagation.png
 │   │   ├── pytorch_framework.dot
@@ -690,7 +690,7 @@ Sparse4D/
 │       └── temporal_utilities.py
 ├── cpp_engine/
 │   ├── include/
-│   │   ├── sparse4d/
+│   │   ├── adnet/
 │   │   │   ├── core/
 │   │   │   │   ├── tensor.hpp
 │   │   │   │   ├── memory_pool.hpp
@@ -700,7 +700,7 @@ Sparse4D/
 │   │   │   │   ├── safety_monitor.hpp
 │   │   │   │   └── utils.hpp
 │   │   │   ├── models/
-│   │   │   │   ├── sparse4d_model.hpp
+│   │   │   │   ├── adnet_model.hpp
 │   │   │   │   ├── backbone.hpp
 │   │   │   │   ├── neck.hpp
 │   │   │   │   ├── head.hpp
@@ -797,7 +797,7 @@ Sparse4D/
 │   │   │   ├── safety_monitor.cpp
 │   │   │   └── utils.cpp
 │   │   ├── models/
-│   │   │   ├── sparse4d_model.cpp
+│   │   │   ├── adnet_model.cpp
 │   │   │   ├── backbone/
 │   │   │   │   ├── resnet_fpn.cpp
 │   │   │   │   ├── efficientnet.cpp
@@ -933,7 +933,7 @@ Sparse4D/
 │   │   │   │   └── test_error_handling.cpp
 │   │   │   ├── test_models/
 │   │   │   │   ├── CMakeLists.txt
-│   │   │   │   ├── test_sparse4d_model.cpp
+│   │   │   │   ├── test_adnet_model.cpp
 │   │   │   │   ├── backbone/
 │   │   │   │   │   ├── test_resnet_fpn.cpp
 │   │   │   │   │   ├── test_efficientnet.cpp
@@ -1332,7 +1332,7 @@ Sparse4D/
 │   ├── safety_monitoring.py
 │   └── occupancy_utils.py
 ├── src/
-│   └── sparse4d/
+│   └── adnet/
 │       ├── __init__.py
 │       ├── cli.py
 │       ├── api.py
@@ -1409,7 +1409,7 @@ Sparse4D/
 │       │       └── server.py
 │       ├── models/
 │       │   ├── __init__.py
-│       │   ├── sparse4d_model.py
+│       │   ├── adnet_model.py
 │       │   ├── backbone/
 │       │   │   ├── __init__.py
 │       │   │   ├── resnet_fpn.py
@@ -1770,7 +1770,7 @@ Sparse4D/
     │   │   └── test_deployment_interface.py
     │   ├── models/
     │   │   ├── __init__.py
-    │   │   ├── test_sparse4d_model.py
+    │   │   ├── test_adnet_model.py
     │   │   ├── backbone/
     │   │   │   ├── __init__.py
     │   │   │   ├── test_resnet_fpn.py

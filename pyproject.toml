@@ -6,17 +6,75 @@ version = "0.1.0"
 description = "4D spatio-temporal object detection framework for advanced driving"
 authors = [{name = "Surajit Dutta", email = "hello@surajit.de"}]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 license = {text = "MIT"}
-keywords = ["machine-learning", "computer-vision", "3d-detection", "autonomous-driving", "4d-perception"]
+keywords = ["machine-learning", "computer-vision", "3d-detection", "autonomous-driving", "4d-perception", "sparse4d", "temporal-detection"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Image Processing",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10", 
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Environment :: GPU :: NVIDIA CUDA",
+]
+
+dependencies = [
+    "numpy>=1.24.0",
+    "torch>=2.0.0",
+    "torchvision>=0.15.0",
+    "opencv-python>=4.8.0",
+    "pillow>=10.0.0",
+    "scipy>=1.11.0",
+    "scikit-learn>=1.3.0",
+    "matplotlib>=3.7.0",
+    "tqdm>=4.65.0",
+    "pyyaml>=6.0",
+    "click>=8.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-benchmark>=4.0.0",
+    "black>=23.7.0",
+    "isort>=5.12.0",
+    "ruff>=0.0.287",
+    "mypy>=1.5.0",
+    "pre-commit>=3.3.0",
+    "bandit>=1.7.5",
+    "safety>=2.3.0",
+    "interrogate>=1.5.0",
+]
+docs = [
+    "sphinx>=7.1.0",
+    "sphinx-rtd-theme>=1.3.0",
+    "myst-parser>=2.0.0",
+    "sphinxcontrib-bibtex>=2.5.0",
+]
+training = [
+    "tensorboard>=2.14.0",
+    "wandb>=0.15.0",
+    "hydra-core>=1.3.0",
+    "omegaconf>=2.3.0",
+]
+visualization = [
+    "plotly>=5.15.0",
+    "seaborn>=0.12.0",
+    "jupyter>=1.0.0",
+    "ipywidgets>=8.0.0",
+]
+api = [
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+    "pydantic>=2.0.0",
 ]
 
 [project.urls]
@@ -65,10 +123,89 @@ exclude = ["tests/", "scripts/", "examples/"]
 # Testing with pytest
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-ra -q --strict-markers --tb=short"
+addopts = "-ra -q --strict-markers --tb=short --cov=src/adnet --cov-report=term-missing --cov-report=html --cov-report=xml"
 testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "gpu: marks tests that require GPU",
-    "integration: marks tests as integration tests"
+    "integration: marks tests as integration tests",
+    "benchmark: marks tests as performance benchmarks",
+    "unit: marks tests as unit tests",
+    "dataset: marks tests that require dataset downloads",
 ]
+filterwarnings = [
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["src/adnet"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__init__.py",
+    "*/cli.py",
+    "*/_version.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+show_missing = true
+precision = 2
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+# Bandit security configuration
+[tool.bandit]
+exclude_dirs = ["tests", "scripts"]
+skips = ["B101", "B601"]
+
+# Interrogate docstring coverage
+[tool.interrogate]
+ignore-init-method = true
+ignore-init-module = true
+ignore-magic = false
+ignore-semiprivate = false
+ignore-private = false
+ignore-property-decorators = false
+ignore-module = false
+ignore-nested-functions = false
+ignore-nested-classes = true
+fail-under = 70
+exclude = ["setup.py", "docs", "tests"]
+verbose = 1
+quiet = false
+whitelist-regex = []
+color = true
+omit-covered-files = false
+
+# Documentation configuration
+[tool.sphinx]
+source-dir = "docs"
+build-dir = "docs/_build"
+
+# Performance benchmarking
+[tool.pytest.benchmark]
+min_rounds = 5
+max_time = 1.0
+min_time = 0.000005
+timer = "time.perf_counter"
+calibration_precision = 10
+disable_gc = false
+warmup = false

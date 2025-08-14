@@ -385,7 +385,7 @@ Sparse4D/
 │           ├── harmonization_quality/
 │           └── generalization_metrics/
 ├── src/                          # 🧠 Core Implementation
-│   └── sparse4d/
+│   └── adnet/
 │       ├── __init__.py
 │       ├── cli.py
 │       ├── api.py
@@ -462,7 +462,7 @@ Sparse4D/
 │       │       └── server.py
 │       ├── models/               # Model Implementations
 │       │   ├── __init__.py
-│       │   ├── sparse4d_model.py
+│       │   ├── adnet_model.py
 │       │   ├── backbone/
 │       │   │   ├── __init__.py
 │       │   │   ├── resnet_fpn.py
@@ -751,7 +751,7 @@ Sparse4D/
 │               └── fail_safe_handlers.py
 ├── cpp_engine/                   # 🚀 High-Performance C++ Engine
 │   ├── include/
-│   │   ├── sparse4d/
+│   │   ├── adnet/
 │   │   │   ├── core/
 │   │   │   │   ├── tensor.hpp
 │   │   │   │   ├── memory_pool.hpp
@@ -761,7 +761,7 @@ Sparse4D/
 │   │   │   │   ├── safety_monitor.hpp
 │   │   │   │   └── utils.hpp
 │   │   │   ├── models/
-│   │   │   │   ├── sparse4d_model.hpp
+│   │   │   │   ├── adnet_model.hpp
 │   │   │   │   ├── backbone.hpp
 │   │   │   │   ├── neck.hpp
 │   │   │   │   ├── head.hpp
@@ -1641,7 +1641,7 @@ class QuerySystemManager(nn.Module):
 
 | Model | Instance Storage | Key Features |
 |-------|------------------|--------------|
-| **Sparse4D v3** | 600 temporal queries, confidence decay (0.6), threshold (0.25) | O(1) temporal propagation, decoupled attention |
+| **ADNet** | 600 temporal queries, confidence decay (0.6), threshold (0.25) | O(1) temporal propagation, decoupled attention |
 | **SparseDrive** | Instance memory queue, symmetric perception | Parallel motion planner integration |
 | **SparseAD** | End-to-end multi-task memory bank | Unified storage for detection/tracking/mapping |
 | **StreamPETR** | Streaming temporal bank | Real-time adaptive instance lifetime |
@@ -1665,7 +1665,7 @@ digraph CameraParameterImplementation {
     Offline [label="Offline Rectification\n(Traditional Approach)\n• Pre-computed embeddings\n• Reduced calibration dependency\n• Preprocessing bottlenecks", fillcolor=lightcoral];
     
     // Sparse4D specific implementation
-    Sparse4DImpl [label="Sparse4D v3 Implementation\n• Instance-level depth reweighting\n• 4D keypoint projection\n• Custom CUDA operations\n• 600x faster than NeRF", fillcolor=orange];
+    Sparse4DImpl [label="ADNet Implementation\n• Instance-level depth reweighting\n• 4D keypoint projection\n• Custom CUDA operations\n• 600x faster than NeRF", fillcolor=orange];
     
     // Performance metrics
     Performance [label="Performance Impact\n• BEVFormer: 51.7% NDS (high sensitivity)\n• PETR: 50.4% NDS (moderate sensitivity)\n• DPFT: 87±1.2ms inference", fillcolor=yellow];
@@ -1684,7 +1684,7 @@ digraph CameraParameterImplementation {
 
 ```python
 class CameraParameterProcessor:
-    """Sparse4D v3 camera parameter processing with explicit encoding"""
+    """ADNet camera parameter processing with explicit encoding"""
     
     def __init__(self, embed_dims: int = 256):
         # Camera intrinsic encoder
@@ -1920,7 +1920,7 @@ Performance Comparison Table:
 │ BEVFormer       │ 51.7        │ High              │ 89.2                │
 │ PETR            │ 50.4        │ Moderate          │ 74.1                │
 │ StreamPETR      │ 55.0        │ Moderate          │ 32.3 (31.7 FPS)    │
-│ Sparse4D v3     │ 71.9        │ High              │ 50.5 (19.8 FPS)    │
+│ ADNet     │ 71.9        │ High              │ 50.5 (19.8 FPS)    │
 │ BEVDepth        │ 60.0        │ Low → High*       │ 95.8                │
 │ DPFT            │ 59.2        │ Variable          │ 87 ± 1.2            │
 └─────────────────┴─────────────┴───────────────────┴─────────────────────┘
@@ -1939,15 +1939,15 @@ Computational Efficiency Analysis:
 │   ├── Cons: Slower convergence, preprocessing bottlenecks
 │   └── Trade-off: Robustness vs Geometric Precision
 │
-└── Hybrid Approaches (StreamPETR, Sparse4D v3):
+└── Hybrid Approaches (StreamPETR, ADNet):
     ├── Benefits: Combined advantages of both strategies
     ├── Performance: State-of-the-art results with practical deployment
     └── Evolution: Beyond simple online/offline distinctions
 ```
 
-#### 4.2 Sparse4D v3 Depth Estimation Integration
+#### 4.2 ADNet Depth Estimation Integration
 
-**Sparse4D v3 definitively includes sophisticated depth estimation capabilities** integrated as a core component of its architecture. The model employs a multi-faceted approach to depth prediction that evolved significantly from earlier versions.
+**ADNet definitively includes sophisticated depth estimation capabilities** integrated as a core component of its architecture. The model employs a multi-faceted approach to depth prediction that evolved significantly from earlier versions.
 
 ### Dense depth supervision drives v3's core architecture
 
@@ -2037,7 +2037,7 @@ class DenseDepthBranch(nn.Module):
 
 ### Instance-level depth reweighting
 
-**Beyond dense supervision, Sparse4D v3 inherits the instance-level depth reweight module** first introduced in v1:
+**Beyond dense supervision, ADNet inherits the instance-level depth reweight module** first introduced in v1:
 
 ```python
 class InstanceLevelDepthReweight(nn.Module):
@@ -2156,7 +2156,7 @@ Sparse4D Depth Evolution Timeline:
 
 ### Complete prediction head architecture includes depth components
 
-**Sparse4D v3 implements five primary prediction heads working in concert**:
+**ADNet implements five primary prediction heads working in concert**:
 
 ```python
 class CompletePredictionHeads(nn.Module):
@@ -2264,12 +2264,12 @@ class CompletePredictionHeads(nn.Module):
 Repository Structure (Depth Components):
 Sparse4D/
 ├── projects/mmdet3d_plugin/models/dense_heads/
-│   ├── sparse4d_head.py ←── Complete prediction heads including depth
+│   ├── adnet_head.py ←── Complete prediction heads including depth
 │   ├── depth_branch.py ←── Dense depth supervision implementation  
 │   └── instance_reweight.py ←── Instance-level depth reweighting
-├── configs/sparse4d/
-│   ├── sparse4d_temporal_r50_1x8_bs6_20e.py ←── Training config with depth
-│   └── sparse4d_temporal_eva02_large_1x8_bs6_20e.py ←── Best performance config
+├── configs/adnet/
+│   ├── adnet_temporal_r50_1x8_bs6_20e.py ←── Training config with depth
+│   └── adnet_temporal_eva02_large_1x8_bs6_20e.py ←── Best performance config
 └── tools/
     ├── train.py ←── Training script with depth supervision
     └── test.py ←── Evaluation script
@@ -2307,14 +2307,14 @@ deployment_config = {
 
 #### 5.1 HR-Compatible Deformable Attention
 
-**Precise Multi-Scale Sampling Implementation** with exact HR Sparse4D v3 compatibility:
+**Precise Multi-Scale Sampling Implementation** with exact HR ADNet compatibility:
 
 ```python
 @register_attention("hr_deformable_attention", 
                    description="HR-compatible deformable attention with exact 13-point sampling",
                    dependencies=["torch", "torchvision"])
 class HRDeformableAttention(nn.Module):
-    """HR Sparse4D v3 compatible deformable attention mechanism"""
+    """HR ADNet compatible deformable attention mechanism"""
     
     def __init__(self, embed_dims: int = 256, num_groups: int = 8, 
                  sampling_points: int = 13, dropout: float = 0.1,
@@ -2326,7 +2326,7 @@ class HRDeformableAttention(nn.Module):
         self.sampling_points = sampling_points
         self.hr_compatible = hr_compatible
         
-        # HR Sparse4D v3 compatibility mode
+        # HR ADNet compatibility mode
         if hr_compatible:
             assert sampling_points == 13, "HR compatibility requires exactly 13 sampling points"
             self.fixed_keypoints = 7      # Anchor-relative fixed positions
@@ -2351,7 +2351,7 @@ class HRDeformableAttention(nn.Module):
         self.attention_metrics = AttentionMetrics()
     
     def _setup_hr_keypoint_layout(self):
-        """Setup HR Sparse4D v3 specific keypoint layout"""
+        """Setup HR ADNet specific keypoint layout"""
         # Fixed keypoint positions (HR's specific 7-point layout around anchor)
         fixed_positions = torch.tensor([
             [0.0, 0.0],    # Center anchor
@@ -2364,7 +2364,7 @@ class HRDeformableAttention(nn.Module):
 **4D Keypoint Sampling Visualization**:
 
 ```
-HR Sparse4D v3 Keypoint Sampling Pattern:
+HR ADNet Keypoint Sampling Pattern:
 ┌─────────────────────────────────────────┐
 │ Object Query in 3D Space                │
 │                                         │
@@ -2580,7 +2580,7 @@ final_confidence = detection_score × √(centerness × yawness)
 
 ```python
 class DecoupledMultiHeadAttention(nn.Module):
-    """Decoupled attention mechanism introduced in Sparse4D v3"""
+    """Decoupled attention mechanism introduced in ADNet"""
     
     def __init__(self, embed_dims: int = 256, num_heads: int = 8):
         super().__init__()
@@ -3715,7 +3715,7 @@ class TestSparse4DComprehensive:
         """Enhanced configuration for comprehensive testing"""
         return OmegaConf.create({
             'model': {
-                'component': 'model.sparse4d',
+                'component': 'model.adnet',
                 'backbone_config': {
                     'component': 'backbone.enhanced_resnet_fpn',
                     'depth': 50,
@@ -4292,12 +4292,12 @@ Production Deployment Metrics:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Sparse4D v3 Performance Achievements
+### ADNet Performance Achievements
 
 **Comprehensive Performance Validation** on nuScenes test set:
 
 ```
-HR Sparse4D v3 Performance Results:
+HR ADNet Performance Results:
 ┌─────────────────────────────────────────────────────────────────┐
 │ Detection Performance (nuScenes Test Set)                      │
 ├─────────────────────────────────────────────────────────────────┤
@@ -4459,11 +4459,11 @@ requirements/safety.txt:
 
 ## Conclusion & Future Roadmap 🚀
 
-The synchronized Sparse4D v3 implementation represents a **comprehensive 4D spatio-temporal object detection framework** that bridges advanced research with production deployment requirements. This project encompasses:
+The synchronized ADNet implementation represents a **comprehensive 4D spatio-temporal object detection framework** that bridges advanced research with production deployment requirements. This project encompasses:
 
 ### Technical Achievements ✅
 
-1. **Complete Architecture Implementation**: Full HR Sparse4D v3 compatibility with exact technical specifications
+1. **Complete Architecture Implementation**: Full HR ADNet compatibility with exact technical specifications
 2. **Production-Ready Infrastructure**: Horizon Journey 5 optimization, safety compliance, comprehensive testing
 3. **Cross-Dataset Harmonization**: Advanced multi-dataset training and validation framework  
 4. **Comprehensive Visualization**: Multi-platform export supporting nuScenes, CARLA, Omniverse, RViz, and more
@@ -4496,6 +4496,6 @@ The synchronized Sparse4D v3 implementation represents a **comprehensive 4D spat
 - [ ] Validate on comprehensive test suites
 - [ ] Prepare for commercial deployment
 
-This synchronized project.md now accurately reflects all technical details from your provided files, maintaining comprehensive coverage while ensuring development order and technical accuracy. The documentation serves as both implementation guide and reference manual for the complete Sparse4D v3 ecosystem.
+This synchronized project.md now accurately reflects all technical details from your provided files, maintaining comprehensive coverage while ensuring development order and technical accuracy. The documentation serves as both implementation guide and reference manual for the complete ADNet ecosystem.
 
 ```

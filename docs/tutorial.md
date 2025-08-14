@@ -1,6 +1,6 @@
-# HR Sparse4D v3: Complete Technical Deep Dive 🚗⚡
+# HR ADNet: Complete Technical Deep Dive 🚗⚡
 
-A comprehensive guide for implementing Horizon Robotics' Sparse4D v3 temporal object detection system.
+A comprehensive guide for implementing Horizon Robotics' ADNet temporal object detection system.
 
 ## 1. Core Concept: From 3D to 4D Detection 🎯
 
@@ -15,7 +15,7 @@ Frame t-1    Frame t    Frame t+1
 Independent Independent Independent
 ```
 
-**Sparse4D v3 (Temporal Continuity):**
+**ADNet (Temporal Continuity):**
 ```
 Frame t-1 ──→ Frame t ──→ Frame t+1
    🚗═════════🚗═════════🚗
@@ -43,10 +43,10 @@ The core 4D representation extends 3D detection to include temporal dimension:
 
 ### Query Distribution Strategy
 
-HR Sparse4D v3 uses exactly **900 total queries** with strategic allocation:
+HR ADNet uses exactly **900 total queries** with strategic allocation:
 
 ```python
-# HR Sparse4D v3 Query Allocation
+# HR ADNet Query Allocation
 TOTAL_QUERIES = 900
 TEMPORAL_QUERIES = 600  # From previous frame instances (66.7%)
 SINGLE_FRAME_QUERIES = 300  # New detections (33.3%)
@@ -55,7 +55,7 @@ SINGLE_FRAME_QUERIES = 300  # New detections (33.3%)
 **Query System Visualization:**
 ```
 ┌─────────────────────────────────────┐
-│     Sparse4D v3 Query System       │
+│     ADNet Query System       │
 ├─────────────────────────────────────┤
 │ 🔄 Temporal Queries: 600 (66.7%)   │
 │    ├── Active instances from t-1   │
@@ -113,7 +113,7 @@ class QuerySystemManager(nn.Module):
 
 ## 3. Instance Bank: Temporal Memory System 🏦
 
-The **Instance Bank** is the heart of Sparse4D v3's temporal reasoning capability.
+The **Instance Bank** is the heart of ADNet's temporal reasoning capability.
 
 ### Core Architecture
 
@@ -264,7 +264,7 @@ The core spatial-temporal feature aggregation mechanism with exact HR specificat
 **HR's Exact Specification:**
 ```python
 class HRDeformableAttention(nn.Module):
-    """HR Sparse4D v3 compatible deformable attention mechanism"""
+    """HR ADNet compatible deformable attention mechanism"""
     
     def __init__(self, embed_dims=256, num_groups=8, 
                  sampling_points=13, hr_compatible=True):
@@ -274,7 +274,7 @@ class HRDeformableAttention(nn.Module):
         self.num_groups = num_groups
         self.sampling_points = sampling_points
         
-        # HR Sparse4D v3 compatibility mode
+        # HR ADNet compatibility mode
         if hr_compatible:
             assert sampling_points == 13, "HR compatibility requires exactly 13 sampling points"
             self.fixed_keypoints = 7      # Anchor-relative fixed positions
@@ -290,7 +290,7 @@ class HRDeformableAttention(nn.Module):
         self.output_proj = nn.Linear(embed_dims, embed_dims)
     
     def _setup_hr_keypoint_layout(self):
-        """Setup HR Sparse4D v3 specific keypoint layout"""
+        """Setup HR ADNet specific keypoint layout"""
         # Fixed keypoint positions (HR's specific 7-point layout)
         fixed_positions = torch.tensor([
             [0.0, 0.0],    # Center anchor
@@ -302,7 +302,7 @@ class HRDeformableAttention(nn.Module):
 
 ### 4D Keypoint Sampling Visualization
 
-**HR Sparse4D v3 Keypoint Pattern (13 points):**
+**HR ADNet Keypoint Pattern (13 points):**
 ```
 ┌─────────────────────────────────────┐
 │ Object Query in 3D Space            │
@@ -422,7 +422,7 @@ HR uses **online projection** (real-time camera access during forward pass) vs t
 
 ```python
 class CameraParameterProcessor(nn.Module):
-    """Sparse4D v3 camera parameter processing with explicit encoding"""
+    """ADNet camera parameter processing with explicit encoding"""
     
     def __init__(self, embed_dims=256):
         super().__init__()
@@ -929,7 +929,7 @@ def traditional_attention(query, key, value, pos_embed):
 
 # Decoupled attention (v3):
 class DecoupledMultiHeadAttention(nn.Module):
-    """Decoupled attention mechanism introduced in Sparse4D v3"""
+    """Decoupled attention mechanism introduced in ADNet"""
     
     def __init__(self, embed_dims=256, num_heads=8):
         super().__init__()
@@ -1004,11 +1004,11 @@ Performance Improvements:
 
 ## 10. Complete Forward Pass Pipeline 🔄
 
-Here's the **complete data flow** through HR Sparse4D v3:
+Here's the **complete data flow** through HR ADNet:
 
 ```python
 class Sparse4DV3(nn.Module):
-    """Complete HR Sparse4D v3 implementation"""
+    """Complete HR ADNet implementation"""
     
     def __init__(self, config):
         super().__init__()
@@ -1038,7 +1038,7 @@ class Sparse4DV3(nn.Module):
         self.temporal_denoising = TemporalInstanceDenoising(**config.denoising_config)
     
     def forward(self, batch_data):
-        """Complete HR Sparse4D v3 forward pass"""
+        """Complete HR ADNet forward pass"""
         
         # 1. Multi-view feature extraction
         multi_view_images = batch_data['images']  # [B, 6, 3, H, W]
@@ -1479,7 +1479,7 @@ performance_results = {
 │ StreamPETR      │ 55.0    │ 48.2    │ 31.7    │ Medium  │
 │ BEVDepth        │ 60.0    │ 47.5    │ 10.5    │ High    │
 │ Sparse4D v2     │ 69.7    │ 65.4    │ 16.8    │ Low     │
-│ Sparse4D v3     │ 71.9    │ 68.4    │ 19.8    │ Low     │ ← HR
+│ ADNet     │ 71.9    │ 68.4    │ 19.8    │ Low     │ ← HR
 └─────────────────┴─────────┴─────────┴─────────┴─────────┘
 ```
 
@@ -1832,6 +1832,6 @@ temporal_denoising = TemporalDenoising(noise_groups=5, temporal_groups=3)
 query_ext = torch.cat([query, pos_embed], dim=-1)  # No interference
 ```
 
-This comprehensive guide provides you with the complete technical foundation to implement HR's Sparse4D v3! The key insight is understanding how the **Instance Bank enables O(1) temporal reasoning** while **13-point deformable attention handles spatial-temporal feature aggregation** across multiple camera views with exact HR specifications.
+This comprehensive guide provides you with the complete technical foundation to implement HR's ADNet! The key insight is understanding how the **Instance Bank enables O(1) temporal reasoning** while **13-point deformable attention handles spatial-temporal feature aggregation** across multiple camera views with exact HR specifications.
 
 Ready to revolutionize temporal object detection? 🚀🚗

@@ -1,4 +1,4 @@
-# HR Sparse4D v3: Complete Step-by-Step Technical Guide 🚗🔍
+# HR ADNet: Complete Step-by-Step Technical Guide 🚗🔍
 
 ## Table of Contents
 1. [System Overview](#system-overview)
@@ -21,7 +21,7 @@
 
 ## System Overview 🏗️
 
-HR Sparse4D v3 is an end-to-end 4D object detection and tracking system that processes multi-view camera inputs to generate 3D detections with consistent tracking IDs across time.
+HR ADNet is an end-to-end 4D object detection and tracking system that processes multi-view camera inputs to generate 3D detections with consistent tracking IDs across time.
 
 ### High-Level Architecture
 
@@ -385,7 +385,7 @@ digraph DeformableAttention {
 
 ### 2. 4D Keypoint Sampling Strategy
 
-HR Sparse4D v3 uses **13 sampling points** per query:
+HR ADNet uses **13 sampling points** per query:
 - **7 fixed keypoints**: Anchor-relative positions (HR standard)
 - **6 learnable keypoints**: Network-predicted offsets
 
@@ -507,7 +507,7 @@ def compute_attention_weights(self, queries):
 
 ## Temporal Instance Denoising 🧠
 
-Sparse4D v3 introduces temporal instance denoising as a key innovation, extending 2D single-frame denoising to 3D temporal scenarios.
+ADNet introduces temporal instance denoising as a key innovation, extending 2D single-frame denoising to 3D temporal scenarios.
 
 ### 1. Temporal Denoising Architecture
 
@@ -856,7 +856,7 @@ def compute_quality_loss(pred_quality, gt_boxes, pred_boxes):
 
 ## Depth Estimation Integration 📏
 
-HR Sparse4D v3 integrates sophisticated depth estimation at multiple levels.
+HR ADNet integrates sophisticated depth estimation at multiple levels.
 
 ### 1. Depth Branch Architecture
 
@@ -1131,7 +1131,7 @@ Layer Configuration:
 
 ## Prediction Heads 🎯
 
-HR Sparse4D v3 uses 5 specialized prediction heads for different tasks.
+HR ADNet uses 5 specialized prediction heads for different tasks.
 
 ### 1. Prediction Heads Architecture
 
@@ -1230,7 +1230,7 @@ class RegressionHead(nn.Module):
 
 ### 4. Quality Estimation Head (New in v3)
 
-This is a key innovation in Sparse4D v3 for improving prediction reliability:
+This is a key innovation in ADNet for improving prediction reliability:
 
 ```python
 class QualityEstimationHead(nn.Module):
@@ -1513,7 +1513,7 @@ detection = {
 
 ## Training & Loss Functions 📚
 
-HR Sparse4D v3 uses a multi-task loss combining detection, tracking, depth, and quality objectives.
+HR ADNet uses a multi-task loss combining detection, tracking, depth, and quality objectives.
 
 ### 1. Loss Function Architecture
 
@@ -1682,7 +1682,7 @@ performance_metrics = {
 
 ## Hardware Optimization 🔧
 
-HR Sparse4D v3 is optimized for Horizon Robotics' Journey 5 platform with 128 TOPS Bayesian BPU architecture.
+HR ADNet is optimized for Horizon Robotics' Journey 5 platform with 128 TOPS Bayesian BPU architecture.
 
 ### 1. Journey 5 Platform Architecture
 
@@ -1840,7 +1840,7 @@ sensor_integration = {
 
 ## Production Deployment 🚀
 
-HR Sparse4D v3 is production-ready with real-world validation and deployment infrastructure.
+HR ADNet is production-ready with real-world validation and deployment infrastructure.
 
 ### 1. Real-World Deployment Statistics
 
@@ -2008,4 +2008,4 @@ Core Mathematical Components:
    Output = Σᵢ αᵢ × BilinearSample(Features, ProjectedPoints[i])
 ```
 
-This completes the comprehensive technical guide to HR Sparse4D v3. The system represents a significant advancement in camera-based 4D perception, combining academic innovation with production engineering for real-world autonomous driving deployment. 🚗✨
+This completes the comprehensive technical guide to HR ADNet. The system represents a significant advancement in camera-based 4D perception, combining academic innovation with production engineering for real-world autonomous driving deployment. 🚗✨
