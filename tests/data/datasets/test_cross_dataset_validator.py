@@ -31,7 +31,7 @@ class MockDataset(BaseDataset):
         self._sample_ids = [f"sample_{i:03d}" for i in range(num_samples)]
         self.class_names = ["car", "pedestrian", "bicycle", "truck"]
         self.camera_names = ["CAM_FRONT", "CAM_BACK"]
-        
+
         # Initialize parent without calling abstract methods
         super(BaseDataset, self).__init__()
         self.data_root = "/mock/data"
@@ -52,6 +52,7 @@ class MockDataset(BaseDataset):
     def get_camera_calibration(self, sample_id):
         """Mock implementation"""
         from adnet.interfaces.data.dataset import CameraParams
+
         return CameraParams(
             intrinsics=np.array([[[1000, 0, 320], [0, 1000, 240], [0, 0, 1]]] * 2),
             extrinsics=np.array([np.eye(4)] * 2),
@@ -61,6 +62,7 @@ class MockDataset(BaseDataset):
     def get_temporal_sequence(self, sample_id):
         """Mock implementation"""
         from adnet.interfaces.data.dataset import TemporalSequence
+
         return TemporalSequence(
             sequence_id="mock_sequence",
             frame_indices=[0, 1, 2],
@@ -77,8 +79,13 @@ class MockDataset(BaseDataset):
 
     def _create_mock_sample(self, index):
         """Create a mock sample for testing"""
-        from adnet.interfaces.data.dataset import CameraParams, InstanceAnnotation, Sample, TemporalSequence
-        
+        from adnet.interfaces.data.dataset import (
+            CameraParams,
+            InstanceAnnotation,
+            Sample,
+            TemporalSequence,
+        )
+
         # Create real instances instead of mocks
         instances = []
         num_objects = np.random.randint(1, 5)
@@ -91,7 +98,7 @@ class MockDataset(BaseDataset):
                 attributes={},
             )
             instances.append(instance)
-        
+
         # Create real temporal sequence
         sequence_info = TemporalSequence(
             sequence_id=f"sequence_{index // 5}",
@@ -100,14 +107,14 @@ class MockDataset(BaseDataset):
             ego_poses=np.array([np.eye(4)]),
             frame_count=1,
         )
-        
+
         # Create real camera params
         camera_params = CameraParams(
             intrinsics=np.array([[[1000, 0, 320], [0, 1000, 240], [0, 0, 1]]] * 2),
             extrinsics=np.array([np.eye(4)] * 2),
             timestamps=np.array([index * 500000] * 2),
         )
-        
+
         # Create real sample
         return Sample(
             sample_id=f"sample_{index:03d}",
