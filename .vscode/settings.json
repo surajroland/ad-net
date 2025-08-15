@@ -89,6 +89,10 @@
 
   "editor.rulers": [88, 120],
   "python.analysis.typeCheckingMode": "off",
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.diagnosticMode": "openFilesOnly",
+  "mypy.enabled": false,
+  "mypy-type-checker.enabled": false,
   "editor.wordWrap": "on",
   "editor.bracketPairColorization.enabled": true,
   "editor.guides.bracketPairs": true,
