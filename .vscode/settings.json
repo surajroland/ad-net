@@ -4,9 +4,8 @@
   "python.linting.enabled": true,
   "python.linting.pylintEnabled": false,
   "python.linting.flake8Enabled": false,
-  "python.linting.mypyEnabled": true,
+  "python.linting.mypyEnabled": false,
 
-  // Black formatting
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter",
     "editor.formatOnSave": true,
@@ -16,26 +15,22 @@
     }
   },
 
-  // Ruff linting (faster than flake8)
   "ruff.enable": true,
   "ruff.organizeImports": true,
+  "ruff.lint.args": ["--ignore=E501,F841"],
 
-  // Jupyter settings
   "jupyter.askForKernelRestart": false,
   "jupyter.interactiveWindow.creationMode": "perFile",
 
-  // Docker integration
   "remote.containers.defaultExtensions": [
     "ms-python.python",
     "ms-toolsai.jupyter"
   ],
 
-  // Git settings
   "git.enableSmartCommit": true,
   "git.confirmSync": false,
   "gitlens.views.repositories.files.layout": "tree",
 
-  // Git Graph settings
   "git-graph.showCurrentBranchByDefault": true,
   "git-graph.defaultColumnVisibility": {
     "Date": true,
@@ -48,12 +43,10 @@
     "#f66a0a", "#6f42c1", "#e1e4e8"
   ],
 
-  // Theme settings
   "workbench.colorTheme": "One Dark Pro Flat",
   "workbench.iconTheme": "material-icon-theme",
   "workbench.productIconTheme": "material-product-icons",
 
-  // File associations
   "files.associations": {
     "*.yaml": "yaml",
     "*.yml": "yaml",
@@ -62,17 +55,14 @@
     "*.cuh": "cuda-cpp"
   },
 
-  // Terminal settings
   "terminal.integrated.defaultProfile.linux": "bash",
   "terminal.integrated.gpuAcceleration": "on",
   "terminal.integrated.fontFamily": "MesloLGS NF, 'Courier New', monospace",
 
-  // C++ settings (for cpp_engine)
   "cmake.configureOnOpen": false,
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
   "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
 
-  // Performance optimizations
   "search.exclude": {
     "**/outputs": true,
     "**/multirun": true,
@@ -87,7 +77,6 @@
     "**/models/checkpoints": true
   },
 
-  // Testing configuration
   "python.testing.pytestEnabled": true,
   "python.testing.unittestEnabled": false,
   "python.testing.autoTestDiscoverOnSaveEnabled": true,
@@ -95,27 +84,22 @@
     "tests"
   ],
 
-  // Code coverage
   "coverage-gutters.showLineCoverage": true,
   "coverage-gutters.showRulerCoverage": true,
 
-  // Editor settings
   "editor.rulers": [88, 120],
+  "python.analysis.typeCheckingMode": "off",
   "editor.wordWrap": "on",
   "editor.bracketPairColorization.enabled": true,
   "editor.guides.bracketPairs": true,
   "editor.fontLigatures": true,
 
-  // Makefile support
   "makefile.configureOnOpen": false,
 
-  // ML/AI specific settings
   "tensorBoard.logDirectory": "${workspaceFolder}/outputs/logs",
 
-  // Task configuration
   "task.showDecorations": true,
 
-  // ADNet specific settings
   "adnet.dataPath": "${workspaceFolder}/data",
   "adnet.outputPath": "${workspaceFolder}/outputs",
   "adnet.modelPath": "${workspaceFolder}/models"
