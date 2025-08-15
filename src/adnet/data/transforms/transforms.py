@@ -10,18 +10,24 @@ This module provides comprehensive data transformation pipelines including:
 """
 
 import random
-import numpy as np
-from typing import Dict, List, Tuple, Optional, Any, Callable
-import cv2
-from PIL import Image
-import torch
-import torch.nn.functional as F
+from typing import Dict, List, Tuple
 
-from ...interfaces.data.dataset import Sample, CameraParams, InstanceAnnotation
+import cv2
+import numpy as np
+from PIL import Image
+
+from ...interfaces.data.dataset import CameraParams, Sample
 
 
 class Transform:
-    """Base class for all data transformations"""
+    """Base class for all data transformations.
+
+    All transform classes should inherit from this base class and implement
+    the __call__ method to apply the transformation to a data sample.
+
+    Attributes:
+        probability: Probability of applying this transformation (0.0 to 1.0).
+    """
 
     def __init__(self, probability: float = 1.0):
         self.probability = probability
@@ -62,11 +68,17 @@ class MultiViewImageTransform(Transform):
 
 
 class PhotometricAugmentation(MultiViewImageTransform):
-    """
-    Photometric augmentations for multi-view images.
+    """Photometric augmentations for multi-view images.
 
-    Includes brightness, contrast, saturation, and hue adjustments
-    while maintaining consistency across camera views.
+    Applies brightness, contrast, saturation, and hue adjustments
+    consistently across all camera views to improve model robustness
+    to lighting variations.
+
+    Attributes:
+        brightness_range: Range for brightness adjustment.
+        contrast_range: Range for contrast adjustment.
+        saturation_range: Range for saturation adjustment.
+        hue_range: Range for hue adjustment.
     """
 
     def __init__(
@@ -162,7 +174,14 @@ class PhotometricAugmentation(MultiViewImageTransform):
 
 
 class MultiViewResize(MultiViewImageTransform):
-    """Resize all camera images to target size"""
+    """Resize all camera images to target size.
+
+    Resizes all multi-view images to a consistent target size while
+    updating camera intrinsic parameters accordingly.
+
+    Attributes:
+        target_size: Target image size as (height, width).
+    """
 
     def __init__(self, target_size: Tuple[int, int], probability: float = 1.0):
         super().__init__(probability)

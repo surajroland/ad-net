@@ -6,26 +6,35 @@ evaluating model generalization across different autonomous driving datasets,
 including domain gap analysis and cross-domain performance evaluation.
 """
 
-import os
 import json
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from typing import Dict, List, Tuple, Optional, Any, Union
-from collections import defaultdict, Counter
+import os
+from collections import Counter
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
-from sklearn.metrics import confusion_matrix, classification_report
-from scipy.stats import wasserstein_distance, entropy
+import seaborn as sns
 from scipy.spatial.distance import jensenshannon
 
-from ...interfaces.data.dataset import BaseDataset, Sample
-from .multi_dataset_loader import UnifiedTaxonomy, CoordinateHarmonizer
+from ...interfaces.data.dataset import BaseDataset
+from .multi_dataset_loader import UnifiedTaxonomy
 
 
 @dataclass
 class DomainGapMetrics:
-    """Container for domain gap analysis metrics"""
+    """Container for domain gap analysis metrics.
+
+    Attributes:
+        class_distribution_divergence: Jensen-Shannon divergence between class distributions.
+        spatial_distribution_divergence: Divergence in spatial object distributions.
+        camera_setup_similarity: Similarity score for camera configurations.
+        temporal_characteristics_similarity: Similarity in temporal patterns.
+        scene_complexity_ratio: Ratio of scene complexity metrics.
+        weather_distribution_divergence: Divergence in weather conditions.
+        overall_domain_gap_score: Combined domain gap score (0-1, higher = more different).
+    """
 
     class_distribution_divergence: float
     spatial_distribution_divergence: float
@@ -38,7 +47,17 @@ class DomainGapMetrics:
 
 @dataclass
 class CrossDatasetResults:
-    """Container for cross-dataset validation results"""
+    """Container for cross-dataset validation results.
+
+    Attributes:
+        source_dataset: Name of the source dataset used for training.
+        target_dataset: Name of the target dataset used for evaluation.
+        domain_gap_metrics: Computed domain gap analysis metrics.
+        performance_metrics: Overall performance metrics (mAP, accuracy, etc.).
+        class_specific_performance: Per-class performance breakdown.
+        failure_analysis: Analysis of failure modes and risk factors.
+        recommendations: List of recommendations for improving transfer performance.
+    """
 
     source_dataset: str
     target_dataset: str
@@ -61,7 +80,15 @@ class DatasetStatisticsAnalyzer:
         self.unified_taxonomy = unified_taxonomy or UnifiedTaxonomy()
 
     def analyze_dataset(self, dataset: BaseDataset) -> Dict[str, Any]:
-        """Comprehensive analysis of a single dataset"""
+        """Perform comprehensive analysis of a single dataset.
+
+        Args:
+            dataset: The dataset to analyze.
+
+        Returns:
+            Dictionary containing detailed analysis results including class distributions,
+            spatial patterns, temporal characteristics, and scene complexity metrics.
+        """
         print(f"Analyzing dataset: {dataset.__class__.__name__}")
 
         stats = {
@@ -79,7 +106,14 @@ class DatasetStatisticsAnalyzer:
         return stats
 
     def _analyze_class_distribution(self, dataset: BaseDataset) -> Dict[str, Any]:
-        """Analyze object class distribution"""
+        """Analyze object class distribution across the dataset.
+
+        Args:
+            dataset: The dataset to analyze.
+
+        Returns:
+            Dictionary containing class counts, probabilities, and distribution statistics.
+        """
         class_counts = Counter()
         total_instances = 0
 
@@ -380,11 +414,14 @@ class DatasetStatisticsAnalyzer:
 
 
 class DomainGapAnalyzer:
-    """
-    Analyzes domain gaps between different datasets.
+    """Analyzes domain gaps between different datasets.
 
-    Computes various metrics to quantify differences between datasets
-    and predict cross-domain transfer performance.
+    This class computes various metrics to quantify differences between datasets
+    and predict cross-domain transfer performance, including class distribution
+    divergence, spatial pattern differences, and camera setup variations.
+
+    Attributes:
+        statistics_analyzer: Instance for computing dataset statistics.
     """
 
     def __init__(self):
@@ -393,7 +430,15 @@ class DomainGapAnalyzer:
     def compute_domain_gap(
         self, source_dataset: BaseDataset, target_dataset: BaseDataset
     ) -> DomainGapMetrics:
-        """Compute comprehensive domain gap metrics between two datasets"""
+        """Compute comprehensive domain gap metrics between two datasets.
+
+        Args:
+            source_dataset: The source dataset (typically used for training).
+            target_dataset: The target dataset (typically used for evaluation).
+
+        Returns:
+            DomainGapMetrics object containing all computed gap metrics.
+        """
 
         # Analyze both datasets
         source_stats = self.statistics_analyzer.analyze_dataset(source_dataset)
@@ -723,9 +768,10 @@ class CrossDatasetValidator:
                 performance_metrics = {}
                 class_specific_performance = {}
                 if model_performance_fn:
-                    performance_metrics, class_specific_performance = (
-                        model_performance_fn(source_dataset, target_dataset)
-                    )
+                    (
+                        performance_metrics,
+                        class_specific_performance,
+                    ) = model_performance_fn(source_dataset, target_dataset)
 
                 # Analyze failure modes
                 failure_analysis = self._analyze_failure_modes(
@@ -961,9 +1007,9 @@ class CrossDatasetValidator:
         for result in results:
             source_idx = datasets.index(result.source_dataset)
             target_idx = datasets.index(result.target_dataset)
-            gap_matrix[source_idx, target_idx] = (
-                result.domain_gap_metrics.overall_domain_gap_score
-            )
+            gap_matrix[
+                source_idx, target_idx
+            ] = result.domain_gap_metrics.overall_domain_gap_score
 
         # Create heatmap
         plt.figure(figsize=(10, 8))

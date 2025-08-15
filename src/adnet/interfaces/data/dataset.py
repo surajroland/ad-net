@@ -7,10 +7,10 @@ enabling seamless multi-dataset training and evaluation.
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Tuple, Optional, Union, Any
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
 import numpy as np
-import torch
 from torch.utils.data import Dataset
 
 

@@ -12,7 +12,9 @@ this_directory = Path(__file__).parent
 try:
     long_description = (this_directory / "README.md").read_text()
 except FileNotFoundError:
-    long_description = "4D spatio-temporal object detection framework for advanced driving"
+    long_description = (
+        "4D spatio-temporal object detection framework for advanced driving"
+    )
 
 
 # Read metadata from pyproject.toml
@@ -50,8 +52,8 @@ def read_requirements(filename: str) -> List[str]:
         lines = requirements_path.read_text().strip().split("\n")
         # Filter out comments and empty lines
         return [
-            line.strip() 
-            for line in lines 
+            line.strip()
+            for line in lines
             if line.strip() and not line.strip().startswith("#")
         ]
     return []

@@ -9,22 +9,20 @@ This module provides a complete nuScenes dataset loader with support for:
 - Instance tracking across frames
 """
 
-import os
 import json
-import pickle
-from typing import Dict, List, Tuple, Optional, Any
+import os
 from collections import defaultdict
+from typing import Dict, List, Optional
+
 import numpy as np
 from PIL import Image
-import torch
 
 from ...interfaces.data.dataset import (
-    BaseDataset,
-    TemporalDataset,
-    MultiModalDataset,
-    Sample,
     CameraParams,
     InstanceAnnotation,
+    MultiModalDataset,
+    Sample,
+    TemporalDataset,
     TemporalSequence,
     register_dataset,
 )

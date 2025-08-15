@@ -161,4 +161,6 @@ cpp_engine/*.so
 
 # Backup files
 *.backup
-*~
+*~coverage.xml
+htmlcov/
+.coverage

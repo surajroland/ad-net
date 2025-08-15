@@ -6,28 +6,29 @@ handling frame sampling, ego motion computation, and instance tracking
 across time for Sparse4D's temporal reasoning capabilities.
 """
 
+from collections import defaultdict
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 import torch
-from torch.utils.data import Dataset, DataLoader
-from typing import Dict, List, Tuple, Optional, Any, Union
-from collections import defaultdict
-import random
+from torch.utils.data import DataLoader, Dataset
 
-from ...interfaces.data.dataset import (
-    BaseDataset,
-    Sample,
-    InstanceAnnotation,
-    TemporalSequence,
-)
+from ...interfaces.data.dataset import BaseDataset, InstanceAnnotation, Sample
 from ..transforms.transforms import Transform
 
 
 class TemporalSequenceSample:
-    """
-    Container for temporal sequence data used in 4D object detection.
+    """Container for temporal sequence data used in 4D object detection.
 
-    Contains multiple frames with ego motion, instance tracking,
-    and proper temporal alignment for Sparse4D processing.
+    This class encapsulates a sequence of frames with their corresponding
+    annotations, camera parameters, ego motion, and temporal relationships
+    for training Sparse4D models with temporal reasoning capabilities.
+
+    Attributes:
+        frames: List of individual frame samples in temporal order.
+        sequence_info: Metadata about the temporal sequence.
+        ego_motion: Ego vehicle motion transformations between frames.
+        track_mapping: Mapping of instance IDs across temporal frames.
     """
 
     def __init__(

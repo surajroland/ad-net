@@ -6,23 +6,15 @@ harmonization of coordinate systems, class taxonomies, and data formats
 across different autonomous driving datasets.
 """
 
-import os
 import json
+import os
 import random
-from typing import Dict, List, Tuple, Optional, Any, Union
-from collections import defaultdict
-import numpy as np
-import torch
-from torch.utils.data import Dataset, ConcatDataset, WeightedRandomSampler
+from typing import Any, Dict, List, Optional, Tuple
 
-from ...interfaces.data.dataset import (
-    BaseDataset,
-    Sample,
-    CameraParams,
-    InstanceAnnotation,
-    TemporalSequence,
-    DatasetRegistry,
-)
+import numpy as np
+from torch.utils.data import Dataset
+
+from ...interfaces.data.dataset import BaseDataset, DatasetRegistry, Sample
 
 
 class UnifiedTaxonomy:

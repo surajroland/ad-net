@@ -36,7 +36,13 @@
       "Bash(python:*)",
       "Bash(black:*)",
       "Bash(git filter-branch:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(isort:*)",
+      "Bash(flake8:*)",
+      "Bash(cat:*)",
+      "Bash(pre-commit:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",
