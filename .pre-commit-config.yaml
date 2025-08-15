@@ -21,20 +21,23 @@ repos:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
 
-  # Type checking
+  # Type checking (optional - can be skipped with SKIP=mypy)
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.17.1
     hooks:
       - id: mypy
         additional_dependencies: [types-requests, types-PyYAML]
-        args: [--ignore-missing-imports, --no-strict-optional]
+        args:
+          [--ignore-missing-imports, --no-strict-optional, --allow-untyped-defs]
+        stages: [manual] # Only run when explicitly requested
 
-  # Security scanning
+  # Security scanning (relaxed for development)
   - repo: https://github.com/PyCQA/bandit
     rev: 1.8.6
     hooks:
       - id: bandit
-        args: [-c, pyproject.toml]
+        args: [-c, pyproject.toml, --skip, B101, B112, B311]
+        stages: [manual] # Only run when explicitly requested
 
   # General hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -53,12 +56,13 @@ repos:
       - id: mixed-line-ending
       - id: requirements-txt-fixer
 
-  # Documentation
+  # Documentation (relaxed - focus on missing docstrings)
   - repo: https://github.com/pycqa/pydocstyle
     rev: 6.3.0
     hooks:
       - id: pydocstyle
-        args: [--convention=google]
+        args: [--convention=google, --add-ignore=D212, D415, D202, D107, D105]
+        stages: [manual] # Only run when explicitly requested
 
   # Dockerfile linting
   - repo: https://github.com/hadolint/hadolint

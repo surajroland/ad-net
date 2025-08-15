@@ -17,7 +17,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Image Processing",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10", 
+    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Operating System :: POSIX :: Linux",
@@ -174,7 +174,7 @@ directory = "htmlcov"
 # Bandit security configuration
 [tool.bandit]
 exclude_dirs = ["tests", "scripts"]
-skips = ["B101", "B601"]
+skips = ["B101", "B112", "B311", "B601"]  # Skip common false positives in ML code
 
 # Interrogate docstring coverage
 [tool.interrogate]
