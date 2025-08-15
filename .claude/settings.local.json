@@ -34,7 +34,9 @@
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
       "Bash(python:*)",
-      "Bash(black:*)"
+      "Bash(black:*)",
+      "Bash(git filter-branch:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",
