@@ -42,7 +42,9 @@
       "Bash(flake8:*)",
       "Bash(cat:*)",
       "Bash(pre-commit:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(ruff check:*)",
+      "Bash(mypy:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",

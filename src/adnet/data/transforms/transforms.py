@@ -10,10 +10,11 @@ This module provides comprehensive data transformation pipelines including:
 """
 
 import random
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import cv2
 import numpy as np
+import numpy.typing as npt
 from PIL import Image
 
 from ...interfaces.data.dataset import CameraParams, Sample
@@ -29,7 +30,7 @@ class Transform:
         probability: Probability of applying this transformation (0.0 to 1.0).
     """
 
-    def __init__(self, probability: float = 1.0):
+    def __init__(self, probability: float = 1.0) -> None:
         self.probability = probability
 
     def __call__(self, sample: Sample) -> Sample:
@@ -44,7 +45,7 @@ class Transform:
 class Compose:
     """Compose multiple transforms together"""
 
-    def __init__(self, transforms: List[Transform]):
+    def __init__(self, transforms: List[Transform]) -> None:
         self.transforms = transforms
 
     def __call__(self, sample: Sample) -> Sample:
@@ -183,7 +184,7 @@ class MultiViewResize(MultiViewImageTransform):
         target_size: Target image size as (height, width).
     """
 
-    def __init__(self, target_size: Tuple[int, int], probability: float = 1.0):
+    def __init__(self, target_size: Tuple[int, int], probability: float = 1.0) -> None:
         super().__init__(probability)
         self.target_size = target_size  # (height, width)
 
@@ -499,7 +500,7 @@ class CutMix3D(Transform):
         self.area_ratio_range = area_ratio_range
         self._mix_sample = None
 
-    def set_mix_sample(self, mix_sample: Sample):
+    def set_mix_sample(self, mix_sample: Sample) -> None:
         """Set the sample to mix with"""
         self._mix_sample = mix_sample
 

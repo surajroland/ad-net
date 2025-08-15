@@ -8,9 +8,10 @@ enabling seamless multi-dataset training and evaluation.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Type
 
 import numpy as np
+import numpy.typing as npt
 from torch.utils.data import Dataset
 
 
@@ -18,17 +19,19 @@ from torch.utils.data import Dataset
 class CameraParams:
     """Camera parameter container for multi-view setup"""
 
-    intrinsics: np.ndarray  # [N_cameras, 3, 3] intrinsic matrices
-    extrinsics: np.ndarray  # [N_cameras, 4, 4] extrinsic matrices (camera to ego)
-    timestamps: np.ndarray  # [N_cameras] timestamps for each camera
-    distortion: Optional[np.ndarray] = None  # [N_cameras, 5] distortion coefficients
+    intrinsics: npt.NDArray[np.float64]  # [N_cameras, 3, 3] intrinsic matrices
+    extrinsics: npt.NDArray[np.float64]  # [N_cameras, 4, 4] extrinsic matrices
+    timestamps: npt.NDArray[np.float64]  # [N_cameras] timestamps for each camera
+    distortion: Optional[npt.NDArray[np.float64]] = None  # [N_cameras, 5] coeffs
 
 
 @dataclass
 class InstanceAnnotation:
     """Single object instance annotation"""
 
-    box_3d: np.ndarray  # [9] - [x, y, z, w, l, h, cos(yaw), sin(yaw), velocity]
+    box_3d: npt.NDArray[
+        np.float64
+    ]  # [9] - [x, y, z, w, l, h, cos(yaw), sin(yaw), velocity]
     category_id: int  # Object category ID
     instance_id: int  # Unique instance ID for tracking
     visibility: float  # Visibility score [0, 1]
@@ -42,8 +45,8 @@ class TemporalSequence:
 
     sequence_id: str  # Unique sequence identifier
     frame_indices: List[int]  # Frame indices in sequence
-    timestamps: np.ndarray  # [T] absolute timestamps
-    ego_poses: np.ndarray  # [T, 4, 4] ego poses in global coordinates
+    timestamps: npt.NDArray[np.float64]  # [T] absolute timestamps
+    ego_poses: npt.NDArray[np.float64]  # [T, 4, 4] ego poses in global coordinates
     frame_count: int  # Total frames in sequence
 
 
@@ -57,17 +60,23 @@ class Sample:
     sequence_info: TemporalSequence
 
     # Visual data
-    images: Dict[str, np.ndarray]  # {camera_name: image_array}
+    images: Dict[str, npt.NDArray[np.uint8]]  # {camera_name: image_array}
     camera_params: CameraParams
 
     # Annotations
     instances: List[InstanceAnnotation]
-    ego_pose: np.ndarray  # [4, 4] current ego pose
+    ego_pose: npt.NDArray[np.float64]  # [4, 4] current ego pose
 
     # Optional modalities
-    lidar_points: Optional[np.ndarray] = None  # [N, 4] - [x, y, z, intensity]
-    radar_points: Optional[np.ndarray] = None  # [M, 6] - [x, y, z, vx, vy, rcs]
-    depth_maps: Optional[Dict[str, np.ndarray]] = None  # {camera_name: depth_map}
+    lidar_points: Optional[npt.NDArray[np.float32]] = (
+        None  # [N, 4] - [x, y, z, intensity]
+    )
+    radar_points: Optional[npt.NDArray[np.float32]] = (
+        None  # [M, 6] - [x, y, z, vx, vy, rcs]
+    )
+    depth_maps: Optional[Dict[str, npt.NDArray[np.float32]]] = (
+        None  # {camera_name: depth_map}
+    )
 
     # Metadata
     weather: str = "clear"
@@ -75,7 +84,7 @@ class Sample:
     location: str = "unknown"
 
 
-class BaseDataset(Dataset, ABC):
+class BaseDataset(Dataset[Sample], ABC):
     """
     Abstract base class for all Sparse4D datasets.
 
@@ -90,8 +99,8 @@ class BaseDataset(Dataset, ABC):
         sequence_length: int = 1,
         temporal_stride: int = 1,
         load_interval: int = 1,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """
         Initialize base dataset.
 
@@ -182,24 +191,26 @@ class MultiModalDataset(BaseDataset):
     with proper temporal alignment.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         self.load_lidar = kwargs.pop("load_lidar", False)
         self.load_radar = kwargs.pop("load_radar", False)
         self.load_depth = kwargs.pop("load_depth", False)
         super().__init__(**kwargs)
 
     @abstractmethod
-    def _load_lidar_data(self, sample_id: str) -> Optional[np.ndarray]:
+    def _load_lidar_data(self, sample_id: str) -> Optional[npt.NDArray[np.float32]]:
         """Load LiDAR point cloud data"""
         pass
 
     @abstractmethod
-    def _load_radar_data(self, sample_id: str) -> Optional[np.ndarray]:
+    def _load_radar_data(self, sample_id: str) -> Optional[npt.NDArray[np.float32]]:
         """Load radar point data"""
         pass
 
     @abstractmethod
-    def _load_depth_data(self, sample_id: str) -> Optional[Dict[str, np.ndarray]]:
+    def _load_depth_data(
+        self, sample_id: str
+    ) -> Optional[Dict[str, npt.NDArray[np.float32]]]:
         """Load depth maps for all cameras"""
         pass
 
@@ -218,7 +229,7 @@ class TemporalDataset(BaseDataset):
     and instance tracking across frames.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         self.enable_temporal = kwargs.pop("enable_temporal", True)
         self.max_temporal_gap = kwargs.pop("max_temporal_gap", 1.0)  # seconds
         super().__init__(**kwargs)
@@ -235,8 +246,8 @@ class TemporalDataset(BaseDataset):
 
     @abstractmethod
     def _compute_ego_motion(
-        self, prev_pose: np.ndarray, curr_pose: np.ndarray
-    ) -> np.ndarray:
+        self, prev_pose: npt.NDArray[np.float64], curr_pose: npt.NDArray[np.float64]
+    ) -> npt.NDArray[np.float64]:
         """Compute ego motion between two poses"""
         pass
 
@@ -272,7 +283,7 @@ class HarmonizedDataset(BaseDataset):
     format standardization across different datasets.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         self.coordinate_system = kwargs.pop("coordinate_system", "ego")
         self.unified_classes = kwargs.pop("unified_classes", None)
         super().__init__(**kwargs)
@@ -306,15 +317,15 @@ class HarmonizedDataset(BaseDataset):
 class DatasetRegistry:
     """Registry for all available dataset implementations"""
 
-    _datasets = {}
+    _datasets: Dict[str, Type[BaseDataset]] = {}
 
     @classmethod
-    def register(cls, name: str, dataset_class: type):
+    def register(cls, name: str, dataset_class: Type[BaseDataset]) -> None:
         """Register a dataset implementation"""
         cls._datasets[name] = dataset_class
 
     @classmethod
-    def get(cls, name: str) -> type:
+    def get(cls, name: str) -> Type[BaseDataset]:
         """Get dataset class by name"""
         if name not in cls._datasets:
             raise ValueError(
@@ -329,10 +340,10 @@ class DatasetRegistry:
 
 
 # Decorator for automatic dataset registration
-def register_dataset(name: str):
+def register_dataset(name: str) -> Callable[[Type[BaseDataset]], Type[BaseDataset]]:
     """Decorator to automatically register dataset classes"""
 
-    def decorator(cls):
+    def decorator(cls: Type[BaseDataset]) -> Type[BaseDataset]:
         DatasetRegistry.register(name, cls)
         return cls
 

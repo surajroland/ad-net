@@ -4,7 +4,7 @@
   "python.linting.enabled": true,
   "python.linting.pylintEnabled": false,
   "python.linting.flake8Enabled": false,
-  "python.linting.mypyEnabled": false,
+  "python.linting.mypyEnabled": true,
 
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter",
@@ -17,7 +17,7 @@
 
   "ruff.enable": true,
   "ruff.organizeImports": true,
-  "ruff.lint.ignore": ["E501", "F841"],
+  "ruff.lint.ignore": [],
 
   "jupyter.askForKernelRestart": false,
   "jupyter.interactiveWindow.creationMode": "perFile",
@@ -88,11 +88,8 @@
   "coverage-gutters.showRulerCoverage": true,
 
   "editor.rulers": [88, 120],
-  "python.analysis.typeCheckingMode": "off",
+  "python.analysis.typeCheckingMode": "basic",
   "python.analysis.autoImportCompletions": true,
-  "python.analysis.diagnosticMode": "openFilesOnly",
-  "mypy.enabled": false,
-  "mypy-type-checker.enabled": false,
   "editor.wordWrap": "on",
   "editor.bracketPairColorization.enabled": true,
   "editor.guides.bracketPairs": true,

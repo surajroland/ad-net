@@ -4,7 +4,7 @@ import click
 
 
 @click.group()
-def main():
+def main() -> None:
     """ADNet: Advanced 4D Spatio-Temporal Object Detection Framework"""
     pass
 

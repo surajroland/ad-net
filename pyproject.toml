@@ -112,8 +112,8 @@ line-length = 88
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I"]
-ignore = ["E501", "F401", "F841"]
+select = ["E", "F", "W", "I", "N", "D"]
+ignore = ["D203", "D213"]  # Conflicting docstring rules
 
 [tool.ruff.format]
 quote-style = "double"
@@ -123,7 +123,11 @@ indent-style = "space"
 [tool.mypy]
 python_version = "3.12"
 warn_return_any = true
+warn_unused_ignores = true
 disallow_untyped_defs = true
+strict_optional = true
+show_error_codes = true
+incremental = true
 exclude = ["tests/", "scripts/", "examples/"]
 
 # Testing with pytest

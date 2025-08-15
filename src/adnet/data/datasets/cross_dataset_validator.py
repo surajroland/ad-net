@@ -76,7 +76,7 @@ class DatasetStatisticsAnalyzer:
     temporal characteristics, and scene complexity.
     """
 
-    def __init__(self, unified_taxonomy: Optional[UnifiedTaxonomy] = None):
+    def __init__(self, unified_taxonomy: Optional[UnifiedTaxonomy] = None) -> None:
         self.unified_taxonomy = unified_taxonomy or UnifiedTaxonomy()
 
     def analyze_dataset(self, dataset: BaseDataset) -> Dict[str, Any]:
@@ -384,11 +384,8 @@ class DatasetStatisticsAnalyzer:
 
     def _analyze_instance_tracking(self, dataset: BaseDataset) -> Dict[str, Any]:
         """Analyze instance tracking characteristics"""
-        # tracking_stats = {
-        #     "track_lengths": [],
-        #     "track_continuity": [],
-        #     "instance_reappearance": [],
-        # }
+        # TODO: Implement temporal sequence analysis
+        # This would require analyzing instance tracking across temporal frames
 
         # This would require temporal sequence analysis
         # Simplified implementation for now
@@ -424,7 +421,7 @@ class DomainGapAnalyzer:
         statistics_analyzer: Instance for computing dataset statistics.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.statistics_analyzer = DatasetStatisticsAnalyzer()
 
     def compute_domain_gap(
@@ -723,7 +720,7 @@ class CrossDatasetValidator:
     and provides recommendations for cross-domain training.
     """
 
-    def __init__(self, output_dir: Optional[str] = None):
+    def __init__(self, output_dir: Optional[str] = None) -> None:
         self.output_dir = output_dir
         self.domain_gap_analyzer = DomainGapAnalyzer()
         self.results_history = []
@@ -922,7 +919,7 @@ class CrossDatasetValidator:
 
         return recommendations
 
-    def _save_validation_results(self, results: List[CrossDatasetResults]):
+    def _save_validation_results(self, results: List[CrossDatasetResults]) -> None:
         """Save validation results to files"""
 
         # Save summary report
@@ -976,7 +973,7 @@ class CrossDatasetValidator:
 
         print(f"Validation results saved to {self.output_dir}")
 
-    def generate_visualization_report(self, results: List[CrossDatasetResults]):
+    def generate_visualization_report(self, results: List[CrossDatasetResults]) -> None:
         """Generate visualization report for cross-dataset validation"""
 
         if not self.output_dir:
@@ -992,7 +989,7 @@ class CrossDatasetValidator:
         # Create recommendation summary
         self._create_recommendation_summary(results)
 
-    def _create_domain_gap_heatmap(self, results: List[CrossDatasetResults]):
+    def _create_domain_gap_heatmap(self, results: List[CrossDatasetResults]) -> None:
         """Create heatmap of domain gaps between datasets"""
 
         # Collect data for heatmap
@@ -1028,12 +1025,12 @@ class CrossDatasetValidator:
         plt.savefig(os.path.join(self.output_dir, "domain_gap_heatmap.png"), dpi=300)
         plt.close()
 
-    def _create_performance_plots(self, results: List[CrossDatasetResults]):
+    def _create_performance_plots(self, results: List[CrossDatasetResults]) -> None:
         """Create performance comparison plots"""
         # Implementation would create various performance visualizations
         pass
 
-    def _create_recommendation_summary(self, results: List[CrossDatasetResults]):
+    def _create_recommendation_summary(self, results: List[CrossDatasetResults]) -> str:
         """Create summary of recommendations across all dataset pairs"""
 
         all_recommendations = []

@@ -12,9 +12,10 @@ This module provides a complete nuScenes dataset loader with support for:
 import json
 import os
 from collections import defaultdict
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import numpy as np
+import numpy.typing as npt
 from PIL import Image
 
 from ...interfaces.data.dataset import (
@@ -79,8 +80,8 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
         sequence_length: int = 1,
         temporal_stride: int = 1,
         load_interval: int = 1,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """
         Initialize nuScenes dataset.
 
@@ -172,8 +173,8 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
             scene_splits = self._get_test_scenes()
 
         # Collect samples from selected scenes
-        self._sample_tokens = []
-        self._sample_data = {}
+        self._sample_tokens: List[str] = []
+        self._sample_data: Dict[str, Any] = {}
 
         for scene_token in scene_splits:
             scene = self.db["scene"][scene_token]
@@ -335,7 +336,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
 
     def _build_extrinsic_matrix(
         self, translation: List[float], rotation: List[float]
-    ) -> np.ndarray:
+    ) -> npt.NDArray[np.float64]:
         """Build 4x4 extrinsic matrix from translation and rotation"""
         from scipy.spatial.transform import Rotation
 
@@ -379,7 +380,9 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
             # Get velocity if available
             velocity = 0.0
             if "velocity" in ann and ann["velocity"] is not None:
-                velocity = np.linalg.norm(ann["velocity"][:2])  # 2D velocity magnitude
+                velocity = float(
+                    np.linalg.norm(ann["velocity"][:2])
+                )  # 2D velocity magnitude
 
             box_3d = np.array(
                 [
@@ -415,7 +418,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
 
         return instances
 
-    def _get_ego_pose(self, ego_pose_token: str) -> np.ndarray:
+    def _get_ego_pose(self, ego_pose_token: str) -> npt.NDArray[np.float64]:
         """Get 4x4 ego pose matrix"""
         ego_pose = self.db["ego_pose"][ego_pose_token]
 
@@ -487,7 +490,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
         end_idx = current_index + 1
 
         sequence_indices = list(range(start_idx, end_idx))
-        # sequence_frames = [scene_samples[i] for i in sequence_indices]
+        # TODO: Add frame validation and preprocessing if needed
 
         return TemporalSequence(
             sequence_id=scene_token,
@@ -498,8 +501,8 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
         )
 
     def _compute_ego_motion(
-        self, prev_pose: np.ndarray, curr_pose: np.ndarray
-    ) -> np.ndarray:
+        self, prev_pose: npt.NDArray[np.float64], curr_pose: npt.NDArray[np.float64]
+    ) -> npt.NDArray[np.float64]:
         """Compute ego motion between two poses"""
         # Compute relative transformation
         relative_transform = np.linalg.inv(prev_pose) @ curr_pose
@@ -535,7 +538,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
 
         return dict(tracks)
 
-    def _load_lidar_data(self, sample_token: str) -> Optional[np.ndarray]:
+    def _load_lidar_data(self, sample_token: str) -> Optional[npt.NDArray[np.float32]]:
         """Load LiDAR point cloud data"""
         if not self.load_lidar:
             return None
@@ -551,7 +554,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
         # Return [x, y, z, intensity] (drop ring index)
         return points[:, :4]
 
-    def _load_radar_data(self, sample_token: str) -> Optional[np.ndarray]:
+    def _load_radar_data(self, sample_token: str) -> Optional[npt.NDArray[np.float32]]:
         """Load radar point data"""
         if not self.load_radar:
             return None
@@ -585,7 +588,9 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
             return np.concatenate(radar_points, axis=0)
         return None
 
-    def _load_depth_data(self, sample_token: str) -> Optional[Dict[str, np.ndarray]]:
+    def _load_depth_data(
+        self, sample_token: str
+    ) -> Optional[Dict[str, npt.NDArray[np.float32]]]:
         """Load depth maps for all cameras"""
         if not self.load_depth:
             return None
@@ -594,19 +599,19 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
         # This would be for custom depth estimation or external depth data
         return None
 
-    def _get_sample_location(self, sample: Dict) -> str:
+    def _get_sample_location(self, sample: Dict[str, Any]) -> str:
         """Get sample location information"""
         scene = self.db["scene"][sample["scene_token"]]
         log = self.db["log"][scene["log_token"]]
         return log["location"]
 
-    def _get_sample_weather(self, sample: Dict) -> str:
+    def _get_sample_weather(self, sample: Dict[str, Any]) -> str:
         """Get sample weather information"""
         # nuScenes doesn't have explicit weather labels
         # This could be inferred from scene description or external data
         return "clear"
 
-    def _get_sample_time(self, sample: Dict) -> str:
+    def _get_sample_time(self, sample: Dict[str, Any]) -> str:
         """Get sample time of day"""
         scene = self.db["scene"][sample["scene_token"]]
         description = scene["description"].lower()
