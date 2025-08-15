@@ -384,11 +384,11 @@ class DatasetStatisticsAnalyzer:
 
     def _analyze_instance_tracking(self, dataset: BaseDataset) -> Dict[str, Any]:
         """Analyze instance tracking characteristics"""
-        tracking_stats = {
-            "track_lengths": [],
-            "track_continuity": [],
-            "instance_reappearance": [],
-        }
+        # tracking_stats = {
+        #     "track_lengths": [],
+        #     "track_continuity": [],
+        #     "instance_reappearance": [],
+        # }
 
         # This would require temporal sequence analysis
         # Simplified implementation for now
@@ -1007,9 +1007,9 @@ class CrossDatasetValidator:
         for result in results:
             source_idx = datasets.index(result.source_dataset)
             target_idx = datasets.index(result.target_dataset)
-            gap_matrix[
-                source_idx, target_idx
-            ] = result.domain_gap_metrics.overall_domain_gap_score
+            gap_matrix[source_idx, target_idx] = (
+                result.domain_gap_metrics.overall_domain_gap_score
+            )
 
         # Create heatmap
         plt.figure(figsize=(10, 8))

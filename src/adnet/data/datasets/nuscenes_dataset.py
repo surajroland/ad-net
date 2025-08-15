@@ -487,7 +487,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
         end_idx = current_index + 1
 
         sequence_indices = list(range(start_idx, end_idx))
-        sequence_frames = [scene_samples[i] for i in sequence_indices]
+        # sequence_frames = [scene_samples[i] for i in sequence_indices]
 
         return TemporalSequence(
             sequence_id=scene_token,
