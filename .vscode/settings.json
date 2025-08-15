@@ -17,7 +17,7 @@
 
   "ruff.enable": true,
   "ruff.organizeImports": true,
-  "ruff.lint.args": ["--ignore=E501,F841"],
+  "ruff.lint.ignore": ["E501", "F841"],
 
   "jupyter.askForKernelRestart": false,
   "jupyter.interactiveWindow.creationMode": "perFile",

@@ -110,8 +110,14 @@ max-line-length = 88
 [tool.ruff]
 line-length = 88
 target-version = "py312"
+
+[tool.ruff.lint]
 select = ["E", "F", "W", "I"]
-ignore = ["E501", "F401"]
+ignore = ["E501", "F401", "F841"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
 
 # Type checking with mypy
 [tool.mypy]
