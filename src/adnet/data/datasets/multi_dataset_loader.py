@@ -1,5 +1,4 @@
-"""
-Multi-dataset loader with harmonization for Sparse4D framework.
+"""Multi-dataset loader with harmonization for Sparse4D framework.
 
 This module provides cross-dataset training capabilities with automatic
 harmonization of coordinate systems, class taxonomies, and data formats
@@ -18,8 +17,7 @@ from ...interfaces.data.dataset import BaseDataset, DatasetRegistry, Sample
 
 
 class UnifiedTaxonomy:
-    """
-    Unified class taxonomy for multi-dataset training.
+    """Unified class taxonomy for multi-dataset training.
 
     Maps dataset-specific classes to a common taxonomy while preserving
     semantic meaning and handling class hierarchies.
@@ -119,8 +117,7 @@ class UnifiedTaxonomy:
 
 
 class CoordinateHarmonizer:
-    """
-    Coordinate system harmonization for multi-dataset training.
+    """Coordinate system harmonization for multi-dataset training.
 
     Converts between different coordinate systems used by various datasets
     to a standardized ego-centric coordinate system.
@@ -248,8 +245,7 @@ class CoordinateHarmonizer:
 
 
 class MultiDatasetLoader(Dataset):
-    """
-    Multi-dataset loader with automatic harmonization.
+    """Multi-dataset loader with automatic harmonization.
 
     Combines multiple datasets with unified class taxonomy, coordinate
     harmonization, and balanced sampling strategies.
@@ -264,8 +260,7 @@ class MultiDatasetLoader(Dataset):
         temporal_alignment: bool = True,
         **kwargs,
     ):
-        """
-        Initialize multi-dataset loader.
+        """Initialize multi-dataset loader.
 
         Args:
             dataset_configs: List of dataset configurations
@@ -273,6 +268,7 @@ class MultiDatasetLoader(Dataset):
             harmonize_classes: Enable class harmonization
             sampling_strategy: Strategy for sampling across datasets
             temporal_alignment: Enable temporal sequence alignment
+
         """
         self.dataset_configs = dataset_configs
         self.harmonize_coordinates = harmonize_coordinates
@@ -529,8 +525,7 @@ class MultiDatasetLoader(Dataset):
 
 
 class CrossDatasetValidator:
-    """
-    Cross-dataset validation for evaluating generalization across datasets.
+    """Cross-dataset validation for evaluating generalization across datasets.
 
     Tests model performance when trained on one dataset and evaluated on another,
     providing insights into domain transfer capabilities.
@@ -604,8 +599,7 @@ def create_multi_dataset_config(
     weights: Optional[Dict[str, float]] = None,
     **common_params,
 ) -> List[Dict[str, Any]]:
-    """
-    Create multi-dataset configuration.
+    """Create multi-dataset configuration.
 
     Args:
         dataset_names: List of dataset names to include
@@ -615,6 +609,7 @@ def create_multi_dataset_config(
 
     Returns:
         List of dataset configurations
+
     """
     configs = []
 

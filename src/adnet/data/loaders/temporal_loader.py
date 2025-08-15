@@ -1,5 +1,4 @@
-"""
-Temporal sequence loader for 4D object detection.
+"""Temporal sequence loader for 4D object detection.
 
 This module provides specialized data loading for temporal sequences,
 handling frame sampling, ego motion computation, and instance tracking
@@ -29,6 +28,7 @@ class TemporalSequenceSample:
         sequence_info: Metadata about the temporal sequence.
         ego_motion: Ego vehicle motion transformations between frames.
         track_mapping: Mapping of instance IDs across temporal frames.
+
     """
 
     def __init__(
@@ -88,8 +88,7 @@ class TemporalSequenceSample:
 
 
 class TemporalSequenceBuilder:
-    """
-    Builds temporal sequences from individual frames.
+    """Builds temporal sequences from individual frames.
 
     Handles frame sampling strategies, ego motion computation,
     and instance tracking across temporal windows.
@@ -114,8 +113,7 @@ class TemporalSequenceBuilder:
     def build_sequence(
         self, dataset: BaseDataset, center_frame_idx: int
     ) -> Optional[TemporalSequenceSample]:
-        """
-        Build temporal sequence centered on given frame.
+        """Build temporal sequence centered on given frame.
 
         Args:
             dataset: Dataset containing frames
@@ -123,6 +121,7 @@ class TemporalSequenceBuilder:
 
         Returns:
             TemporalSequenceSample if successful, None if insufficient frames
+
         """
         # Get frame indices for sequence
         frame_indices = self._get_sequence_indices(dataset, center_frame_idx)
@@ -378,8 +377,7 @@ class TemporalSequenceBuilder:
 
 
 class TemporalDataLoader(DataLoader):
-    """
-    Specialized DataLoader for temporal sequences.
+    """Specialized DataLoader for temporal sequences.
 
     Handles batch collation for temporal data and provides
     utilities for working with 4D object detection batches.
@@ -413,11 +411,11 @@ class TemporalDataLoader(DataLoader):
     def collate_temporal_batch(
         self, batch: List[TemporalSequenceSample]
     ) -> Dict[str, Any]:
-        """
-        Collate temporal sequences into batch format.
+        """Collate temporal sequences into batch format.
 
         Returns:
             Dictionary containing batched temporal data for Sparse4D
+
         """
         if not batch:
             return {}
@@ -589,8 +587,7 @@ def create_temporal_dataloader(
     transform: Optional[Transform] = None,
     **kwargs,
 ) -> TemporalDataLoader:
-    """
-    Factory function to create temporal data loader.
+    """Factory function to create temporal data loader.
 
     Args:
         dataset: Base dataset
@@ -604,6 +601,7 @@ def create_temporal_dataloader(
 
     Returns:
         Configured TemporalDataLoader
+
     """
     sequence_builder = TemporalSequenceBuilder(
         sequence_length=sequence_length,

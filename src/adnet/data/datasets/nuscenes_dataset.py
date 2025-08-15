@@ -1,5 +1,4 @@
-"""
-nuScenes dataset implementation for Sparse4D framework.
+"""nuScenes dataset implementation for Sparse4D framework.
 
 This module provides a complete nuScenes dataset loader with support for:
 - Multi-view camera data (6 surround cameras)
@@ -31,8 +30,7 @@ from ...interfaces.data.dataset import (
 
 @register_dataset("nuscenes")
 class NuScenesDataset(TemporalDataset, MultiModalDataset):
-    """
-    nuScenes dataset implementation for Sparse4D.
+    """nuScenes dataset implementation for Sparse4D.
 
     Supports the standard nuScenes dataset format with multi-view cameras,
     3D annotations, and temporal sequences for 4D object detection.
@@ -82,8 +80,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
         load_interval: int = 1,
         **kwargs: Any,
     ) -> None:
-        """
-        Initialize nuScenes dataset.
+        """Initialize nuScenes dataset.
 
         Args:
             data_root: Root directory containing nuScenes data
@@ -92,6 +89,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
             sequence_length: Number of frames in temporal sequences
             temporal_stride: Stride between frames in sequence
             load_interval: Interval for loading frames
+
         """
         self.version = version
         self.data_root = data_root

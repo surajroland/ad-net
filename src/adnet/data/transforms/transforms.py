@@ -1,5 +1,4 @@
-"""
-Data transforms and augmentations for Sparse4D framework.
+"""Data transforms and augmentations for Sparse4D framework.
 
 This module provides comprehensive data transformation pipelines including:
 - Multi-view image augmentations
@@ -10,11 +9,10 @@ This module provides comprehensive data transformation pipelines including:
 """
 
 import random
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 import cv2
 import numpy as np
-import numpy.typing as npt
 from PIL import Image
 
 from ...interfaces.data.dataset import CameraParams, Sample
@@ -28,6 +26,7 @@ class Transform:
 
     Attributes:
         probability: Probability of applying this transformation (0.0 to 1.0).
+
     """
 
     def __init__(self, probability: float = 1.0) -> None:
@@ -80,6 +79,7 @@ class PhotometricAugmentation(MultiViewImageTransform):
         contrast_range: Range for contrast adjustment.
         saturation_range: Range for saturation adjustment.
         hue_range: Range for hue adjustment.
+
     """
 
     def __init__(
@@ -182,6 +182,7 @@ class MultiViewResize(MultiViewImageTransform):
 
     Attributes:
         target_size: Target image size as (height, width).
+
     """
 
     def __init__(self, target_size: Tuple[int, int], probability: float = 1.0) -> None:
@@ -252,8 +253,7 @@ class MultiViewResize(MultiViewImageTransform):
 
 
 class SpatialAugmentation3D(Transform):
-    """
-    3D spatial augmentations for autonomous driving scenes.
+    """3D spatial augmentations for autonomous driving scenes.
 
     Includes rotation, translation, and scaling while maintaining
     geometric consistency across all modalities.
@@ -390,8 +390,7 @@ class SpatialAugmentation3D(Transform):
 
 
 class TemporalAugmentation(Transform):
-    """
-    Temporal sequence augmentations for 4D object detection.
+    """Temporal sequence augmentations for 4D object detection.
 
     Includes temporal dropout, sequence reordering, and
     frame rate simulation.
@@ -482,8 +481,7 @@ class TemporalAugmentation(Transform):
 
 
 class CutMix3D(Transform):
-    """
-    3D CutMix augmentation for multi-view object detection.
+    """3D CutMix augmentation for multi-view object detection.
 
     Randomly replaces 3D regions from one sample with another,
     maintaining geometric consistency across views.

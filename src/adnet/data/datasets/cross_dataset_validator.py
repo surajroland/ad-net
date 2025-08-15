@@ -1,5 +1,4 @@
-"""
-Cross-dataset validation framework for Sparse4D.
+"""Cross-dataset validation framework for Sparse4D.
 
 This module provides comprehensive validation and analysis tools for
 evaluating model generalization across different autonomous driving datasets,
@@ -34,6 +33,7 @@ class DomainGapMetrics:
         scene_complexity_ratio: Ratio of scene complexity metrics.
         weather_distribution_divergence: Divergence in weather conditions.
         overall_domain_gap_score: Combined domain gap score (0-1, higher = more different).
+
     """
 
     class_distribution_divergence: float
@@ -57,6 +57,7 @@ class CrossDatasetResults:
         class_specific_performance: Per-class performance breakdown.
         failure_analysis: Analysis of failure modes and risk factors.
         recommendations: List of recommendations for improving transfer performance.
+
     """
 
     source_dataset: str
@@ -69,8 +70,7 @@ class CrossDatasetResults:
 
 
 class DatasetStatisticsAnalyzer:
-    """
-    Analyzes and compares statistics across different datasets.
+    """Analyzes and compares statistics across different datasets.
 
     Provides detailed analysis of class distributions, spatial patterns,
     temporal characteristics, and scene complexity.
@@ -88,6 +88,7 @@ class DatasetStatisticsAnalyzer:
         Returns:
             Dictionary containing detailed analysis results including class distributions,
             spatial patterns, temporal characteristics, and scene complexity metrics.
+
         """
         print(f"Analyzing dataset: {dataset.__class__.__name__}")
 
@@ -113,6 +114,7 @@ class DatasetStatisticsAnalyzer:
 
         Returns:
             Dictionary containing class counts, probabilities, and distribution statistics.
+
         """
         class_counts = Counter()
         total_instances = 0
@@ -419,6 +421,7 @@ class DomainGapAnalyzer:
 
     Attributes:
         statistics_analyzer: Instance for computing dataset statistics.
+
     """
 
     def __init__(self) -> None:
@@ -435,8 +438,8 @@ class DomainGapAnalyzer:
 
         Returns:
             DomainGapMetrics object containing all computed gap metrics.
-        """
 
+        """
         # Analyze both datasets
         source_stats = self.statistics_analyzer.analyze_dataset(source_dataset)
         target_stats = self.statistics_analyzer.analyze_dataset(target_dataset)
@@ -683,7 +686,6 @@ class DomainGapAnalyzer:
         weather_div: float,
     ) -> float:
         """Compute weighted overall domain gap score"""
-
         # Weights for different aspects
         weights = {
             "class": 0.25,
@@ -713,8 +715,7 @@ class DomainGapAnalyzer:
 
 
 class CrossDatasetValidator:
-    """
-    Main class for cross-dataset validation and analysis.
+    """Main class for cross-dataset validation and analysis.
 
     Orchestrates domain gap analysis, performance evaluation,
     and provides recommendations for cross-domain training.
@@ -734,8 +735,7 @@ class CrossDatasetValidator:
         target_datasets: List[BaseDataset],
         model_performance_fn: Optional[callable] = None,
     ) -> List[CrossDatasetResults]:
-        """
-        Perform comprehensive cross-dataset validation.
+        """Perform comprehensive cross-dataset validation.
 
         Args:
             source_datasets: List of source datasets for training
@@ -744,6 +744,7 @@ class CrossDatasetValidator:
 
         Returns:
             List of validation results for each source-target pair
+
         """
         results = []
 
@@ -806,7 +807,6 @@ class CrossDatasetValidator:
         domain_gap: DomainGapMetrics,
     ) -> Dict[str, Any]:
         """Analyze potential failure modes in cross-dataset transfer"""
-
         failure_analysis = {
             "high_risk_classes": [],
             "spatial_bias_risk": "low",
@@ -853,7 +853,6 @@ class CrossDatasetValidator:
         self, domain_gap: DomainGapMetrics, performance_metrics: Dict[str, float]
     ) -> List[str]:
         """Generate actionable recommendations for improving cross-dataset transfer"""
-
         recommendations = []
 
         # Class imbalance recommendations
@@ -921,7 +920,6 @@ class CrossDatasetValidator:
 
     def _save_validation_results(self, results: List[CrossDatasetResults]) -> None:
         """Save validation results to files"""
-
         # Save summary report
         summary_path = os.path.join(
             self.output_dir, "cross_dataset_validation_summary.json"
@@ -975,7 +973,6 @@ class CrossDatasetValidator:
 
     def generate_visualization_report(self, results: List[CrossDatasetResults]) -> None:
         """Generate visualization report for cross-dataset validation"""
-
         if not self.output_dir:
             print("No output directory specified for visualizations")
             return
@@ -991,7 +988,6 @@ class CrossDatasetValidator:
 
     def _create_domain_gap_heatmap(self, results: List[CrossDatasetResults]) -> None:
         """Create heatmap of domain gaps between datasets"""
-
         # Collect data for heatmap
         datasets = set()
         for result in results:
@@ -1032,7 +1028,6 @@ class CrossDatasetValidator:
 
     def _create_recommendation_summary(self, results: List[CrossDatasetResults]) -> str:
         """Create summary of recommendations across all dataset pairs"""
-
         all_recommendations = []
         for result in results:
             all_recommendations.extend(result.recommendations)

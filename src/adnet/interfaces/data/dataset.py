@@ -1,5 +1,4 @@
-"""
-Abstract base classes for dataset interfaces in Sparse4D framework.
+"""Abstract base classes for dataset interfaces in Sparse4D framework.
 
 This module defines the core interfaces that all dataset implementations must follow,
 ensuring consistency across different datasets (nuScenes, Waymo, KITTI, etc.) and
@@ -85,8 +84,7 @@ class Sample:
 
 
 class BaseDataset(Dataset[Sample], ABC):
-    """
-    Abstract base class for all Sparse4D datasets.
+    """Abstract base class for all Sparse4D datasets.
 
     Defines the interface that all dataset implementations must follow,
     ensuring consistency across nuScenes, Waymo, KITTI, Argoverse, etc.
@@ -101,8 +99,7 @@ class BaseDataset(Dataset[Sample], ABC):
         load_interval: int = 1,
         **kwargs: Any,
     ) -> None:
-        """
-        Initialize base dataset.
+        """Initialize base dataset.
 
         Args:
             data_root: Root directory containing dataset files
@@ -110,6 +107,7 @@ class BaseDataset(Dataset[Sample], ABC):
             sequence_length: Number of frames in temporal sequences
             temporal_stride: Stride between frames in sequence
             load_interval: Interval for loading frames (1 = all frames)
+
         """
         self.data_root = data_root
         self.split = split
@@ -184,8 +182,7 @@ class BaseDataset(Dataset[Sample], ABC):
 
 
 class MultiModalDataset(BaseDataset):
-    """
-    Extended base class for multi-modal datasets (camera + LiDAR + radar).
+    """Extended base class for multi-modal datasets (camera + LiDAR + radar).
 
     Handles loading and synchronization of multiple sensor modalities
     with proper temporal alignment.
@@ -222,8 +219,7 @@ class MultiModalDataset(BaseDataset):
 
 
 class TemporalDataset(BaseDataset):
-    """
-    Base class for temporal datasets supporting 4D object detection.
+    """Base class for temporal datasets supporting 4D object detection.
 
     Handles temporal sequence construction, ego motion computation,
     and instance tracking across frames.
@@ -276,8 +272,7 @@ class TemporalDataset(BaseDataset):
 
 
 class HarmonizedDataset(BaseDataset):
-    """
-    Base class for harmonized multi-dataset training.
+    """Base class for harmonized multi-dataset training.
 
     Provides coordinate normalization, class mapping, and
     format standardization across different datasets.
