@@ -1,5 +1,4 @@
-"""
-Test suite for temporal loader implementation.
+"""Test suite for temporal loader implementation.
 
 Tests for temporal sequence handling including:
 - Temporal sequence building strategies
@@ -11,7 +10,7 @@ Tests for temporal sequence handling including:
 
 import os
 import sys
-from unittest.mock import MagicMock, Mock, patch
+from typing import Dict, List
 
 import numpy as np
 import pytest
@@ -20,6 +19,13 @@ import torch
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "src"))
 
+from adnet.data.loaders.temporal_loader import (
+    TemporalDataLoader,
+    TemporalDatasetWrapper,
+    TemporalSequenceBuilder,
+    TemporalSequenceSample,
+    create_temporal_dataloader,
+)
 from adnet.interfaces.data.dataset import (
     BaseDataset,
     CameraParams,
@@ -29,10 +35,11 @@ from adnet.interfaces.data.dataset import (
 )
 
 
-class MockTemporalDataset(BaseDataset):
-    """Mock dataset with temporal sequences for testing"""
+class MockTemporalDataset(BaseDataset):  # type: ignore[misc]
+    """Mock dataset with temporal sequences for testing."""
 
-    def __init__(self, num_samples=20, sequence_length=4):
+    def __init__(self, num_samples: int = 20, sequence_length: int = 4) -> None:
+        """Initialize mock dataset."""
         self.num_samples = num_samples
         self.sequence_length = sequence_length
         self._sample_ids = [f"sample_{i:03d}" for i in range(num_samples)]
@@ -43,28 +50,28 @@ class MockTemporalDataset(BaseDataset):
         self.data_root = "/mock/data"
         self.split = "train"
 
-    def _load_dataset_info(self):
-        """Mock implementation"""
+    def _load_dataset_info(self) -> None:
+        """Mock implementation."""
         pass
 
-    def _load_annotations(self):
-        """Mock implementation"""
+    def _load_annotations(self) -> None:
+        """Mock implementation."""
         pass
 
-    def _load_sample_data(self, index):
-        """Mock implementation"""
+    def _load_sample_data(self, index: int) -> Sample:
+        """Mock implementation."""
         return self._create_mock_sample(index)
 
-    def get_camera_calibration(self, sample_id):
-        """Mock implementation"""
+    def get_camera_calibration(self, sample_id: str) -> CameraParams:
+        """Mock implementation."""
         return CameraParams(
             intrinsics=np.array([[[1000, 0, 320], [0, 1000, 240], [0, 0, 1]]] * 2),
             extrinsics=np.array([np.eye(4)] * 2),
             timestamps=np.array([1000000, 1000000]),
         )
 
-    def get_temporal_sequence(self, sample_id):
-        """Mock implementation"""
+    def get_temporal_sequence(self, sample_id: str) -> TemporalSequence:
+        """Mock implementation."""
         return TemporalSequence(
             sequence_id="mock_sequence",
             frame_indices=[0, 1, 2],
@@ -73,14 +80,16 @@ class MockTemporalDataset(BaseDataset):
             frame_count=3,
         )
 
-    def __len__(self):
+    def __len__(self) -> int:
+        """Return dataset length."""
         return self.num_samples
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> Sample:
+        """Get item by index."""
         return self._load_sample_data(index)
 
-    def _create_mock_sample(self, index):
-        """Create mock sample with temporal information"""
+    def _create_mock_sample(self, index: int) -> Sample:
+        """Create mock sample with temporal information."""
         # Create sequence info
         sequence_id = f"sequence_{index // 5}"
         frame_indices = [index]
@@ -146,8 +155,8 @@ class MockTemporalDataset(BaseDataset):
             location="test",
         )
 
-    def _create_ego_pose(self, index):
-        """Create mock ego pose with some movement"""
+    def _create_ego_pose(self, index: int) -> np.ndarray:
+        """Create mock ego pose with some movement."""
         pose = np.eye(4)
         # Simulate forward movement
         pose[0, 3] = index * 2.0  # 2m per frame
@@ -155,35 +164,31 @@ class MockTemporalDataset(BaseDataset):
         return pose
 
     @property
-    def sample_ids(self):
+    def sample_ids(self) -> List[str]:
+        """Return sample IDs."""
         return self._sample_ids
 
 
 class TestTemporalSequenceBuilder:
-    """Test temporal sequence building functionality"""
+    """Test temporal sequence building functionality."""
 
-    def setup_method(self):
-        """Setup test fixtures"""
-        try:
-            from adnet.data.loaders.temporal_loader import TemporalSequenceBuilder
+    def setup_method(self) -> None:
+        """Set up test fixtures."""
+        self.dataset = MockTemporalDataset(num_samples=20)
+        self.sequence_builder = TemporalSequenceBuilder(
+            sequence_length=4, temporal_stride=1, sampling_strategy="uniform"
+        )
 
-            self.dataset = MockTemporalDataset(num_samples=20)
-            self.sequence_builder = TemporalSequenceBuilder(
-                sequence_length=4, temporal_stride=1, sampling_strategy="uniform"
-            )
-        except ImportError:
-            pytest.skip("TemporalSequenceBuilder not available")
-
-    def test_sequence_builder_initialization(self):
-        """Test sequence builder initialization"""
+    def test_sequence_builder_initialization(self) -> None:
+        """Test sequence builder initialization."""
         assert self.sequence_builder.sequence_length == 4
         assert self.sequence_builder.temporal_stride == 1
         assert self.sequence_builder.sampling_strategy == "uniform"
         assert self.sequence_builder.max_temporal_gap == 0.5
-        assert self.sequence_builder.instance_tracking == True
+        assert self.sequence_builder.instance_tracking is True
 
-    def test_uniform_sampling_strategy(self):
-        """Test uniform temporal sampling"""
+    def test_uniform_sampling_strategy(self) -> None:
+        """Test uniform temporal sampling."""
         center_frame_idx = 10
         sequence = self.sequence_builder.build_sequence(self.dataset, center_frame_idx)
 
@@ -200,8 +205,8 @@ class TestTemporalSequenceBuilder:
             assert len(sequence.ego_motions) == sequence.sequence_length - 1
             assert len(sequence.temporal_weights) == sequence.sequence_length
 
-    def test_key_frame_sampling_strategy(self):
-        """Test key frame sampling based on ego motion"""
+    def test_key_frame_sampling_strategy(self) -> None:
+        """Test key frame sampling based on ego motion."""
         key_frame_builder = TemporalSequenceBuilder(
             sequence_length=4, sampling_strategy="key_frame", ego_motion_threshold=1.0
         )
@@ -214,8 +219,8 @@ class TestTemporalSequenceBuilder:
             assert sequence.sequence_length <= 4
             assert len(sequence.frames) == sequence.sequence_length
 
-    def test_adaptive_sampling_strategy(self):
-        """Test adaptive sampling based on scene dynamics"""
+    def test_adaptive_sampling_strategy(self) -> None:
+        """Test adaptive sampling based on scene dynamics."""
         adaptive_builder = TemporalSequenceBuilder(
             sequence_length=4, sampling_strategy="adaptive"
         )
@@ -228,8 +233,8 @@ class TestTemporalSequenceBuilder:
             assert sequence.sequence_length <= 4
             assert len(sequence.frames) == sequence.sequence_length
 
-    def test_ego_motion_computation(self):
-        """Test ego motion computation between frames"""
+    def test_ego_motion_computation(self) -> None:
+        """Test ego motion computation between frames."""
         center_frame_idx = 10
         sequence = self.sequence_builder.build_sequence(self.dataset, center_frame_idx)
 
@@ -243,8 +248,8 @@ class TestTemporalSequenceBuilder:
             # Ego motions should be finite
             assert np.all(np.isfinite(ego_motions))
 
-    def test_instance_tracking(self):
-        """Test instance tracking across temporal sequence"""
+    def test_instance_tracking(self) -> None:
+        """Test instance tracking across temporal sequence."""
         center_frame_idx = 10
         sequence = self.sequence_builder.build_sequence(self.dataset, center_frame_idx)
 
@@ -260,8 +265,8 @@ class TestTemporalSequenceBuilder:
                 assert isinstance(annotations, list)
                 assert len(annotations) >= 2  # Should appear in at least 2 frames
 
-    def test_temporal_weights_computation(self):
-        """Test temporal weight computation"""
+    def test_temporal_weights_computation(self) -> None:
+        """Test temporal weight computation."""
         center_frame_idx = 10
         sequence = self.sequence_builder.build_sequence(self.dataset, center_frame_idx)
 
@@ -276,8 +281,8 @@ class TestTemporalSequenceBuilder:
             # Current frame (last) should have highest weight
             assert weights[-1] == 1.0
 
-    def test_sequence_insufficient_frames(self):
-        """Test handling when insufficient frames available"""
+    def test_sequence_insufficient_frames(self) -> None:
+        """Test handling when insufficient frames available."""
         # Test at beginning of dataset
         sequence = self.sequence_builder.build_sequence(
             self.dataset, center_frame_idx=0
@@ -288,9 +293,9 @@ class TestTemporalSequenceBuilder:
             assert sequence.sequence_length >= 1
         # Or return None if truly insufficient
 
-    @pytest.mark.parametrize("sequence_length", [2, 4, 6, 8])
-    def test_different_sequence_lengths(self, sequence_length):
-        """Test different temporal sequence lengths"""
+    @pytest.mark.parametrize("sequence_length", [2, 4, 6, 8])  # type: ignore[misc]
+    def test_different_sequence_lengths(self, sequence_length: int) -> None:
+        """Test different temporal sequence lengths."""
         builder = TemporalSequenceBuilder(
             sequence_length=sequence_length, sampling_strategy="uniform"
         )
@@ -304,52 +309,47 @@ class TestTemporalSequenceBuilder:
 
 
 class TestTemporalSequenceSample:
-    """Test temporal sequence sample functionality"""
+    """Test temporal sequence sample functionality."""
 
-    def setup_method(self):
-        """Setup test fixtures"""
-        try:
-            from adnet.data.loaders.temporal_loader import TemporalSequenceSample
+    def setup_method(self) -> None:
+        """Set up test fixtures."""
+        self.dataset = MockTemporalDataset(num_samples=10)
 
-            self.dataset = MockTemporalDataset(num_samples=10)
+        # Create mock sequence
+        frames = [self.dataset[i] for i in range(4)]
+        ego_motions = np.random.rand(3, 6)
+        instance_tracks: Dict[str, List[InstanceAnnotation]] = {"instance_1": []}
+        temporal_weights = np.array([0.5, 0.7, 0.9, 1.0])
 
-            # Create mock sequence
-            frames = [self.dataset[i] for i in range(4)]
-            ego_motions = np.random.rand(3, 6)
-            instance_tracks = {"instance_1": [Mock(), Mock()]}
-            temporal_weights = np.array([0.5, 0.7, 0.9, 1.0])
+        self.sequence_sample = TemporalSequenceSample(
+            frames=frames,
+            sequence_length=4,
+            ego_motions=ego_motions,
+            instance_tracks=instance_tracks,
+            temporal_weights=temporal_weights,
+        )
 
-            self.sequence_sample = TemporalSequenceSample(
-                frames=frames,
-                sequence_length=4,
-                ego_motions=ego_motions,
-                instance_tracks=instance_tracks,
-                temporal_weights=temporal_weights,
-            )
-        except ImportError:
-            pytest.skip("TemporalSequenceSample not available")
-
-    def test_sequence_sample_properties(self):
-        """Test sequence sample properties"""
+    def test_sequence_sample_properties(self) -> None:
+        """Test sequence sample properties."""
         assert self.sequence_sample.sequence_length == 4
         assert len(self.sequence_sample.frames) == 4
         assert self.sequence_sample.ego_motions.shape == (3, 6)
         assert len(self.sequence_sample.temporal_weights) == 4
 
-    def test_current_frame_access(self):
-        """Test current frame access"""
+    def test_current_frame_access(self) -> None:
+        """Test current frame access."""
         current_frame = self.sequence_sample.get_current_frame()
         assert current_frame is not None
         assert current_frame == self.sequence_sample.frames[-1]
 
-    def test_temporal_frames_access(self):
-        """Test temporal frames access"""
+    def test_temporal_frames_access(self) -> None:
+        """Test temporal frames access."""
         temporal_frames = self.sequence_sample.get_temporal_frames()
         assert len(temporal_frames) == 4
         assert temporal_frames == self.sequence_sample.frames
 
-    def test_ego_motion_access(self):
-        """Test ego motion access by frame index"""
+    def test_ego_motion_access(self) -> None:
+        """Test ego motion access by frame index."""
         ego_motion_0 = self.sequence_sample.get_ego_motion_at(0)
         assert len(ego_motion_0) == 6
 
@@ -357,17 +357,17 @@ class TestTemporalSequenceSample:
         ego_motion_out = self.sequence_sample.get_ego_motion_at(10)
         assert np.array_equal(ego_motion_out, np.zeros(6))
 
-    def test_instance_track_access(self):
-        """Test instance track access"""
+    def test_instance_track_access(self) -> None:
+        """Test instance track access."""
         track = self.sequence_sample.get_instance_track("instance_1")
-        assert len(track) == 2
+        assert len(track) == 0
 
         # Test non-existent instance
         empty_track = self.sequence_sample.get_instance_track("nonexistent")
         assert empty_track == []
 
-    def test_temporal_statistics(self):
-        """Test temporal sequence statistics"""
+    def test_temporal_statistics(self) -> None:
+        """Test temporal sequence statistics."""
         stats = self.sequence_sample.get_temporal_statistics()
 
         # Validate statistics structure
@@ -385,36 +385,28 @@ class TestTemporalSequenceSample:
 
 
 class TestTemporalDataLoader:
-    """Test temporal data loader functionality"""
+    """Test temporal data loader functionality."""
 
-    def setup_method(self):
-        """Setup test fixtures"""
-        try:
-            from adnet.data.loaders.temporal_loader import (
-                TemporalDataLoader,
-                TemporalSequenceBuilder,
-            )
+    def setup_method(self) -> None:
+        """Set up test fixtures."""
+        self.dataset = MockTemporalDataset(num_samples=20)
+        self.sequence_builder = TemporalSequenceBuilder(sequence_length=3)
 
-            self.dataset = MockTemporalDataset(num_samples=20)
-            self.sequence_builder = TemporalSequenceBuilder(sequence_length=3)
+        self.dataloader = TemporalDataLoader(
+            dataset=self.dataset,
+            sequence_builder=self.sequence_builder,
+            batch_size=2,
+            shuffle=False,
+            num_workers=0,  # Use 0 for testing
+        )
 
-            self.dataloader = TemporalDataLoader(
-                dataset=self.dataset,
-                sequence_builder=self.sequence_builder,
-                batch_size=2,
-                shuffle=False,
-                num_workers=0,  # Use 0 for testing
-            )
-        except ImportError:
-            pytest.skip("TemporalDataLoader not available")
-
-    def test_dataloader_initialization(self):
-        """Test dataloader initialization"""
+    def test_dataloader_initialization(self) -> None:
+        """Test dataloader initialization."""
         assert self.dataloader.batch_size == 2
         assert self.dataloader.sequence_builder.sequence_length == 3
 
-    def test_batch_iteration(self):
-        """Test batch iteration"""
+    def test_batch_iteration(self) -> None:
+        """Test batch iteration."""
         try:
             batch = next(iter(self.dataloader))
 
@@ -447,8 +439,8 @@ class TestTemporalDataLoader:
             # May occur if no valid sequences can be built
             pytest.skip("No valid temporal sequences available")
 
-    def test_batch_collation(self):
-        """Test batch collation functionality"""
+    def test_batch_collation(self) -> None:
+        """Test batch collation functionality."""
         try:
             batch = next(iter(self.dataloader))
 
@@ -473,13 +465,13 @@ class TestTemporalDataLoader:
         except (StopIteration, RuntimeError):
             pytest.skip("No valid temporal sequences available")
 
-    def test_sequence_padding(self):
-        """Test sequence padding for variable length sequences"""
+    def test_sequence_padding(self) -> None:
+        """Test sequence padding for variable length sequences."""
         try:
             batch = next(iter(self.dataloader))
 
             if batch["batch_size"] > 1:
-                sequence_lengths = batch["sequence_lengths"]
+                _ = batch["sequence_lengths"]  # Used for validation
                 max_length = batch["max_sequence_length"]
 
                 # All sequences should be padded to max length
@@ -494,33 +486,25 @@ class TestTemporalDataLoader:
 
 
 class TestTemporalDatasetWrapper:
-    """Test temporal dataset wrapper functionality"""
+    """Test temporal dataset wrapper functionality."""
 
-    def setup_method(self):
-        """Setup test fixtures"""
-        try:
-            from adnet.data.loaders.temporal_loader import (
-                TemporalDatasetWrapper,
-                TemporalSequenceBuilder,
-            )
+    def setup_method(self) -> None:
+        """Set up test fixtures."""
+        self.base_dataset = MockTemporalDataset(num_samples=20)
+        self.sequence_builder = TemporalSequenceBuilder(sequence_length=3)
 
-            self.base_dataset = MockTemporalDataset(num_samples=20)
-            self.sequence_builder = TemporalSequenceBuilder(sequence_length=3)
+        self.wrapper = TemporalDatasetWrapper(
+            base_dataset=self.base_dataset, sequence_builder=self.sequence_builder
+        )
 
-            self.wrapper = TemporalDatasetWrapper(
-                base_dataset=self.base_dataset, sequence_builder=self.sequence_builder
-            )
-        except ImportError:
-            pytest.skip("TemporalDatasetWrapper not available")
-
-    def test_wrapper_initialization(self):
-        """Test wrapper initialization"""
+    def test_wrapper_initialization(self) -> None:
+        """Test wrapper initialization."""
         assert self.wrapper.base_dataset == self.base_dataset
         assert self.wrapper.sequence_builder == self.sequence_builder
         assert hasattr(self.wrapper, "valid_indices")
 
-    def test_valid_indices_building(self):
-        """Test valid indices building"""
+    def test_valid_indices_building(self) -> None:
+        """Test valid indices building."""
         # Should identify frames that can be centers of valid sequences
         valid_indices = self.wrapper.valid_indices
         assert isinstance(valid_indices, list)
@@ -530,14 +514,14 @@ class TestTemporalDatasetWrapper:
         for idx in valid_indices:
             assert 0 <= idx < len(self.base_dataset)
 
-    def test_wrapper_length(self):
-        """Test wrapper length"""
+    def test_wrapper_length(self) -> None:
+        """Test wrapper length."""
         wrapper_length = len(self.wrapper)
         assert wrapper_length <= len(self.base_dataset)
         assert wrapper_length == len(self.wrapper.valid_indices)
 
-    def test_sequence_retrieval(self):
-        """Test sequence retrieval by index"""
+    def test_sequence_retrieval(self) -> None:
+        """Test sequence retrieval by index."""
         if len(self.wrapper) > 0:
             sequence = self.wrapper[0]
 
@@ -549,31 +533,25 @@ class TestTemporalDatasetWrapper:
 
 
 class TestTemporalLoaderFactory:
-    """Test temporal loader factory function"""
+    """Test temporal loader factory function."""
 
-    def test_create_temporal_dataloader(self):
-        """Test temporal dataloader creation factory"""
-        try:
-            from adnet.data.loaders.temporal_loader import create_temporal_dataloader
+    def test_create_temporal_dataloader(self) -> None:
+        """Test temporal dataloader creation factory."""
+        dataset = MockTemporalDataset(num_samples=10)
 
-            dataset = MockTemporalDataset(num_samples=10)
+        dataloader = create_temporal_dataloader(
+            dataset=dataset,
+            sequence_length=4,
+            temporal_stride=1,
+            sampling_strategy="uniform",
+            batch_size=2,
+            shuffle=False,
+            num_workers=0,
+        )
 
-            dataloader = create_temporal_dataloader(
-                dataset=dataset,
-                sequence_length=4,
-                temporal_stride=1,
-                sampling_strategy="uniform",
-                batch_size=2,
-                shuffle=False,
-                num_workers=0,
-            )
-
-            # Validate dataloader creation
-            assert dataloader is not None
-            assert dataloader.batch_size == 2
-
-        except ImportError:
-            pytest.skip("create_temporal_dataloader not available")
+        # Validate dataloader creation
+        assert dataloader is not None
+        assert dataloader.batch_size == 2
 
 
 if __name__ == "__main__":

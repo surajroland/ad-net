@@ -26,7 +26,8 @@ repos:
     rev: v1.17.1
     hooks:
       - id: mypy
-        additional_dependencies: [types-requests, types-PyYAML, numpy, torch]
+        additional_dependencies:
+          [types-requests, types-PyYAML, types-setuptools, numpy, torch]
         args: [--config-file=mypy.ini]
 
   # Security scanning (relaxed for development)
