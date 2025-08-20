@@ -16,7 +16,7 @@ from torch.utils.data import Dataset
 
 @dataclass
 class CameraParams:
-    """Camera parameter container for multi-view setup"""
+    """Camera parameter container for multi-view setup."""
 
     intrinsics: npt.NDArray[np.float64]  # [N_cameras, 3, 3] intrinsic matrices
     extrinsics: npt.NDArray[np.float64]  # [N_cameras, 4, 4] extrinsic matrices
@@ -26,7 +26,7 @@ class CameraParams:
 
 @dataclass
 class InstanceAnnotation:
-    """Single object instance annotation"""
+    """Single object instance annotation."""
 
     box_3d: npt.NDArray[
         np.float64
@@ -40,7 +40,7 @@ class InstanceAnnotation:
 
 @dataclass
 class TemporalSequence:
-    """Temporal sequence metadata for 4D processing"""
+    """Temporal sequence metadata for 4D processing."""
 
     sequence_id: str  # Unique sequence identifier
     frame_indices: List[int]  # Frame indices in sequence
@@ -51,7 +51,7 @@ class TemporalSequence:
 
 @dataclass
 class Sample:
-    """Single data sample containing all modalities and annotations"""
+    """Single data sample containing all modalities and annotations."""
 
     # Core identifiers
     sample_id: str
@@ -107,6 +107,7 @@ class BaseDataset(Dataset[Sample], ABC):
             sequence_length: Number of frames in temporal sequences
             temporal_stride: Stride between frames in sequence
             load_interval: Interval for loading frames (1 = all frames)
+            **kwargs: Additional dataset-specific arguments
 
         """
         self.data_root = data_root
@@ -127,49 +128,49 @@ class BaseDataset(Dataset[Sample], ABC):
 
     @abstractmethod
     def _load_dataset_info(self) -> None:
-        """Load dataset-specific information (classes, camera setup, etc.)"""
+        """Load dataset-specific information (classes, camera setup, etc.)."""
         pass
 
     @abstractmethod
     def _load_annotations(self) -> None:
-        """Load and parse dataset annotations"""
+        """Load and parse dataset annotations."""
         pass
 
     @abstractmethod
     def _load_sample_data(self, index: int) -> Sample:
-        """Load complete sample data for given index"""
+        """Load complete sample data for given index."""
         pass
 
     @abstractmethod
     def get_camera_calibration(self, sample_id: str) -> CameraParams:
-        """Get camera calibration parameters for sample"""
+        """Get camera calibration parameters for sample."""
         pass
 
     @abstractmethod
     def get_temporal_sequence(self, sample_id: str) -> TemporalSequence:
-        """Get temporal sequence information for sample"""
+        """Get temporal sequence information for sample."""
         pass
 
     def __len__(self) -> int:
-        """Return dataset length"""
+        """Return dataset length."""
         return len(self.sample_ids)
 
     def __getitem__(self, index: int) -> Sample:
-        """Get single sample by index"""
+        """Get single sample by index."""
         return self._load_sample_data(index)
 
     @property
     @abstractmethod
     def sample_ids(self) -> List[str]:
-        """List of all sample IDs in dataset"""
+        """List of all sample IDs in dataset."""
         pass
 
     def get_class_mapping(self) -> Dict[str, int]:
-        """Get mapping from class names to IDs"""
+        """Get mapping from class names to IDs."""
         return {name: idx for idx, name in enumerate(self.class_names)}
 
     def get_statistics(self) -> Dict[str, Any]:
-        """Get dataset statistics"""
+        """Get dataset statistics."""
         return {
             "num_samples": len(self),
             "num_classes": self.num_classes,
@@ -189,6 +190,15 @@ class MultiModalDataset(BaseDataset):
     """
 
     def __init__(self, **kwargs: Any) -> None:
+        """Initialize multi-modal dataset.
+
+        Args:
+            **kwargs: Additional arguments including:
+                - load_lidar: Whether to load LiDAR data
+                - load_radar: Whether to load radar data
+                - load_depth: Whether to load depth maps
+
+        """
         self.load_lidar = kwargs.pop("load_lidar", False)
         self.load_radar = kwargs.pop("load_radar", False)
         self.load_depth = kwargs.pop("load_depth", False)
@@ -196,23 +206,23 @@ class MultiModalDataset(BaseDataset):
 
     @abstractmethod
     def _load_lidar_data(self, sample_id: str) -> Optional[npt.NDArray[np.float32]]:
-        """Load LiDAR point cloud data"""
+        """Load LiDAR point cloud data."""
         pass
 
     @abstractmethod
     def _load_radar_data(self, sample_id: str) -> Optional[npt.NDArray[np.float32]]:
-        """Load radar point data"""
+        """Load radar point data."""
         pass
 
     @abstractmethod
     def _load_depth_data(
         self, sample_id: str
     ) -> Optional[Dict[str, npt.NDArray[np.float32]]]:
-        """Load depth maps for all cameras"""
+        """Load depth maps for all cameras."""
         pass
 
     def _synchronize_modalities(self, sample: Sample) -> Sample:
-        """Synchronize different sensor modalities to common timestamp"""
+        """Synchronize different sensor modalities to common timestamp."""
         # Implement temporal synchronization logic
         # This is dataset-specific and should be overridden
         return sample
@@ -226,6 +236,14 @@ class TemporalDataset(BaseDataset):
     """
 
     def __init__(self, **kwargs: Any) -> None:
+        """Initialize temporal dataset.
+
+        Args:
+            **kwargs: Additional arguments including:
+                - enable_temporal: Whether to enable temporal processing
+                - max_temporal_gap: Maximum temporal gap in seconds
+
+        """
         self.enable_temporal = kwargs.pop("enable_temporal", True)
         self.max_temporal_gap = kwargs.pop("max_temporal_gap", 1.0)  # seconds
         super().__init__(**kwargs)
@@ -234,7 +252,7 @@ class TemporalDataset(BaseDataset):
             self._build_temporal_sequences()
 
     def _build_temporal_sequences(self) -> None:
-        """Build temporal sequences from individual frames"""
+        """Build temporal sequences from individual frames."""
         # Group frames into temporal sequences
         # Handle ego motion computation
         # Track instance IDs across frames
@@ -244,18 +262,18 @@ class TemporalDataset(BaseDataset):
     def _compute_ego_motion(
         self, prev_pose: npt.NDArray[np.float64], curr_pose: npt.NDArray[np.float64]
     ) -> npt.NDArray[np.float64]:
-        """Compute ego motion between two poses"""
+        """Compute ego motion between two poses."""
         pass
 
     @abstractmethod
     def _track_instances(
         self, sequence: TemporalSequence
     ) -> Dict[int, List[InstanceAnnotation]]:
-        """Track instances across temporal sequence"""
+        """Track instances across temporal sequence."""
         pass
 
     def get_temporal_sample(self, index: int) -> List[Sample]:
-        """Get temporal sequence of samples"""
+        """Get temporal sequence of samples."""
         if not self.enable_temporal or self.sequence_length == 1:
             return [self._load_sample_data(index)]
 
@@ -279,6 +297,14 @@ class HarmonizedDataset(BaseDataset):
     """
 
     def __init__(self, **kwargs: Any) -> None:
+        """Initialize harmonized dataset.
+
+        Args:
+            **kwargs: Additional arguments including:
+                - coordinate_system: Target coordinate system for harmonization
+                - unified_classes: Unified class taxonomy for multi-dataset training
+
+        """
         self.coordinate_system = kwargs.pop("coordinate_system", "ego")
         self.unified_classes = kwargs.pop("unified_classes", None)
         super().__init__(**kwargs)
@@ -287,56 +313,57 @@ class HarmonizedDataset(BaseDataset):
             self._setup_class_harmonization()
 
     def _setup_class_harmonization(self) -> None:
-        """Setup class mapping to unified taxonomy"""
+        """Set up class mapping to unified taxonomy."""
         # Load unified class taxonomy
         # Create mapping from dataset-specific to unified classes
         pass
 
     @abstractmethod
     def _normalize_coordinates(self, sample: Sample) -> Sample:
-        """Normalize coordinates to standard coordinate system"""
+        """Normalize coordinates to standard coordinate system."""
         pass
 
     @abstractmethod
     def _harmonize_annotations(self, sample: Sample) -> Sample:
-        """Harmonize annotations to unified format"""
+        """Harmonize annotations to unified format."""
         pass
 
     def _harmonize_sample(self, sample: Sample) -> Sample:
-        """Apply all harmonization steps"""
+        """Apply all harmonization steps."""
         sample = self._normalize_coordinates(sample)
         sample = self._harmonize_annotations(sample)
         return sample
 
 
 class DatasetRegistry:
-    """Registry for all available dataset implementations"""
+    """Registry for all available dataset implementations."""
 
     _datasets: Dict[str, Type[BaseDataset]] = {}
 
     @classmethod
     def register(cls, name: str, dataset_class: Type[BaseDataset]) -> None:
-        """Register a dataset implementation"""
+        """Register a dataset implementation."""
         cls._datasets[name] = dataset_class
 
     @classmethod
     def get(cls, name: str) -> Type[BaseDataset]:
-        """Get dataset class by name"""
+        """Get dataset class by name."""
         if name not in cls._datasets:
             raise ValueError(
-                f"Dataset '{name}' not registered. Available: {list(cls._datasets.keys())}"
+                f"Dataset '{name}' not registered. "
+                f"Available: {list(cls._datasets.keys())}"
             )
         return cls._datasets[name]
 
     @classmethod
     def list_datasets(cls) -> List[str]:
-        """List all registered datasets"""
+        """List all registered datasets."""
         return list(cls._datasets.keys())
 
 
 # Decorator for automatic dataset registration
 def register_dataset(name: str) -> Callable[[Type[BaseDataset]], Type[BaseDataset]]:
-    """Decorator to automatically register dataset classes"""
+    """Decorate class for automatic dataset registration."""
 
     def decorator(cls: Type[BaseDataset]) -> Type[BaseDataset]:
         DatasetRegistry.register(name, cls)

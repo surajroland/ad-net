@@ -44,12 +44,15 @@
       "Bash(pre-commit:*)",
       "Bash(grep:*)",
       "Bash(ruff check:*)",
-      "Bash(mypy:*)"
+      "Bash(mypy:*)",
+      "Bash(starship config:*)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
-      "/root/.ssh"
+      "/root/.ssh",
+      "/root"
     ]
   }
 }

@@ -86,6 +86,7 @@ docs/build/
 
 # Testing
 .coverage
+coverage.xml
 htmlcov/
 .pytest_cache/
 .tox/
@@ -161,6 +162,56 @@ cpp_engine/*.so
 
 # Backup files
 *.backup
-*~coverage.xml
-htmlcov/
-.coverage
+*~
+
+# ADNet specific
+src/adnet/_version.py
+
+# Sphinx documentation builds
+docs/_build/
+docs/build/
+docs/.doctrees/
+
+# Benchmark results
+benchmark_results/
+.benchmarks/
+
+# Data preprocessing cache
+.cache/
+cache/
+
+# Configuration overrides
+config/local/
+conf/local/
+*.local.yaml
+*.local.yml
+
+# Large model files and weights
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+
+# Profiling data
+*.prof
+*.pstats
+
+# IDE specific settings
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+
+# Virtual environment variations
+.virtualenv/
+.conda/
+conda-meta/
+pyvenv.cfg
+
+# System-specific files
+*.pid
+*.lock
+*.socket
+
+# Temporary visualization outputs
+temp_vis/
+temp_outputs/
