@@ -1,10 +1,14 @@
 {
   "name": "ADNet Development",
-  "dockerComposeFile": ["../docker-compose.yml"],
-  "service": "adnet-dev",
+  "dockerComposeFile": [
+    "../docker/docker-compose.yml"
+  ],
+  "env": {
+    "COMPOSE_PROJECT_DIR": ".."
+  },
+  "service": "dev",
   "workspaceFolder": "/workspace",
-
-  // Environment variables for development
+  "overrideCommand": false,
   "containerEnv": {
     "PYTHONPATH": "/workspace/src",
     "WANDB_CONSOLE": "off",
@@ -12,17 +16,12 @@
     "HF_TOKEN": "${localEnv:HF_TOKEN}",
     "GITHUB_TOKEN": "${localEnv:GITHUB_TOKEN}"
   },
-
-  // VS Code customizations
   "customizations": {
     "vscode": {
       "extensions": [
-        // Container & Remote Development
         "ms-vscode-remote.remote-containers",
         "ms-vscode-remote.remote-ssh",
         "ms-vscode-remote.remote-extensionpack",
-
-        // Core Python Development
         "ms-python.python",
         "ms-python.vscode-pylance",
         "ms-python.black-formatter",
@@ -31,75 +30,50 @@
         "ms-python.flake8",
         "ms-python.debugpy",
         "charliermarsh.ruff",
-
-        // AI/ML Productivity
         "github.copilot",
         "github.copilot-chat",
-
-        // Python Documentation & Testing
         "njpwerner.autodocstring",
         "ryanluker.vscode-coverage-gutters",
         "formulahendry.code-runner",
-
-        // Jupyter & ML
         "ms-toolsai.jupyter",
         "ms-toolsai.jupyter-renderers",
         "ms-toolsai.tensorboard",
         "ms-toolsai.vscode-ai",
         "ms-toolsai.jupyter-keymap",
-
-        // Git & Version Control
         "eamodio.gitlens",
         "mhutchie.git-graph",
         "github.vscode-pull-request-github",
         "github.vscode-github-actions",
         "ms-vscode.vscode-github-issue-notebooks",
-
-        // Configuration Files
         "redhat.vscode-yaml",
         "tamasfe.even-better-toml",
         "ms-vscode.makefile-tools",
         "spencerwmiles.vscode-task-buttons",
-
-        // Documentation & Writing
         "yzhang.markdown-all-in-one",
         "davidanson.vscode-markdownlint",
         "ms-vscode.live-server",
         "shd101wyy.markdown-preview-enhanced",
-
-        // Data & Visualization
         "mechatroner.rainbow-csv",
         "quarto.quarto",
-
-        // Environment Management
         "donjayamanne.python-environment-manager",
-
-        // Productivity & UI
         "zhuangtongfa.material-theme",
         "pkief.material-icon-theme",
         "gruntfuggly.todo-tree",
         "wayou.vscode-todo-highlight",
-		    "ms-vscode.vscode-speech",
-
-        // C++ Development (for cpp_engine)
+        "ms-vscode.vscode-speech",
         "ms-vscode.cpptools",
         "ms-vscode.cmake-tools"
       ],
       "settings": {
-        // Theme & UI
         "workbench.colorTheme": "One Dark Pro Flat",
         "workbench.iconTheme": "material-icon-theme",
         "workbench.startupEditor": "readme",
         "workbench.sideBar.location": "left",
-
-        // Terminal
         "terminal.integrated.defaultProfile.linux": "bash",
         "terminal.integrated.fontFamily": "'Fira Code', 'Courier New', monospace",
         "terminal.integrated.fontSize": 14,
         "terminal.integrated.copyOnSelection": true,
         "terminal.integrated.rightClickBehavior": "paste",
-
-        // Python Configuration
         "python.defaultInterpreterPath": "/usr/bin/python3.12",
         "python.formatting.provider": "none",
         "python.linting.enabled": true,
@@ -109,8 +83,6 @@
         "python.testing.pytestEnabled": true,
         "python.testing.unittestEnabled": false,
         "python.testing.autoTestDiscoverOnSaveEnabled": true,
-
-        // Code Formatting
         "[python]": {
           "editor.defaultFormatter": "ms-python.black-formatter",
           "editor.formatOnSave": true,
@@ -119,35 +91,30 @@
             "source.fixAll.ruff": "explicit"
           }
         },
-
-        // Ruff Configuration
         "ruff.enable": true,
         "ruff.organizeImports": true,
-
-        // Jupyter Configuration
         "jupyter.askForKernelRestart": false,
         "jupyter.interactiveWindow.creationMode": "perFile",
         "jupyter.notebookFileRoot": "${workspaceFolder}",
         "jupyter.jupyterServerType": "local",
-
-        // Git Configuration
         "git.enableSmartCommit": true,
         "git.confirmSync": false,
         "git.autofetch": true,
         "git-graph.repository.onLoad.showCheckedOutBranch": true,
         "git-graph.graph.colours": [
-          "#0085d1", "#d73a49", "#28a745", "#ffd33d",
-          "#f66a0a", "#6f42c1", "#e1e4e8"
+          "#0085d1",
+          "#d73a49",
+          "#28a745",
+          "#ffd33d",
+          "#f66a0a",
+          "#6f42c1",
+          "#e1e4e8"
         ],
         "gitlens.currentLine.enabled": false,
         "gitlens.codeLens.enabled": false,
-
-        // Docker Configuration
         "docker.showStartPage": false,
         "docker.dockerComposeBuild": true,
         "docker.dockerComposeDetached": true,
-
-        // File Associations
         "files.associations": {
           "*.yaml": "yaml",
           "*.yml": "yaml",
@@ -157,14 +124,13 @@
           "*.cu": "cuda-cpp",
           "*.cuh": "cuda-cpp"
         },
-
-        // Editor Configuration
         "editor.fontSize": 14,
         "editor.fontLigatures": true,
-        "editor.rulers": [88, 120],
+        "editor.rulers": [
+          88,
+          120
+        ],
         "editor.wordWrap": "on",
-
-        // Search Configuration
         "search.exclude": {
           "**/outputs": true,
           "**/multirun": true,
@@ -178,19 +144,11 @@
           "**/data/raw": true,
           "**/data/processed": true
         },
-
-        // C++ Configuration (for cpp_engine)
         "cmake.configureOnOpen": false,
         "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-	
-	      // ML/AI Specific Settings
         "tensorBoard.logDirectory": "${workspaceFolder}/outputs/logs",
-
-	      // Task Configuration
         "task.showDecorations": true,
         "task.quickOpen.history": 10,
-
-        // Performance
         "files.watcherExclude": {
           "**/.git/objects/**": true,
           "**/.git/subtree-cache/**": true,
@@ -201,9 +159,14 @@
       }
     }
   },
-
-  // Port forwarding for development services
-  "forwardPorts": [8888, 6006, 8097, 8000, 7860, 8080],
+  "forwardPorts": [
+    8888,
+    6006,
+    8097,
+    8000,
+    7860,
+    8080
+  ],
   "portsAttributes": {
     "8888": {
       "label": "Jupyter Lab",
@@ -226,23 +189,18 @@
       "onAutoForward": "ignore"
     }
   },
-
-  // Lifecycle commands
-  "initializeCommand": "echo '🏗️ Initializing ADNet development environment...'",
-  
-  "onCreateCommand": "echo '📋 Creating development container...'",
-
+  "initializeCommand": "echo '\ud83c\udfd7\ufe0f Initializing ADNet development environment...'",
+  "onCreateCommand": "echo '\ud83d\udccb Creating development container...'",
   "postCreateCommand": [
-    "bash", "-c",
-    "git config --global --add safe.directory '*' && echo '🚀 Git safe directory configured' && echo '🚀 ADNet development environment ready!' && if command -v pre-commit >/dev/null 2>&1; then echo '📦 Installing pre-commit hooks...' && pre-commit install --install-hooks; else echo '⚠️ pre-commit not found, skipping hooks installation'; fi && echo '✅ Environment setup complete!'"
+    "bash",
+    "-c",
+    "git config --global --add safe.directory '*' && echo '\ud83d\ude80 Git safe directory configured' && echo '\ud83d\ude80 ADNet development environment ready!' && if command -v pre-commit >/dev/null 2>&1; then echo '\ud83d\udce6 Installing pre-commit hooks...' && pre-commit install --install-hooks; else echo '\u26a0\ufe0f pre-commit not found, skipping hooks installation'; fi && echo '\u2705 Environment setup complete!'"
   ],
-
   "postStartCommand": [
-    "bash", "-c",
-    "echo '🔥 Container started! Checking environment...' && which python3 && python3 --version && echo '🐍 Python available' && if command -v nvidia-smi >/dev/null 2>&1; then echo '🎮 NVIDIA driver detected' && nvidia-smi --query-gpu=name --format=csv,noheader,nounits 2>/dev/null || echo 'GPU query failed'; else echo '⚠️ No NVIDIA driver found (expected in non-GPU environments)'; fi && if python3 -c 'import torch' 2>/dev/null; then echo '🔥 PyTorch available' && python3 -c 'import torch; print(f\"CUDA Available: {torch.cuda.is_available()}\")' 2>/dev/null || echo '⚠️ CUDA check deferred'; else echo '⚠️ PyTorch not yet available (may still be installing)'; fi && echo '✅ Environment check complete!'"
+    "bash",
+    "-c",
+    "echo '\ud83d\udd25 Container started! Checking environment...' && which python3 && python3 --version && echo '\ud83d\udc0d Python available' && if command -v nvidia-smi >/dev/null 2>&1; then echo '\ud83c\udfae NVIDIA driver detected' && nvidia-smi --query-gpu=name --format=csv,noheader,nounits 2>/dev/null || echo 'GPU query failed'; else echo '\u26a0\ufe0f No NVIDIA driver found (expected in non-GPU environments)'; fi && if python3 -c 'import torch' 2>/dev/null; then echo '\ud83d\udd25 PyTorch available' && python3 -c 'import torch; print(f\"CUDA Available: {torch.cuda.is_available()}\")' 2>/dev/null || echo '\u26a0\ufe0f CUDA check deferred'; else echo '\u26a0\ufe0f PyTorch not yet available (may still be installing)'; fi && echo '\u2705 Environment check complete!'"
   ],
-
-  // Development container features
   "features": {
     "ghcr.io/devcontainers/features/git:1": {
       "ppa": true,
@@ -253,14 +211,10 @@
       "version": "latest"
     }
   },
-
-  // Mount configuration for optimal performance
   "mounts": [
     "source=${localWorkspaceFolder}/.vscode,target=/workspace/.vscode,type=bind,consistency=cached",
     "source=${localWorkspaceFolder}/.git,target=/workspace/.git,type=bind,consistency=cached"
   ],
-
-  // Security and permissions
   "privileged": false,
   "remoteUser": "root",
   "updateRemoteUserUID": false

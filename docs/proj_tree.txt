@@ -1,13 +1,14 @@
 Sparse4D/
-├── .dockerignore
 ├── .env
 ├── .gitignore
 ├── .pre-commit-config.yaml
-├── Dockerfile
 ├── LICENSE
 ├── Makefile
 ├── README.md
-├── docker-compose.yml
+├── docker/
+│   ├── .dockerignore
+│   ├── Dockerfile
+│   └── docker-compose.yml
 ├── pyproject.toml
 ├── setup.py
 ├── conf/

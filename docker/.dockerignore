@@ -47,7 +47,6 @@
 **/.venv
 **/venv
 **/env
-**/requirements.txt
 
 # IDE and system files
 **/.DS_Store

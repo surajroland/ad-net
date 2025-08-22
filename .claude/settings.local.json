@@ -46,13 +46,35 @@
       "Bash(ruff check:*)",
       "Bash(mypy:*)",
       "Bash(starship config:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(pkill:*)",
+      "Bash(git push:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker system events:*)",
+      "Bash(sudo chown:*)",
+      "Bash(docker compose:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(kill:*)",
+      "Bash(mount)",
+      "Bash(docker ps:*)",
+      "Bash(docker images:*)",
+      "Bash(docker volume:*)",
+      "Bash(docker network:*)",
+      "Bash(docker system prune:*)",
+      "Bash(code .)",
+      "Bash(env)",
+      "Bash(source .env)",
+      "Bash(docker-compose:*)",
+      "Bash(git describe:*)",
+      "Bash(find:*)",
+      "Bash(claude mcp:*)",
+      "Bash(for file in *.yml)",
+      "Bash(do mv \"$file\" \"$file.disabled\")",
+      "Bash(done)",
+      "Bash(for:*)",
+      "Bash(do mv \"$file\" \"$file%.disabled\")"
     ],
     "deny": [],
-    "defaultMode": "acceptEdits",
-    "additionalDirectories": [
-      "/root/.ssh",
-      "/root"
-    ]
+    "defaultMode": "acceptEdits"
   }
 }

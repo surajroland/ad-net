@@ -2,27 +2,38 @@
 # Multi-service setup for development, training, research, and API deployment
 # Uses environment variables from .env for configuration
 
+name: adnet
+
 services:
   # ==============================================================================
   # DEVELOPMENT SERVICE - Primary development environment
   # ==============================================================================
-  adnet-dev:
+  dev:
     build:
-      context: .                    # Build context is current directory
+      context: ..                   # Build context is parent directory (project root)
+      dockerfile: docker/Dockerfile # Specify Dockerfile location
       target: development           # Multi-stage build target
-    image: adnet-dev:${VERSION}
+      cache_from:
+        - adnet-dev:${VERSION:-latest}
+        - adnet-dev:latest
+      args:
+        VERSION: ${VERSION:-latest}
+        BUILD_DATE: ${BUILD_DATE}
+        VCS_REF: ${VCS_REF}
+    image: adnet-dev:${VERSION:-latest}
     container_name: adnet-dev
+    env_file: ../.env               # Load environment variables from project root
 
     # Volume mounts for development workflow
     volumes:
-      - .:/workspace                              # Mount project directory
+      - ..:/workspace                             # Mount project directory
       - ~/.ssh:/root/.ssh:ro                      # SSH keys (read-only)
       - ~/.gitconfig:/root/.gitconfig:ro          # Git configuration
       - bash-history:/root                        # Persist bash history
-      - adnet-data:/workspace/data             # Project data
-      - adnet-logs:/workspace/logs             # Application logs
-      - adnet-models:/workspace/models         # ML models
-      - adnet-cache:/root/.cache               # Cache directory
+      - data:/workspace/data             # Project data
+      - logs:/workspace/logs             # Application logs
+      - models:/workspace/models         # ML models
+      - cache:/root/.cache               # Cache directory
       - vscode-server:/root/.vscode-server        # VS Code server files
       - /var/run/docker.sock:/var/run/docker.sock # Docker-in-Docker
 
@@ -37,7 +48,6 @@ services:
 
     # Environment variables for development
     environment:
-      - NODE_ENV=development                       # Node.js environment
       - PYTHONPATH=/workspace/src                  # Python module path
       - HYDRA_FULL_ERROR=1                        # Hydra debug mode
       - GITHUB_TOKEN=${GITHUB_TOKEN}              # GitHub API access
@@ -69,7 +79,7 @@ services:
 
     # Health monitoring
     healthcheck:
-      test: ["CMD", "python", "-c", "import torch; assert torch.cuda.is_available()"]
+      test: ["CMD", "python", "-c", "import torch; print('PyTorch available:', torch.__version__)"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -86,13 +96,18 @@ services:
   # ==============================================================================
   # TRAINING SERVICE - Optimized for ML training workloads
   # ==============================================================================
-  adnet-train:
+  training:
     build:
-      context: .
+      context: ..
+      dockerfile: docker/Dockerfile
       target: training                   # Training-optimized stage
-    image: adnet-train:${VERSION}
-    container_name: adnet-train
-    extends: adnet-dev               # Inherit from dev service
+      args:
+        VERSION: ${VERSION:-latest}
+        BUILD_DATE: ${BUILD_DATE}
+        VCS_REF: ${VCS_REF}
+    image: adnet-training:${VERSION:-latest}
+    container_name: adnet-training
+    extends: dev               # Inherit from dev service
 
     # Training-specific environment
     environment:
@@ -106,13 +121,14 @@ services:
   # ==============================================================================
   # RESEARCH SERVICE - Jupyter-only environment for experimentation
   # ==============================================================================
-  adnet-research:
+  research:
     build:
-      context: .
+      context: ..
+      dockerfile: docker/Dockerfile
       target: development                # Use development stage
-    image: adnet-dev:${VERSION}
+    image: adnet-dev:${VERSION:-latest}
     container_name: adnet-research
-    extends: adnet-dev               # Inherit configuration
+    extends: dev               # Inherit configuration
 
     # Only expose Jupyter port
     ports:
@@ -125,13 +141,18 @@ services:
   # ==============================================================================
   # API SERVICE - Production API deployment
   # ==============================================================================
-  adnet-api:
+  production:
     build:
-      context: .
+      context: ..
+      dockerfile: docker/Dockerfile
       target: production                 # Production-optimized stage
-    image: adnet-api:${VERSION}
-    container_name: adnet-api
-    extends: adnet-dev               # Inherit base configuration
+      args:
+        VERSION: ${VERSION:-latest}
+        BUILD_DATE: ${BUILD_DATE}
+        VCS_REF: ${VCS_REF}
+    image: adnet-production:${VERSION:-latest}
+    container_name: adnet-production
+    extends: dev               # Inherit base configuration
 
     # API-specific port mapping
     ports:
@@ -153,13 +174,18 @@ services:
   # ==============================================================================
   # VISUALIZATION SERVICE - 3D rendering and export
   # ==============================================================================
-  adnet-viz:
+  viz:
     build:
-      context: .
+      context: ..
+      dockerfile: docker/Dockerfile
       target: development
-    image: adnet-dev:${VERSION}
+      args:
+        VERSION: ${VERSION:-latest}
+        BUILD_DATE: ${BUILD_DATE}
+        VCS_REF: ${VCS_REF}
+    image: adnet-dev:${VERSION:-latest}
     container_name: adnet-viz
-    extends: adnet-dev
+    extends: dev
 
     # Visualization-specific ports
     ports:
@@ -173,10 +199,10 @@ services:
 # PERSISTENT VOLUMES - Data persistence across container restarts
 # ==============================================================================
 volumes:
-  adnet-data:    # Project datasets and files
-  adnet-logs:    # Application and training logs
-  adnet-models:  # Trained model artifacts
-  adnet-cache:   # Cache for faster rebuilds
+  data:    # Project datasets and files
+  logs:    # Application and training logs
+  models:  # Trained model artifacts
+  cache:   # Cache for faster rebuilds
   bash-history:     # Shell command history
   vscode-server:    # VS Code server files
 

@@ -25,15 +25,16 @@
 
 ```
 Sparse4D/
-├── .dockerignore
 ├── .env
 ├── .gitignore
 ├── .pre-commit-config.yaml
-├── Dockerfile
 ├── LICENSE
 ├── Makefile
 ├── README.md
-├── docker-compose.yml
+├── docker/
+│   ├── .dockerignore
+│   ├── Dockerfile
+│   └── docker-compose.yml
 ├── pyproject.toml
 ├── setup.py
 ├── conf/                          # 🎛️ Configuration Management
@@ -1019,19 +1020,19 @@ import inspect
 
 class EnhancedComponentRegistry:
     """Enhanced registry with comprehensive metadata tracking and performance monitoring"""
-    
+
     def __init__(self):
         self._components: Dict[str, Type] = {}
         self._metadata: Dict[str, Dict] = {}
         self._performance_stats: Dict[str, Dict] = {}
         self._dependency_graph: Dict[str, List[str]] = {}
-        
-    def register(self, name: str, component_class: Type, 
+
+    def register(self, name: str, component_class: Type,
                  namespace: str = "default", description: str = "",
                  dependencies: List[str] = None) -> Type:
         """Enhanced registration with dependency tracking"""
         full_name = f"{namespace}.{name}"
-        
+
         self._components[full_name] = component_class
         self._metadata[full_name] = {
             "namespace": namespace,
@@ -1044,10 +1045,10 @@ class EnhancedComponentRegistry:
             "signature": str(inspect.signature(component_class.__init__)),
             "source_file": inspect.getfile(component_class),
         }
-        
+
         # Track dependencies
         self._dependency_graph[full_name] = dependencies or []
-        
+
         # Initialize performance tracking
         self._performance_stats[full_name] = {
             "instantiation_count": 0,
@@ -1055,13 +1056,13 @@ class EnhancedComponentRegistry:
             "avg_instantiation_time": 0.0,
             "last_used": None
         }
-        
+
         return component_class
 
 # Global enhanced registry
 REGISTRY = EnhancedComponentRegistry()
 
-def register_backbone(name: str, namespace: str = "backbone", description: str = "", 
+def register_backbone(name: str, namespace: str = "backbone", description: str = "",
                      dependencies: List[str] = None):
     def decorator(cls):
         return REGISTRY.register(name, cls, namespace, description, dependencies)
@@ -1081,18 +1082,18 @@ def register_attention(name: str, namespace: str = "attention", description: str
 
 def build_component(config: DictConfig, **override_kwargs):
     """Enhanced registry-first, Hydra fallback component instantiation"""
-    
+
     try:
         if hasattr(config, 'component') and config.component:
             # Registry pattern (PRIMARY)
             component_params = OmegaConf.to_dict(config)
             component_params.pop('component', None)  # Remove identifier
-            
+
             # Override with additional parameters
             component_params.update(override_kwargs)
-            
+
             return REGISTRY.instantiate(config.component, **component_params)
-        
+
         elif hasattr(config, '_target_') and config._target_:
             # Hydra pattern (FALLBACK)
             # Merge override kwargs
@@ -1100,12 +1101,12 @@ def build_component(config: DictConfig, **override_kwargs):
                 config_dict = OmegaConf.to_dict(config)
                 config_dict.update(override_kwargs)
                 config = OmegaConf.create(config_dict)
-            
+
             return hydra.utils.instantiate(config)
-        
+
         else:
             raise ValueError("Configuration must specify 'component' (registry) or '_target_' (hydra)")
-    
+
     except Exception as e:
         # Enhanced error reporting
         error_context = {
@@ -1113,7 +1114,7 @@ def build_component(config: DictConfig, **override_kwargs):
             "override_kwargs": override_kwargs,
             "available_components": REGISTRY.list_namespace("") if hasattr(config, 'component') else None
         }
-        
+
         raise RuntimeError(f"Failed to build component: {e}") from e
 ```
 
@@ -1127,25 +1128,25 @@ def build_component(config: DictConfig, **override_kwargs):
 digraph DatasetTiers {
     rankdir=TB;
     node [shape=box, style=filled];
-    
+
     // Tier 1 - Standard datasets
     T1 [label="Tier 1: Standard Multi-Camera Temporal\n• nuScenes (Boston/Singapore)\n• Waymo (Multiple US cities)\n• Argoverse 1.0 (Pittsburgh/Miami)\n• Argoverse 2.0 (6 cities worldwide)", fillcolor=lightgreen];
-    
+
     // Tier 2 - Large-scale public
     T2 [label="Tier 2: Large-Scale Public\n• ONCE (China)\n• Zenseact Open Dataset (Europe)\n• KITTI-360 (Germany)\n• A2D2 (Audi/Germany)", fillcolor=lightblue];
-    
+
     // Tier 3 - Specialized/Regional
     T3 [label="Tier 3: Specialized/Regional\n• PandaSet (San Francisco)\n• Lyft Level 5 (Palo Alto)\n• CADC (Canada/Winter)\n• ApolloScape (China/Baidu)", fillcolor=orange];
-    
+
     // Tier 4 - Academic/Research
     T4 [label="Tier 4: Academic/Research\n• H3D (Honda Research)\n• DAIR-V2X (V2X Cooperative)\n• Rope3D (Roadside Perception)\n• DDAD (Toyota Research)", fillcolor=yellow];
-    
+
     // Tier 5 - Synthetic/Simulation
     T5 [label="Tier 5: Synthetic/Simulation\n• CARLA (Open Source Simulator)\n• AirSim (Microsoft Simulator)\n• V2X-Sim (V2X Simulation)", fillcolor=pink];
-    
+
     // Tier 6 - Emerging/New
     T6 [label="Tier 6: Emerging/New\n• Shifts (Distribution Shift)\n• nuPlan (Planning Dataset)", fillcolor=lightcoral];
-    
+
     T1 -> T2 [label="Priority Order"];
     T2 -> T3;
     T3 -> T4;
@@ -1159,13 +1160,13 @@ digraph DatasetTiers {
 ```
 Phase 1 (Core benchmarks):
 ├── nuScenes ──────── 6 surround-view (360°), 20Hz, 20s sequences
-├── Waymo ──────────── 5 cameras (front + 4 side), 10Hz, ~20s sequences  
+├── Waymo ──────────── 5 cameras (front + 4 side), 10Hz, ~20s sequences
 ├── Argoverse 2.0 ──── 7 surround cameras, 10Hz, longer sequences
 └── KITTI-360 ─────── 2 stereo pairs, continuous sequences
 
 Phase 2 (Scale + diversity):
 ├── ONCE ──────────── 7 cameras, 10Hz sequences, China
-├── ZOD ────────────── 8 cameras, variable Hz, Europe  
+├── ZOD ────────────── 8 cameras, variable Hz, Europe
 ├── A2D2 ──────────── 6 cameras, 10Hz sequences, Germany
 └── PandaSet ──────── 6 cameras, 10Hz sequences, San Francisco
 
@@ -1189,14 +1190,14 @@ Total: ~20 public datasets for comprehensive 4D detection coverage
 ```python
 class CrossDatasetHarmonization:
     """Advanced cross-dataset harmonization with metadata tracking"""
-    
-    def __init__(self, coordinate_systems: Dict[str, str], 
+
+    def __init__(self, coordinate_systems: Dict[str, str],
                  class_mappings: Dict[str, Dict],
                  normalization_params: Dict[str, Dict] = None):
         self.coordinate_systems = coordinate_systems
         self.class_mappings = class_mappings
         self.normalization_params = normalization_params or {}
-        
+
         # Harmonization statistics
         self.harmonization_stats = {
             'samples_processed': 0,
@@ -1204,24 +1205,24 @@ class CrossDatasetHarmonization:
             'class_mappings_applied': 0,
             'normalization_applied': 0
         }
-    
+
     def harmonize_sample(self, sample_data: Dict[str, Any], source_dataset: str) -> Dict[str, Any]:
         """Enhanced sample harmonization with statistics tracking"""
-        
+
         self.harmonization_stats['samples_processed'] += 1
-        
+
         # Coordinate system harmonization
         sample_data = self._harmonize_coordinates(sample_data, source_dataset)
-        
+
         # Class label harmonization
         sample_data = self._harmonize_classes(sample_data, source_dataset)
-        
+
         # Temporal alignment
         sample_data = self._harmonize_temporal(sample_data, source_dataset)
-        
+
         # Image normalization harmonization
         sample_data = self._harmonize_normalization(sample_data, source_dataset)
-        
+
         return sample_data
 ```
 
@@ -1261,14 +1262,14 @@ Confidence Scoring per Mapping:
 ```python
 class DataQualityAssessment:
     """Enhanced data quality assessment with multiple metrics"""
-    
+
     def __init__(self):
         self.quality_metrics = {}
         self.assessment_history = []
-        
+
     def assess_sample_quality(self, sample_data: Dict[str, Any]) -> Dict[str, float]:
         """Comprehensive sample quality assessment"""
-        
+
         quality_scores = {
             'image_quality': self._assess_image_quality(sample_data),
             'annotation_quality': self._assess_annotation_quality(sample_data),
@@ -1277,7 +1278,7 @@ class DataQualityAssessment:
             'completeness_score': self._assess_completeness(sample_data),
             'metadata_quality': self._assess_metadata_quality(sample_data)
         }
-        
+
         # Overall quality score with weighted combination
         weights = {
             'image_quality': 0.25,
@@ -1287,16 +1288,16 @@ class DataQualityAssessment:
             'completeness_score': 0.10,
             'metadata_quality': 0.05
         }
-        
+
         quality_scores['overall_quality'] = sum(
-            score * weights.get(metric, 0) 
-            for metric, score in quality_scores.items() 
+            score * weights.get(metric, 0)
+            for metric, score in quality_scores.items()
             if metric != 'overall_quality'
         )
-        
+
         # Store assessment history
         self.assessment_history.append(quality_scores)
-        
+
         return quality_scores
 ```
 
@@ -1335,7 +1336,7 @@ Frame Sequence Evolution & Temporal Propagation:
                           │ TEMPORAL MEMORY   │                 │
                           │                   │                 │
                           │ Max Instances:600 │                 │
-                          │ Decay Factor:0.6  │                 │  
+                          │ Decay Factor:0.6  │                 │
                           │ Age Threshold:8   │                 │
                           │ Conf Thresh:0.25  │                 │
                           │                   │                 │
@@ -1481,7 +1482,7 @@ CONFIDENCE_THRESHOLD = 0.25   # Instance filtering threshold
 **HR-Compatible Deformable Attention Parameters**:
 ```python
 K_SAMPLING_POINTS = 13        # Exact HR specification
-FIXED_KEYPOINTS = 7          # HR-compatible: anchor-relative positions  
+FIXED_KEYPOINTS = 7          # HR-compatible: anchor-relative positions
 LEARNABLE_KEYPOINTS = 6      # HR-compatible: network-predicted offsets
 EMBED_DIMS = 256             # Feature embedding dimensions
 NUM_GROUPS = 8               # Attention groups
@@ -1509,26 +1510,26 @@ The **instance bank** (also called **instance memory** or **instance queue**) is
 ```python
 class InstanceBank(nn.Module):
     """Temporal instance storage for 4D object detection"""
-    
-    def __init__(self, max_instances: int = 600, embed_dims: int = 256, 
+
+    def __init__(self, max_instances: int = 600, embed_dims: int = 256,
                  max_history: int = 8, decay_factor: float = 0.6):
         super().__init__()
-        
+
         self.max_instances = max_instances      # Maximum temporal queries
         self.embed_dims = embed_dims           # Feature dimensions
         self.max_history = max_history         # Frame lifetime limit
         self.decay_factor = decay_factor       # Confidence decay rate
-        
+
         # Instance storage buffers
         self.instance_features = torch.zeros(max_instances, embed_dims)  # Object features
         self.instance_boxes = torch.zeros(max_instances, 9)             # 3D bounding boxes
         self.instance_confidences = torch.zeros(max_instances)          # Detection confidence
         self.instance_ages = torch.zeros(max_instances, dtype=torch.int) # Frame age
         self.instance_ids = torch.full((max_instances,), -1)            # Unique tracking IDs
-        
+
         # Active instance tracking
         self.active_mask = torch.zeros(max_instances, dtype=torch.bool)
-        
+
         # Performance monitoring
         self.performance_metrics = InstanceBankMetrics()
 ```
@@ -1540,15 +1541,15 @@ class InstanceBank(nn.Module):
 def update(self, new_instances, new_boxes, new_confidences, frame_idx):
     # Age existing instances
     self.instance_ages[self.active_mask] += 1
-    
+
     # Apply confidence decay for aging instances
     age_decay = torch.pow(self.decay_factor, self.instance_ages.float())
     self.instance_confidences *= age_decay
-    
+
     # Remove old/low-confidence instances (threshold = 0.25)
     keep_mask = (self.instance_confidences > 0.25) & (self.instance_ages < self.max_history)
     self._remove_instances(~keep_mask)
-    
+
     # Performance tracking
     self.performance_metrics.update_removal_stats(torch.sum(~keep_mask).item())
 ```
@@ -1557,20 +1558,20 @@ def update(self, new_instances, new_boxes, new_confidences, frame_idx):
 ```python
 def _associate_instances(self, new_instances, new_boxes):
     """Hungarian algorithm-based optimal assignment"""
-    
+
     # Feature similarity (70% weight)
     feature_sim = torch.mm(new_instances, active_features.T)
-    
-    # Spatial proximity via 3D IoU (30% weight)  
+
+    # Spatial proximity via 3D IoU (30% weight)
     spatial_sim = self._compute_3d_iou(new_boxes, active_boxes)
-    
+
     # Combined similarity for optimal assignment
     total_sim = 0.7 * feature_sim + 0.3 * spatial_sim
-    
+
     # Hungarian assignment with performance tracking
     assignments = self._hungarian_assignment(total_sim)
     self.performance_metrics.update_association_stats(assignments)
-    
+
     return assignments
 ```
 
@@ -1581,10 +1582,10 @@ def _apply_motion_compensation(self, instances):
     # Transform instance coordinates based on vehicle motion
     # P(t) = R(P(t-1) + v*Δt) + T
     compensated = self._transform_with_ego_motion(instances)
-    
+
     # Track motion compensation accuracy
     self.performance_metrics.update_motion_stats(instances, compensated)
-    
+
     return compensated
 ```
 
@@ -1596,22 +1597,22 @@ The instance bank directly feeds the **600 temporal queries** in Sparse4D's quer
 class QuerySystemManager(nn.Module):
     def initialize_queries(self, temporal_instances, camera_params):
         """Initialize 900 total queries: 600 temporal + 300 single-frame"""
-        
+
         # Get temporal instances from bank
         temporal_queries = self.instance_bank.get_temporal_instances()  # [B, 600, 256]
-        
+
         # Initialize single-frame detection queries
         single_frame_queries = self.single_frame_embeddings            # [B, 300, 256]
-        
+
         # Combine temporal and single-frame queries
         all_queries = torch.cat([temporal_queries, single_frame_queries], dim=1)
-        
+
         # Add positional encoding
         all_queries += self.query_pos_encoding
-        
+
         # Performance monitoring
         self._monitor_query_initialization(all_queries)
-        
+
         return all_queries
 ```
 
@@ -1658,18 +1659,18 @@ The instance bank represents a fundamental shift from **stateless 3D detection**
 digraph CameraParameterImplementation {
     rankdir=TB;
     node [shape=box, style=filled];
-    
+
     // Online vs Offline distinction
     Online [label="Online Projection\n(Sparse4D Approach)\n• Real-time camera access\n• Geometric interpretability\n• Adaptive feature sampling", fillcolor=lightgreen];
-    
+
     Offline [label="Offline Rectification\n(Traditional Approach)\n• Pre-computed embeddings\n• Reduced calibration dependency\n• Preprocessing bottlenecks", fillcolor=lightcoral];
-    
+
     // Sparse4D specific implementation
     Sparse4DImpl [label="ADNet Implementation\n• Instance-level depth reweighting\n• 4D keypoint projection\n• Custom CUDA operations\n• 600x faster than NeRF", fillcolor=orange];
-    
+
     // Performance metrics
     Performance [label="Performance Impact\n• BEVFormer: 51.7% NDS (high sensitivity)\n• PETR: 50.4% NDS (moderate sensitivity)\n• DPFT: 87±1.2ms inference", fillcolor=yellow];
-    
+
     Online -> Sparse4DImpl;
     Offline -> Performance;
     Sparse4DImpl -> Performance;
@@ -1685,7 +1686,7 @@ digraph CameraParameterImplementation {
 ```python
 class CameraParameterProcessor:
     """ADNet camera parameter processing with explicit encoding"""
-    
+
     def __init__(self, embed_dims: int = 256):
         # Camera intrinsic encoder
         self.intrinsic_encoder = nn.Sequential(
@@ -1693,32 +1694,32 @@ class CameraParameterProcessor:
             nn.ReLU(),
             nn.Linear(embed_dims // 2, embed_dims)
         )
-        
-        # Camera extrinsic encoder  
+
+        # Camera extrinsic encoder
         self.extrinsic_encoder = nn.Sequential(
             nn.Linear(16, embed_dims // 2),  # 4x4 extrinsic matrix flattened
             nn.ReLU(),
             nn.Linear(embed_dims // 2, embed_dims)
         )
-        
+
         # Temporal ego-pose transformer
         self.ego_pose_transformer = EgoPoseTransformer(embed_dims)
-        
+
     def process_camera_params(self, intrinsics: torch.Tensor, extrinsics: torch.Tensor,
                              ego_motion: torch.Tensor) -> Dict[str, torch.Tensor]:
         """Process and encode camera parameters"""
-        
+
         # Encode intrinsic parameters
         intrinsic_flat = intrinsics.flatten(start_dim=-2)  # [B, N_views, 9]
         intrinsic_encoding = self.intrinsic_encoder(intrinsic_flat)
-        
+
         # Encode extrinsic parameters
         extrinsic_flat = extrinsics.flatten(start_dim=-2)  # [B, N_views, 16]
         extrinsic_encoding = self.extrinsic_encoder(extrinsic_flat)
-        
+
         # Temporal alignment via ego-pose transformations
         temporal_encoding = self.ego_pose_transformer(extrinsic_encoding, ego_motion)
-        
+
         return {
             'intrinsic_encoding': intrinsic_encoding,
             'extrinsic_encoding': extrinsic_encoding,
@@ -1729,23 +1730,23 @@ class CameraParameterProcessor:
 
 def online_projection_system(keypoints_3d: torch.Tensor, camera_params: Dict[str, torch.Tensor]) -> torch.Tensor:
     """Online 3D-to-2D projection system: p_2d = K * [R|T] * p_3d"""
-    
+
     intrinsics = camera_params['raw_intrinsics']  # [B, N_views, 3, 3]
     extrinsics = camera_params['raw_extrinsics']  # [B, N_views, 4, 4]
-    
+
     # Extract rotation and translation
     R = extrinsics[..., :3, :3]  # [B, N_views, 3, 3]
     T = extrinsics[..., :3, 3]   # [B, N_views, 3]
-    
+
     # Transform to camera coordinates: P_cam = R * P_world + T
     keypoints_cam = torch.matmul(R, keypoints_3d.unsqueeze(-1)).squeeze(-1) + T
-    
+
     # Project to image plane: P_img = K * P_cam
     keypoints_proj = torch.matmul(intrinsics, keypoints_cam.unsqueeze(-1)).squeeze(-1)
-    
+
     # Normalize by depth: [x/z, y/z, 1]
     keypoints_2d = keypoints_proj[..., :2] / keypoints_proj[..., 2:3]
-    
+
     return keypoints_2d
 ```
 
@@ -1755,29 +1756,29 @@ def online_projection_system(keypoints_3d: torch.Tensor, camera_params: Dict[str
 ```python
 class BEVFormerCameraHandler:
     """BEVFormer spatial cross-attention with explicit 3D-to-2D projection"""
-    
-    def spatial_cross_attention(self, bev_queries: torch.Tensor, 
+
+    def spatial_cross_attention(self, bev_queries: torch.Tensor,
                                image_features: torch.Tensor,
                                camera_params: Dict[str, torch.Tensor]) -> torch.Tensor:
-        
+
         # Lift BEV queries into 3D pillar reference points
         bev_3d_points = self.lift_to_3d_pillars(bev_queries)
-        
+
         # Project to image planes using full camera transformation matrices
         projected_points = []
         for view_idx in range(camera_params['raw_intrinsics'].shape[1]):
             K = camera_params['raw_intrinsics'][:, view_idx]  # [B, 3, 3]
             RT = camera_params['raw_extrinsics'][:, view_idx]  # [B, 4, 4]
-            
+
             # Full transformation: p_2d = K @ (R @ p_3d + t)
             projected = self.project_3d_to_2d(bev_3d_points, K, RT)
             projected_points.append(projected)
-        
+
         # Deformable attention around projected locations
         attended_features = self.deformable_attention(
             bev_queries, image_features, projected_points
         )
-        
+
         return attended_features
 ```
 
@@ -1785,37 +1786,37 @@ class BEVFormerCameraHandler:
 ```python
 class PETRCameraHandler:
     """PETR 2D-to-3D coordinate transformation with position embeddings"""
-    
+
     def transform_2d_to_3d(self, image_features: torch.Tensor,
                           camera_params: Dict[str, torch.Tensor]) -> torch.Tensor:
-        
+
         # Create frustum coordinates for each camera view
         frustum_coords = []
-        
+
         for view_idx in range(camera_params['raw_intrinsics'].shape[1]):
             # Extract camera parameters
             K = camera_params['raw_intrinsics'][:, view_idx]
             RT = camera_params['raw_extrinsics'][:, view_idx]
-            
+
             # Generate 2D feature coordinates
             H, W = image_features.shape[-2:]
             y_coords, x_coords = torch.meshgrid(
                 torch.arange(H, device=image_features.device),
                 torch.arange(W, device=image_features.device)
             )
-            
+
             # Transform to 3D world coordinates using camera parameters
             coords_2d = torch.stack([x_coords, y_coords, torch.ones_like(x_coords)], dim=-1)
             coords_3d = self.unproject_to_world(coords_2d, K, RT)
-            
+
             frustum_coords.append(coords_3d)
-        
+
         # Generate 3D position embeddings through MLPs
         position_embeddings = self.position_mlp(torch.cat(frustum_coords, dim=0))
-        
+
         # Blend with image features
         enhanced_features = image_features + position_embeddings
-        
+
         return enhanced_features
 ```
 
@@ -1823,34 +1824,34 @@ class PETRCameraHandler:
 ```python
 class StreamPETRCameraHandler:
     """StreamPETR object-centric temporal alignment with coordinate consistency"""
-    
+
     def object_centric_temporal_alignment(self, current_features: torch.Tensor,
                                         previous_features: torch.Tensor,
                                         camera_params: Dict[str, torch.Tensor],
                                         ego_motion: torch.Tensor) -> torch.Tensor:
-        
+
         # Maintain coordinate consistency across temporal sequences
         aligned_features = []
-        
+
         for t in range(self.temporal_window):
             # Get camera parameters for timestamp t
             K_t = camera_params['intrinsics_sequence'][t]
             RT_t = camera_params['extrinsics_sequence'][t]
-            
+
             # Apply ego motion compensation
             compensated_RT = self.compensate_ego_motion(RT_t, ego_motion[t])
-            
+
             # Transform features to consistent coordinate frame
             transformed_features = self.coordinate_transform(
                 current_features if t == 0 else previous_features[t-1],
                 K_t, compensated_RT
             )
-            
+
             aligned_features.append(transformed_features)
-        
+
         # Temporal aggregation with object-centric attention
         aggregated = self.object_centric_attention(torch.stack(aligned_features, dim=1))
-        
+
         return aggregated
 ```
 
@@ -1859,52 +1860,52 @@ class StreamPETRCameraHandler:
 **The core mathematical framework follows projective geometry principles**:
 
 ```python
-def projective_geometry_pipeline(points_3d: torch.Tensor, 
+def projective_geometry_pipeline(points_3d: torch.Tensor,
                                intrinsics: torch.Tensor,
                                extrinsics: torch.Tensor) -> torch.Tensor:
     """Complete projective geometry pipeline with 4D homogeneous coordinates"""
-    
+
     # Convert to homogeneous coordinates
     points_3d_homo = torch.cat([points_3d, torch.ones_like(points_3d[..., :1])], dim=-1)
-    
+
     # Stage 1: World coordinates → Camera coordinates
     # P_camera = R × P_world + t (using 4x4 transformation matrix)
     points_camera = torch.matmul(extrinsics, points_3d_homo.unsqueeze(-1)).squeeze(-1)
-    
-    # Stage 2: Camera coordinates → Image coordinates  
+
+    # Stage 2: Camera coordinates → Image coordinates
     # P_image = K × P_camera (intrinsic transformation)
     points_image = torch.matmul(intrinsics, points_camera[..., :3].unsqueeze(-1)).squeeze(-1)
-    
+
     # Stage 3: Image coordinates → Pixel coordinates
     # Perspective division: [x/z, y/z, 1]
     points_pixel = points_image[..., :2] / points_image[..., 2:3]
-    
+
     return points_pixel
 
 # Advanced handling for spatial and ray-directional misalignments (EVT approach)
 class AdaptiveSamplingAndProjection:
     """Adaptive Sampling and Adaptive Projection (ASAP) for misalignment handling"""
-    
+
     def __init__(self, embed_dims: int = 256):
         self.spatial_adapter = SpatialMisalignmentAdapter(embed_dims)
         self.ray_adapter = RayDirectionalAdapter(embed_dims)
-        
+
     def adaptive_projection(self, queries_3d: torch.Tensor,
                            camera_params: Dict[str, torch.Tensor]) -> torch.Tensor:
-        
+
         # Standard projective transformation
         projected_2d = projective_geometry_pipeline(
-            queries_3d, 
+            queries_3d,
             camera_params['raw_intrinsics'],
             camera_params['raw_extrinsics']
         )
-        
+
         # Adaptive spatial sampling to handle misalignments
         adapted_spatial = self.spatial_adapter(projected_2d, camera_params)
-        
+
         # Ray-directional adaptive projection
         adapted_ray = self.ray_adapter(adapted_spatial, queries_3d, camera_params)
-        
+
         return adapted_ray
 ```
 
@@ -1925,7 +1926,7 @@ Performance Comparison Table:
 │ DPFT            │ 59.2        │ Variable          │ 87 ± 1.2            │
 └─────────────────┴─────────────┴───────────────────┴─────────────────────┘
 
-* BEVDepth: Camera parameter embedding improves baseline mAP by 0.8%, 
+* BEVDepth: Camera parameter embedding improves baseline mAP by 0.8%,
   but mixing irrelevant extrinsic information can decrease performance by 0.8%
 
 Computational Efficiency Analysis:
@@ -1954,17 +1955,17 @@ Computational Efficiency Analysis:
 ```python
 class DenseDepthBranch(nn.Module):
     """Dense depth branch for auxiliary supervision during training"""
-    
-    def __init__(self, input_channels: List[int] = [256, 512, 1024, 2048], 
-                 embed_dims: int = 256, num_depth_layers: int = 3, 
+
+    def __init__(self, input_channels: List[int] = [256, 512, 1024, 2048],
+                 embed_dims: int = 256, num_depth_layers: int = 3,
                  loss_weight: float = 0.2):
         super().__init__()
-        
+
         self.input_channels = input_channels
         self.embed_dims = embed_dims
         self.num_depth_layers = num_depth_layers
         self.loss_weight = loss_weight
-        
+
         # Multi-scale depth prediction layers
         self.depth_convs = nn.ModuleList([
             nn.Sequential(
@@ -1973,65 +1974,65 @@ class DenseDepthBranch(nn.Module):
                 nn.ReLU(inplace=True)
             ) for in_ch in input_channels
         ])
-        
+
         # Final depth prediction layers
         self.depth_predictor = nn.Sequential(
             nn.Conv2d(embed_dims, embed_dims, 3, padding=1),
             nn.ReLU(inplace=True),
-            nn.Conv2d(embed_dims, embed_dims, 3, padding=1), 
+            nn.Conv2d(embed_dims, embed_dims, 3, padding=1),
             nn.ReLU(inplace=True),
             nn.Conv2d(embed_dims, 1, 3, padding=1),
             nn.Sigmoid()  # Normalize to [0, 1], then scale to depth range
         )
-        
+
         # Depth range configuration
         self.depth_min = 1.0   # meters
         self.depth_max = 60.0  # meters
-        
+
     def forward(self, fpn_features: List[torch.Tensor]) -> torch.Tensor:
         """Process FPN features to generate dense depth maps"""
-        
+
         # Process each FPN level
         depth_features = []
         for i, (features, conv) in enumerate(zip(fpn_features, self.depth_convs)):
             depth_feat = conv(features)
-            
+
             # Upsample to consistent resolution (P2 level)
             if i > 0:
                 scale_factor = 2 ** i
                 depth_feat = F.interpolate(
-                    depth_feat, scale_factor=scale_factor, 
+                    depth_feat, scale_factor=scale_factor,
                     mode='bilinear', align_corners=False
                 )
-            
+
             depth_features.append(depth_feat)
-        
+
         # Aggregate multi-scale features
         aggregated = torch.stack(depth_features, dim=0).mean(dim=0)
-        
+
         # Predict normalized depth
         depth_norm = self.depth_predictor(aggregated)
-        
+
         # Scale to actual depth range
         depth_pred = depth_norm * (self.depth_max - self.depth_min) + self.depth_min
-        
+
         return depth_pred
-    
-    def compute_depth_loss(self, pred_depth: torch.Tensor, 
-                          gt_depth: torch.Tensor, 
+
+    def compute_depth_loss(self, pred_depth: torch.Tensor,
+                          gt_depth: torch.Tensor,
                           valid_mask: torch.Tensor) -> torch.Tensor:
         """L1 loss for depth supervision with LiDAR ground truth"""
-        
+
         # Apply valid mask to exclude invalid LiDAR points
         pred_valid = pred_depth[valid_mask]
         gt_valid = gt_depth[valid_mask]
-        
+
         # L1 loss as specified in HR documentation
         l1_loss = torch.abs(pred_valid - gt_valid)
-        
+
         # Average over valid pixels
         depth_loss = l1_loss.mean()
-        
+
         return depth_loss * self.loss_weight
 ```
 
@@ -2042,13 +2043,13 @@ class DenseDepthBranch(nn.Module):
 ```python
 class InstanceLevelDepthReweight(nn.Module):
     """Instance-level depth reweighting to address 3D-to-2D projection ambiguities"""
-    
+
     def __init__(self, embed_dims: int = 256, num_keypoints: int = 13):
         super().__init__()
-        
+
         self.embed_dims = embed_dims
         self.num_keypoints = num_keypoints
-        
+
         # Depth confidence prediction network
         self.depth_confidence_net = nn.Sequential(
             nn.Linear(embed_dims, embed_dims // 2),
@@ -2056,61 +2057,61 @@ class InstanceLevelDepthReweight(nn.Module):
             nn.Linear(embed_dims // 2, num_keypoints),
             nn.Sigmoid()  # Confidence scores [0, 1]
         )
-        
+
         # Depth distribution predictor
         self.depth_distribution_net = nn.Sequential(
             nn.Linear(embed_dims, embed_dims),
-            nn.ReLU(), 
+            nn.ReLU(),
             nn.Linear(embed_dims, num_keypoints * 2),  # mean and std for each keypoint
         )
-        
-    def forward(self, instance_features: torch.Tensor, 
+
+    def forward(self, instance_features: torch.Tensor,
                 keypoint_depths: torch.Tensor) -> Dict[str, torch.Tensor]:
         """Apply instance-level depth reweighting"""
-        
+
         batch_size, num_instances, _ = instance_features.shape
-        
+
         # Predict depth confidence for each keypoint
         depth_confidence = self.depth_confidence_net(instance_features)  # [B, N, K]
-        
+
         # Predict depth distributions (mean, std)
         depth_dist_params = self.depth_distribution_net(instance_features)
         depth_dist_params = depth_dist_params.view(batch_size, num_instances, self.num_keypoints, 2)
         depth_means = depth_dist_params[..., 0]
         depth_stds = torch.exp(depth_dist_params[..., 1])  # Ensure positive std
-        
+
         # Sample depth confidence from predicted distributions
         if keypoint_depths is not None:
             # Compute likelihood of observed depths under predicted distributions
             depth_likelihood = self._compute_depth_likelihood(
                 keypoint_depths, depth_means, depth_stds
             )
-            
+
             # Combine with confidence predictions
             final_confidence = depth_confidence * depth_likelihood
         else:
             final_confidence = depth_confidence
-        
+
         # Apply reweighting to instance features
         reweighted_features = instance_features.unsqueeze(2) * final_confidence.unsqueeze(-1)
         reweighted_features = reweighted_features.sum(dim=2)  # Aggregate across keypoints
-        
+
         return {
             'reweighted_features': reweighted_features,
             'depth_confidence': final_confidence,
             'depth_means': depth_means,
             'depth_stds': depth_stds
         }
-    
+
     def _compute_depth_likelihood(self, observed_depths: torch.Tensor,
                                  predicted_means: torch.Tensor,
                                  predicted_stds: torch.Tensor) -> torch.Tensor:
         """Compute Gaussian likelihood of observed depths"""
-        
+
         # Gaussian likelihood: exp(-0.5 * ((x - μ) / σ)²)
         normalized_diff = (observed_depths - predicted_means) / predicted_stds
         likelihood = torch.exp(-0.5 * normalized_diff.pow(2))
-        
+
         return likelihood
 ```
 
@@ -2161,16 +2162,16 @@ Sparse4D Depth Evolution Timeline:
 ```python
 class CompletePredictionHeads(nn.Module):
     """Complete v3 prediction heads including depth estimation"""
-    
+
     def __init__(self, embed_dims: int = 256, num_classes: int = 10):
         super().__init__()
-        
+
         # 1. Classification head (focal loss)
         self.classification_head = nn.Linear(embed_dims, num_classes + 1)  # +1 for background
-        
+
         # 2. Regression head (10-dimensional boxes including 3D coordinates and velocity)
         self.regression_head = nn.Linear(embed_dims, 10)  # [x,y,z,w,l,h,cos(θ),sin(θ),vx,vy]
-        
+
         # 3. Quality estimation heads (NEW in v3)
         self.centerness_head = nn.Sequential(
             nn.Linear(embed_dims, embed_dims // 2),
@@ -2178,78 +2179,78 @@ class CompletePredictionHeads(nn.Module):
             nn.Linear(embed_dims // 2, 1),
             nn.Sigmoid()
         )
-        
+
         self.yawness_head = nn.Sequential(
-            nn.Linear(embed_dims, embed_dims // 2), 
+            nn.Linear(embed_dims, embed_dims // 2),
             nn.ReLU(),
             nn.Linear(embed_dims // 2, 1),
             nn.Sigmoid()
         )
-        
+
         # 4. Instance ID head (tracking)
         self.instance_id_head = nn.Linear(embed_dims, 256)  # 256-D embedding for tracking
-        
+
         # 5. Dense depth branch (auxiliary supervision during training)
         self.dense_depth_branch = DenseDepthBranch(
             embed_dims=embed_dims,
             num_depth_layers=3,
             loss_weight=0.2
         )
-        
+
         # Loss configuration matching HR specification
         self.loss_weights = {
             'classification': 2.0,    # focal loss
-            'regression': 5.0,        # L1 + IoU loss  
+            'regression': 5.0,        # L1 + IoU loss
             'quality': 1.0,           # quality estimation
             'tracking': 1.0,          # instance ID
             'dense_depth': 0.2        # auxiliary depth supervision
         }
-    
-    def forward(self, query_features: torch.Tensor, 
+
+    def forward(self, query_features: torch.Tensor,
                 fpn_features: List[torch.Tensor] = None,
                 training: bool = False) -> Dict[str, torch.Tensor]:
         """Complete forward pass with all prediction heads"""
-        
+
         batch_size, num_queries, embed_dims = query_features.shape
-        
+
         # Core predictions
         predictions = {
             'cls_logits': self.classification_head(query_features),
             'bbox_preds': self.regression_head(query_features),
             'instance_embeddings': self.instance_id_head(query_features)
         }
-        
+
         # Quality estimation (NEW in v3)
         predictions['centerness'] = self.centerness_head(query_features)
         predictions['yawness'] = self.yawness_head(query_features)
-        
+
         # Dense depth supervision (training only)
         if training and fpn_features is not None:
             predictions['dense_depth'] = self.dense_depth_branch(fpn_features)
-        
+
         return predictions
-    
-    def compute_quality_targets(self, pred_boxes: torch.Tensor, 
+
+    def compute_quality_targets(self, pred_boxes: torch.Tensor,
                                gt_boxes: torch.Tensor) -> Dict[str, torch.Tensor]:
         """Compute quality estimation targets as specified in HR paper"""
-        
+
         # Centerness: exponential decay based on position error
         position_error = torch.norm(pred_boxes[:, :, :3] - gt_boxes[:, :, :3], dim=2)
         centerness_targets = torch.exp(-position_error)
-        
-        # Yawness: cosine similarity between yaw vectors  
+
+        # Yawness: cosine similarity between yaw vectors
         pred_yaw_vec = torch.stack([
-            torch.sin(pred_boxes[:, :, 6]), 
+            torch.sin(pred_boxes[:, :, 6]),
             torch.cos(pred_boxes[:, :, 6])
         ], dim=-1)
-        
+
         gt_yaw_vec = torch.stack([
             torch.sin(gt_boxes[:, :, 6]),
-            torch.cos(gt_boxes[:, :, 6]) 
+            torch.cos(gt_boxes[:, :, 6])
         ], dim=-1)
-        
+
         yawness_targets = torch.sum(pred_yaw_vec * gt_yaw_vec, dim=-1)
-        
+
         return {
             'centerness_targets': centerness_targets,
             'yawness_targets': yawness_targets
@@ -2265,7 +2266,7 @@ Repository Structure (Depth Components):
 Sparse4D/
 ├── projects/mmdet3d_plugin/models/dense_heads/
 │   ├── adnet_head.py ←── Complete prediction heads including depth
-│   ├── depth_branch.py ←── Dense depth supervision implementation  
+│   ├── depth_branch.py ←── Dense depth supervision implementation
 │   └── instance_reweight.py ←── Instance-level depth reweighting
 ├── configs/adnet/
 │   ├── adnet_temporal_r50_1x8_bs6_20e.py ←── Training config with depth
@@ -2281,11 +2282,11 @@ Sparse4D/
 # Official HR deployment configuration
 deployment_config = {
     'hardware_platform': 'Horizon Journey 5',
-    'computing_power': '128 TOPS Bayesian BPU', 
+    'computing_power': '128 TOPS Bayesian BPU',
     'inference_speed': '19.8 FPS (ResNet50)',
     'memory_requirements': '8 RTX 3090 GPUs (24GB each) for training',
     'production_integration': 'NVIDIA TAO optimized inference',
-    
+
     'depth_configuration': {
         'dense_branch_enabled': True,   # Training only
         'instance_reweight_enabled': True,  # Always enabled
@@ -2293,7 +2294,7 @@ deployment_config = {
         'depth_range': [1.0, 60.0],     # meters
         'supervision_weight': 0.2       # As specified in HR paper
     },
-    
+
     'performance_metrics': {
         'mATE': 0.553,      # vs 0.598 in v2 (depth improvement)
         'NDS': 71.9,        # Overall detection score
@@ -2310,22 +2311,22 @@ deployment_config = {
 **Precise Multi-Scale Sampling Implementation** with exact HR ADNet compatibility:
 
 ```python
-@register_attention("hr_deformable_attention", 
+@register_attention("hr_deformable_attention",
                    description="HR-compatible deformable attention with exact 13-point sampling",
                    dependencies=["torch", "torchvision"])
 class HRDeformableAttention(nn.Module):
     """HR ADNet compatible deformable attention mechanism"""
-    
-    def __init__(self, embed_dims: int = 256, num_groups: int = 8, 
+
+    def __init__(self, embed_dims: int = 256, num_groups: int = 8,
                  sampling_points: int = 13, dropout: float = 0.1,
                  hr_compatible: bool = True):
         super().__init__()
-        
+
         self.embed_dims = embed_dims
         self.num_groups = num_groups
         self.sampling_points = sampling_points
         self.hr_compatible = hr_compatible
-        
+
         # HR ADNet compatibility mode
         if hr_compatible:
             assert sampling_points == 13, "HR compatibility requires exactly 13 sampling points"
@@ -2336,20 +2337,20 @@ class HRDeformableAttention(nn.Module):
             # Flexible configuration for other approaches
             self.fixed_keypoints = sampling_points // 2
             self.learnable_keypoints = sampling_points - self.fixed_keypoints
-        
+
         # Offset and attention networks
         self.offset_net = nn.Linear(embed_dims, self.learnable_keypoints * 2)
         self.attention_weights = nn.Linear(embed_dims, sampling_points)
-        
+
         # Group-wise linear projections
         self.value_proj = nn.Linear(embed_dims, embed_dims)
         self.output_proj = nn.Linear(embed_dims, embed_dims)
-        
+
         self.dropout = nn.Dropout(dropout)
-        
+
         # Performance monitoring
         self.attention_metrics = AttentionMetrics()
-    
+
     def _setup_hr_keypoint_layout(self):
         """Setup HR ADNet specific keypoint layout"""
         # Fixed keypoint positions (HR's specific 7-point layout around anchor)
@@ -2368,8 +2369,8 @@ HR ADNet Keypoint Sampling Pattern:
 ┌─────────────────────────────────────────┐
 │ Object Query in 3D Space                │
 │                                         │
-│     • ← Fixed keypoints (7)             │ 
-│   • ◦ •                                 │ 
+│     • ← Fixed keypoints (7)             │
+│   • ◦ •                                 │
 │     •     ○ ← Learnable keypoints (6)   │
 │   • ◦ •                                 │
 │     •                                   │
@@ -2395,19 +2396,19 @@ Where:
 ```python
 class AdvancedInstanceDenoising(nn.Module):
     """Production-grade instance denoising with temporal consistency"""
-    
+
     def __init__(self, embed_dims: int = 256, num_heads: int = 8,
                  noise_groups: int = 5, temporal_groups: int = 3):
         super().__init__()
-        
+
         self.noise_groups = noise_groups        # M=5 groups for denoising
         self.temporal_groups = temporal_groups  # M'=3 for temporal propagation
-        
+
         # Multi-head denoising attention
         self.denoising_attention = nn.MultiheadAttention(
             embed_dims, num_heads, batch_first=True
         )
-        
+
         # Quality estimation network
         self.quality_estimator = nn.Sequential(
             nn.Linear(embed_dims, embed_dims // 2),
@@ -2418,7 +2419,7 @@ class AdvancedInstanceDenoising(nn.Module):
             nn.Linear(embed_dims // 4, 1),
             nn.Sigmoid()
         )
-        
+
         # Temporal consistency enforcer
         self.consistency_mlp = nn.Sequential(
             nn.Linear(embed_dims * 2, embed_dims),
@@ -2426,36 +2427,36 @@ class AdvancedInstanceDenoising(nn.Module):
             nn.LayerNorm(embed_dims),
             nn.Linear(embed_dims, embed_dims)
         )
-        
+
         # Robust feature matching with Hungarian algorithm
         self.feature_matcher = FeatureMatcher(embed_dims)
-        
+
         # Confidence calibration
         self.confidence_calibrator = ConfidenceCalibrator(embed_dims)
-        
+
         # Performance monitoring
         self.denoising_metrics = DenoisingMetrics()
-    
+
     def generate_temporal_noise(self, gt_boxes: torch.Tensor) -> torch.Tensor:
         """Generate temporal noise for denoising training"""
-        
+
         B, N, _ = gt_boxes.shape
-        
+
         # Generate positive samples (close to GT) - M'=3 temporal groups
         positive_noise = torch.randn(B, N, self.temporal_groups, 10, device=gt_boxes.device) * 0.1
         positive_boxes = gt_boxes.unsqueeze(2) + positive_noise
-        
+
         # Generate negative samples (far from GT) - remaining groups
         negative_groups = self.noise_groups - self.temporal_groups
         negative_noise = torch.randn(B, N, negative_groups, 10, device=gt_boxes.device) * 1.0
         negative_boxes = gt_boxes.unsqueeze(2) + negative_noise
-        
+
         # Combine all noisy samples
         all_noisy_boxes = torch.cat([positive_boxes, negative_boxes], dim=2)
-        
+
         # Convert to query features
         noisy_queries = self.box_to_query_embedding(all_noisy_boxes)
-        
+
         return noisy_queries.view(B, N * self.noise_groups, 256)
 ```
 
@@ -2465,18 +2466,18 @@ class AdvancedInstanceDenoising(nn.Module):
 digraph TemporalDenoising {
     rankdir=TB;
     node [shape=box, style=filled];
-    
+
     // Input
     Queries [label="Object Queries\n[B, 900, 256]", fillcolor=lightblue];
     NoiseGen [label="Noise Generation\nM=5 groups, M'=3 temporal", fillcolor=yellow];
-    
+
     // Processing
     BipartiteMatch [label="Bipartite Matching\nHungarian Algorithm\nAvoid assignment ambiguity", fillcolor=orange];
     GroupMask [label="Group Independence\nAttention masking", fillcolor=orange];
-    
+
     // Output
     DenoisedQueries [label="Denoised Queries\n[B, 900, 256]", fillcolor=lightgreen];
-    
+
     // Connections
     Queries -> NoiseGen;
     NoiseGen -> BipartiteMatch;
@@ -2492,10 +2493,10 @@ digraph TemporalDenoising {
 ```python
 class QualityEstimationModule(nn.Module):
     """Quality estimation with centerness and yawness metrics for V3"""
-    
+
     def __init__(self, embed_dims: int = 256):
         super().__init__()
-        
+
         # Centerness estimation network
         self.centerness_net = nn.Sequential(
             nn.Linear(embed_dims, embed_dims // 2),
@@ -2503,7 +2504,7 @@ class QualityEstimationModule(nn.Module):
             nn.Linear(embed_dims // 2, 1),
             nn.Sigmoid()
         )
-        
+
         # Yawness estimation network
         self.yawness_net = nn.Sequential(
             nn.Linear(embed_dims, embed_dims // 2),
@@ -2511,46 +2512,46 @@ class QualityEstimationModule(nn.Module):
             nn.Linear(embed_dims // 2, 1),
             nn.Sigmoid()
         )
-        
+
     def forward(self, query_features: torch.Tensor) -> Dict[str, torch.Tensor]:
         """
         Args:
             query_features: [B, N, 256] - Object query features
-        
+
         Returns:
             quality_scores: [B, N, 2] - [centerness, yawness]
         """
         centerness = self.centerness_net(query_features)  # [B, N, 1]
         yawness = self.yawness_net(query_features)        # [B, N, 1]
-        
+
         quality_scores = torch.cat([centerness, yawness], dim=-1)
         return quality_scores
 
 def compute_quality_metrics(pred_boxes: torch.Tensor, gt_boxes: torch.Tensor) -> Dict[str, torch.Tensor]:
     """
     Compute quality metrics mathematics as specified in HR paper
-    
+
     Args:
         pred_boxes: [N, 9] - Predicted 3D boxes
         gt_boxes: [N, 9] - Ground truth 3D boxes
-    
+
     Returns:
         quality_metrics: Dictionary with centerness and yawness scores
     """
-    
+
     # Centerness metric: C = exp(-‖[x,y,z]pred - [x,y,z]gt‖2)
     position_error = torch.norm(pred_boxes[:, :3] - gt_boxes[:, :3], dim=-1)
     centerness = torch.exp(-position_error)
-    
+
     # Yawness metric: Y = [sin yaw, cos yaw]pred · [sin yaw, cos yaw]gt
     pred_yaw = pred_boxes[:, 6]  # Yaw angle
     gt_yaw = gt_boxes[:, 6]
-    
+
     pred_yaw_vec = torch.stack([torch.sin(pred_yaw), torch.cos(pred_yaw)], dim=-1)
     gt_yaw_vec = torch.stack([torch.sin(gt_yaw), torch.cos(gt_yaw)], dim=-1)
-    
+
     yawness = torch.sum(pred_yaw_vec * gt_yaw_vec, dim=-1)
-    
+
     return {
         'centerness': centerness,
         'yawness': yawness
@@ -2581,54 +2582,54 @@ final_confidence = detection_score × √(centerness × yawness)
 ```python
 class DecoupledMultiHeadAttention(nn.Module):
     """Decoupled attention mechanism introduced in ADNet"""
-    
+
     def __init__(self, embed_dims: int = 256, num_heads: int = 8):
         super().__init__()
         self.embed_dims = embed_dims
         self.num_heads = num_heads
         self.head_dims = embed_dims // num_heads
-        
+
         # Extended dimensions for concatenation (256 + 256 = 512)
         self.extended_dims = embed_dims * 2
-        
+
         # Projection layers for extended input
         self.q_proj = nn.Linear(self.extended_dims, embed_dims)
         self.k_proj = nn.Linear(self.extended_dims, embed_dims)
         self.v_proj = nn.Linear(embed_dims, embed_dims)  # Value uses original dims
         self.out_proj = nn.Linear(embed_dims, embed_dims)
-        
-    def forward(self, query: torch.Tensor, key: torch.Tensor, 
+
+    def forward(self, query: torch.Tensor, key: torch.Tensor,
                 value: torch.Tensor, pos_embed: torch.Tensor) -> torch.Tensor:
         """
         Decoupled attention forward pass
-        
+
         Traditional: attention(query + pos_embed, key + pos_embed, value + pos_embed)
         Decoupled:   attention(cat(query, pos_embed), cat(key, pos_embed), value)
         """
         B, N, C = query.shape
-        
+
         # Concatenation instead of addition (KEY INNOVATION)
         query_with_pos = torch.cat([query, pos_embed], dim=-1)  # [B, N, 512]
         key_with_pos = torch.cat([key, pos_embed], dim=-1)      # [B, N, 512]
-        
+
         # Multi-head processing
         Q = self.q_proj(query_with_pos).view(B, N, self.num_heads, self.head_dims)
         K = self.k_proj(key_with_pos).view(B, N, self.num_heads, self.head_dims)
         V = self.v_proj(value).view(B, N, self.num_heads, self.head_dims)
-        
+
         # Transpose for attention computation
         Q = Q.transpose(1, 2)  # [B, num_heads, N, head_dims]
         K = K.transpose(1, 2)
         V = V.transpose(1, 2)
-        
+
         # Scaled dot-product attention
         scale = self.head_dims ** -0.5
         attn = torch.softmax(torch.matmul(Q, K.transpose(-2, -1)) * scale, dim=-1)
-        
+
         # Apply attention to values
         out = torch.matmul(attn, V)  # [B, num_heads, N, head_dims]
         out = out.transpose(1, 2).reshape(B, N, C)  # [B, N, 256]
-        
+
         return self.out_proj(out)
 ```
 
@@ -2669,7 +2670,7 @@ Dimension Processing Pipeline:
 ```python
 class HorizonJourney5Optimizer:
     """Horizon Journey 5 platform optimization with Bayesian BPU acceleration"""
-    
+
     def __init__(self):
         self.platform_specs = {
             'architecture': 'Dual-core Bayesian BPU',
@@ -2680,35 +2681,35 @@ class HorizonJourney5Optimizer:
             'camera_support': '16 HD cameras (4K support)',
             'safety_certification': 'ASIL-B certified'
         }
-        
+
         self.optimization_features = {
             'probabilistic_computing': 'Uncertainty handling',
             'transformer_optimization': 'Multi-head attention acceleration',
             'sparse_processing': 'Optimized for Sparse4D',
             'temporal_fusion': 'O(1) complexity operations'
         }
-    
+
     def optimize_for_journey5(self, model: nn.Module) -> nn.Module:
         """Optimize Sparse4D model for Journey 5 deployment"""
-        
+
         # Bayesian BPU specific optimizations
         optimized_model = model
-        
+
         # 1. Probabilistic computing optimization
         optimized_model = self._enable_uncertainty_quantification(optimized_model)
-        
+
         # 2. Transformer acceleration
         optimized_model = self._optimize_multihead_attention(optimized_model)
-        
+
         # 3. Sparse processing optimization
         optimized_model = self._optimize_sparse_operations(optimized_model)
-        
+
         # 4. Temporal fusion acceleration
         optimized_model = self._optimize_temporal_operations(optimized_model)
-        
+
         # 5. Memory optimization for 8W power budget
         optimized_model = self._optimize_memory_access(optimized_model)
-        
+
         return optimized_model
 ```
 
@@ -2718,7 +2719,7 @@ class HorizonJourney5Optimizer:
 digraph Journey5Architecture {
     rankdir=TB;
     node [shape=box, style=filled];
-    
+
     // Main components
     CPU [label="8-core ARM Cortex A55\n26k DMIPS", fillcolor=lightblue];
     BPU [label="Dual-core Bayesian BPU\n128 TOPS AI computing", fillcolor=orange];
@@ -2726,22 +2727,22 @@ digraph Journey5Architecture {
     GPU [label="Computer Vision Engine\n4K camera support", fillcolor=lightgreen];
     DSP [label="2 DSP cores\nSignal processing", fillcolor=cyan];
     VideoCodec [label="Video Encoding/Decoding\nH.265 support", fillcolor=pink];
-    
+
     // Memory and Storage
     Memory [label="LPDDR5 Memory\nHigh-bandwidth", fillcolor=lightyellow];
     Storage [label="eMMC/UFS Storage\nModel storage", fillcolor=lightgray];
-    
+
     // Safety & Security
     SafetyIsland [label="Safety Island Design\nASIL-B certified", fillcolor=red];
     Security [label="Hardware Security\nARM TrustZone", fillcolor=darkred];
-    
+
     // Interconnects
     CPU -> BPU [label="Control"];
     BPU -> ISP [label="Camera Data"];
     ISP -> GPU [label="Vision Processing"];
     GPU -> DSP [label="Signal Processing"];
     DSP -> VideoCodec [label="Encoding"];
-    
+
     Memory -> {CPU, BPU, ISP, GPU};
     Storage -> {CPU, BPU};
     SafetyIsland -> {CPU, BPU, ISP};
@@ -2757,7 +2758,7 @@ digraph Journey5Architecture {
 // Custom CUDA kernel for 4D deformable attention
 __global__ void deformable_4d_attention_kernel(
     const float* query_features,        // [B, N, 256]
-    const float* multi_view_features,   // [B, 6, 256, H, W]  
+    const float* multi_view_features,   // [B, 6, 256, H, W]
     const float* camera_params,         // [B, 6, 4, 4]
     const float* keypoint_offsets,      // [B, N, 13, 2]
     const float* attention_weights,     // [B, N, 13]
@@ -2769,13 +2770,13 @@ __global__ void deformable_4d_attention_kernel(
     int batch_idx = blockIdx.x;
     int query_idx = blockIdx.y;
     int thread_idx = threadIdx.x;
-    
+
     if (batch_idx >= batch_size || query_idx >= num_queries) return;
-    
+
     // Shared memory for efficiency
     __shared__ float shared_features[256];
     __shared__ float shared_weights[13];
-    
+
     // Load attention weights to shared memory
     if (thread_idx < 13) {
         shared_weights[thread_idx] = attention_weights[
@@ -2783,10 +2784,10 @@ __global__ void deformable_4d_attention_kernel(
         ];
     }
     __syncthreads();
-    
+
     // Initialize output
     float accumulated_feature = 0.0f;
-    
+
     // Process each keypoint
     for (int k = 0; k < 13; k++) {
         // Get keypoint offset
@@ -2796,36 +2797,36 @@ __global__ void deformable_4d_attention_kernel(
         float offset_y = keypoint_offsets[
             batch_idx * num_queries * 13 * 2 + query_idx * 13 * 2 + k * 2 + 1
         ];
-        
+
         // Sample from all camera views
         float camera_aggregated = 0.0f;
-        
+
         for (int cam = 0; cam < num_cameras; cam++) {
             // Project 3D keypoint to 2D camera coordinates
             // (Simplified - actual implementation includes full camera transformation)
             float sample_x = offset_x; // + camera projection
             float sample_y = offset_y; // + camera projection
-            
+
             // Bilinear sampling from feature map
             float sampled_feature = bilinear_sample(
-                multi_view_features, 
-                batch_idx, cam, thread_idx, 
+                multi_view_features,
+                batch_idx, cam, thread_idx,
                 sample_x, sample_y,
                 feature_height, feature_width
             );
-            
+
             camera_aggregated += sampled_feature / num_cameras;
         }
-        
+
         // Weight by attention score
         accumulated_feature += camera_aggregated * shared_weights[k];
     }
-    
+
     // Write to output
     if (thread_idx < embed_dims) {
         output_features[
-            batch_idx * num_queries * embed_dims + 
-            query_idx * embed_dims + 
+            batch_idx * num_queries * embed_dims +
+            query_idx * embed_dims +
             thread_idx
         ] = accumulated_feature;
     }
@@ -2834,24 +2835,24 @@ __global__ void deformable_4d_attention_kernel(
 // CUDA operation wrapper
 class DeformableAttentionCUDA:
     """Custom CUDA operation for efficient 4D deformable attention"""
-    
+
     @staticmethod
     def forward(query_features: torch.Tensor,
                 multi_view_features: torch.Tensor,
                 camera_params: Dict[str, torch.Tensor],
                 keypoint_offsets: torch.Tensor,
                 attention_weights: torch.Tensor) -> torch.Tensor:
-        
+
         batch_size, num_queries, embed_dims = query_features.shape
         _, num_cameras, _, feature_height, feature_width = multi_view_features.shape
-        
+
         # Allocate output tensor
         output = torch.empty_like(query_features)
-        
+
         # Define CUDA kernel launch parameters
         block_size = (embed_dims,)  # One thread per feature dimension
         grid_size = (batch_size, num_queries)
-        
+
         # Launch CUDA kernel
         deformable_4d_attention_kernel[grid_size, block_size](
             query_features.data_ptr(),
@@ -2863,7 +2864,7 @@ class DeformableAttentionCUDA:
             batch_size, num_queries, embed_dims,
             num_cameras, feature_height, feature_width
         )
-        
+
         return output
 ```
 
@@ -2883,7 +2884,7 @@ Custom CUDA Operations Performance:
 
 Compared to Baseline Methods:
 ├── 600x faster than NeRF-based methods
-├── 1/10th GPU memory usage vs dense approaches  
+├── 1/10th GPU memory usage vs dense approaches
 ├── Real-time performance: 19.8 FPS (ResNet50)
 └── Production-ready: Journey 5 deployment
 ```
@@ -2914,19 +2915,19 @@ class PerformanceMetrics:
 
 class AdvancedPerformanceProfiler:
     """Production-grade performance profiling with detailed analytics"""
-    
-    def __init__(self, enable_gpu_profiling: bool = True, 
+
+    def __init__(self, enable_gpu_profiling: bool = True,
                  monitoring_interval: float = 0.1,
                  max_history_size: int = 1000):
         self.enable_gpu_profiling = enable_gpu_profiling
         self.monitoring_interval = monitoring_interval
         self.max_history_size = max_history_size
-        
+
         # Performance history
         self.metrics_history: List[PerformanceMetrics] = []
         self.detailed_timings = {}
         self.memory_snapshots = []
-        
+
         # GPU monitoring setup
         if enable_gpu_profiling and torch.cuda.is_available():
             try:
@@ -2938,63 +2939,63 @@ class AdvancedPerformanceProfiler:
                 self.gpu_monitoring_available = False
         else:
             self.gpu_monitoring_available = False
-    
+
     @contextmanager
     def profile_inference(self, model: torch.nn.Module, batch_data: Dict[str, torch.Tensor]):
         """Context manager for profiling model inference with comprehensive metrics"""
-        
+
         # Pre-inference setup
         self._start_monitoring()
-        
+
         # Warm up (3 iterations)
         with torch.no_grad():
             for _ in range(3):
                 _ = model(batch_data)
-        
+
         if self.enable_gpu_profiling and torch.cuda.is_available():
             torch.cuda.synchronize()
-        
+
         # Start detailed timing
         start_time = time.perf_counter()
         memory_start = self._get_memory_usage()
-        
+
         try:
             yield
-            
+
         finally:
             # End timing and collect comprehensive metrics
             if self.enable_gpu_profiling and torch.cuda.is_available():
                 torch.cuda.synchronize()
-            
+
             end_time = time.perf_counter()
             memory_end = self._get_memory_usage()
-            
+
             # Calculate comprehensive metrics
             metrics = self._calculate_comprehensive_metrics(
                 start_time, end_time, memory_start, memory_end, batch_data
             )
-            
+
             # Store metrics with history management
             self.metrics_history.append(metrics)
             if len(self.metrics_history) > self.max_history_size:
                 self.metrics_history = self.metrics_history[-self.max_history_size:]
-            
+
             self._stop_monitoring()
-    
+
     def get_performance_summary(self) -> Dict[str, Any]:
         """Get comprehensive performance summary with percentile analysis"""
-        
+
         if not self.metrics_history:
             return {"status": "no_data"}
-        
+
         # Convert metrics to arrays for analysis
         recent_metrics = self.metrics_history[-100:]  # Last 100 measurements
-        
+
         latencies = [m.latency_ms for m in recent_metrics]
         throughputs = [m.throughput_fps for m in recent_metrics]
         memory_usages = [m.memory_usage_mb for m in recent_metrics]
         gpu_memory_usages = [m.gpu_memory_mb for m in recent_metrics]
-        
+
         summary = {
             'performance_stats': {
                 'avg_latency_ms': np.mean(latencies),
@@ -3003,40 +3004,40 @@ class AdvancedPerformanceProfiler:
                 'p99_latency_ms': np.percentile(latencies, 99),
                 'max_latency_ms': np.max(latencies),
                 'latency_std_ms': np.std(latencies),
-                
+
                 'avg_throughput_fps': np.mean(throughputs),
                 'min_throughput_fps': np.min(throughputs),
                 'throughput_std_fps': np.std(throughputs),
-                
+
                 'avg_memory_mb': np.mean(memory_usages),
                 'peak_memory_mb': np.max(memory_usages),
                 'memory_std_mb': np.std(memory_usages),
-                
+
                 'avg_gpu_memory_mb': np.mean(gpu_memory_usages),
                 'peak_gpu_memory_mb': np.max(gpu_memory_usages)
             },
-            
+
             'efficiency_metrics': {
                 'avg_memory_efficiency': np.mean([m.memory_efficiency for m in recent_metrics]),
                 'avg_cache_hit_rate': np.mean([m.cache_hit_rate for m in recent_metrics]),
                 'gpu_utilization': np.mean([m.gpu_utilization_percent for m in recent_metrics]),
                 'cpu_utilization': np.mean([m.cpu_usage_percent for m in recent_metrics])
             },
-            
+
             'system_health': {
                 'total_measurements': len(self.metrics_history),
                 'monitoring_duration_hours': self._get_monitoring_duration(),
                 'performance_stability': self._assess_performance_stability(latencies),
                 'memory_stability': self._assess_memory_stability(memory_usages)
             },
-            
+
             'hardware_utilization': {
                 'cpu_efficiency': self._calculate_cpu_efficiency(),
-                'gpu_efficiency': self._calculate_gpu_efficiency(), 
+                'gpu_efficiency': self._calculate_gpu_efficiency(),
                 'memory_bandwidth_utilization': self._calculate_memory_bandwidth_utilization()
             }
         }
-        
+
         return summary
 ```
 
@@ -3049,105 +3050,105 @@ class AdvancedPerformanceProfiler:
 ```python
 class ProductionServer:
     """Advanced production inference server with comprehensive monitoring"""
-    
+
     def __init__(self, model_path: str, config: DictConfig):
         self.config = config
         self.model = self._load_optimized_model(model_path)
         self.profiler = AdvancedPerformanceProfiler()
-        
+
         # Advanced production features
         self.load_balancer = LoadBalancer(config.get('max_concurrent_requests', 10))
         self.cache_manager = CacheManager(config.get('cache_size', 1000))
         self.health_monitor = HealthMonitor()
         self.alert_system = AlertSystem(config.get('alert_config', {}))
-        
+
         # Request rate limiting
         self.rate_limiter = RateLimiter(
             max_requests_per_second=config.get('max_rps', 100),
             burst_capacity=config.get('burst_capacity', 200)
         )
-        
+
         # Model versioning and metadata
         self.model_version = self._get_model_version(model_path)
         self.model_metadata = self._extract_model_metadata()
-        
+
         # Safety and compliance
         self.safety_monitor = SafetyMonitor(config.get('safety_config', {}))
         self.iso26262_validator = ISO26262Validator()
-        
+
     async def predict(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
         """Async prediction with comprehensive error handling and monitoring"""
-        
+
         request_id = self._generate_request_id()
         request_start = time.perf_counter()
-        
+
         try:
             # Rate limiting check
             if not self.rate_limiter.allow_request():
                 raise HTTPException(status_code=429, detail="Rate limit exceeded")
-            
+
             # Health check
             if not self.health_monitor.is_healthy():
                 raise HTTPException(status_code=503, detail="Service unhealthy")
-            
+
             # Safety validation
             safety_check = self.safety_monitor.validate_request(request_data)
             if not safety_check['valid']:
                 raise HTTPException(status_code=400, detail=f"Safety validation failed: {safety_check['reason']}")
-            
+
             # Cache check
             cache_key = self._generate_cache_key(request_data)
             cached_result = self.cache_manager.get(cache_key)
-            
+
             if cached_result is not None:
                 self.profiler.update_cache_stats(hit=True)
                 return self._format_response(cached_result, request_id, from_cache=True)
-            
+
             self.profiler.update_cache_stats(hit=False)
-            
+
             # Load balancing
             await self.load_balancer.acquire_slot()
-            
+
             try:
                 # Preprocess request with validation
                 batch_data = self.preprocess_request(request_data)
-                
+
                 # Run inference with comprehensive profiling
                 with self.profiler.profile_inference(self.model, batch_data):
                     with torch.no_grad():
                         predictions = self.model(batch_data)
-                
+
                 # Post-process predictions with safety checks
                 processed_predictions = self._postprocess_predictions(predictions)
-                
+
                 # ISO 26262 compliance validation
                 compliance_check = self.iso26262_validator.validate_predictions(processed_predictions)
                 if not compliance_check['compliant']:
                     self.alert_system.send_alert(
-                        f"ISO 26262 compliance violation: {compliance_check['issues']}", 
+                        f"ISO 26262 compliance violation: {compliance_check['issues']}",
                         severity="critical"
                     )
-                
+
                 # Cache results
                 self.cache_manager.set(cache_key, processed_predictions)
-                
+
                 # Update health metrics
                 request_time = time.perf_counter() - request_start
                 self.health_monitor.update_request_metrics(request_time, success=True)
-                
+
                 return self._format_response(processed_predictions, request_id, from_cache=False)
-                
+
             finally:
                 self.load_balancer.release_slot()
-                
+
         except Exception as e:
             # Comprehensive error handling
             request_time = time.perf_counter() - request_start
             self.health_monitor.update_request_metrics(request_time, success=False)
-            
+
             # Alert system notification
             self.alert_system.send_alert(
-                f"Prediction error: {e}", 
+                f"Prediction error: {e}",
                 severity="error",
                 metadata={
                     'request_id': request_id,
@@ -3155,7 +3156,7 @@ class ProductionServer:
                     'model_version': self.model_version
                 }
             )
-            
+
             return self._format_error_response(str(e), request_id)
 ```
 
@@ -3166,11 +3167,11 @@ class ProductionServer:
 ```python
 class CrossPlatformVisualizationExporter:
     """Advanced visualization export supporting multiple platforms and formats"""
-    
+
     def __init__(self):
         self.supported_platforms = {
             'nuscenes': NuScenesFormatExporter(),
-            'carla': CarlaObjectsExporter(), 
+            'carla': CarlaObjectsExporter(),
             'omniverse': OmniverseUSDExporter(),
             'rviz': RVizMarkersExporter(),
             'open3d': Open3DFormatExporter(),
@@ -3178,27 +3179,27 @@ class CrossPlatformVisualizationExporter:
             'unity': UnityBridgeExporter(),
             'web_viewer': WebViewerExporter()
         }
-        
+
         self.export_history = []
-        
-    def export_detections(self, detections: Dict[str, Any], 
+
+    def export_detections(self, detections: Dict[str, Any],
                          platform: str,
                          output_path: str,
                          metadata: Dict[str, Any] = None) -> Dict[str, Any]:
         """Export detections to specified platform format"""
-        
+
         if platform not in self.supported_platforms:
             raise ValueError(f"Unsupported platform: {platform}. Available: {list(self.supported_platforms.keys())}")
-        
+
         exporter = self.supported_platforms[platform]
         export_start = time.perf_counter()
-        
+
         try:
             # Platform-specific export
             export_result = exporter.export(detections, output_path, metadata)
-            
+
             export_time = time.perf_counter() - export_start
-            
+
             # Record export success
             export_record = {
                 'platform': platform,
@@ -3209,9 +3210,9 @@ class CrossPlatformVisualizationExporter:
                 'timestamp': time.time(),
                 'file_size_mb': self._get_file_size(output_path) if os.path.exists(output_path) else 0
             }
-            
+
             export_record.update(export_result)
-            
+
         except Exception as e:
             export_record = {
                 'platform': platform,
@@ -3220,26 +3221,26 @@ class CrossPlatformVisualizationExporter:
                 'success': False,
                 'timestamp': time.time()
             }
-        
+
         self.export_history.append(export_record)
         return export_record
 
 class NuScenesFormatExporter:
     """Export to nuScenes visualization format"""
-    
-    def export(self, detections: Dict[str, Any], output_path: str, 
+
+    def export(self, detections: Dict[str, Any], output_path: str,
                metadata: Dict[str, Any] = None) -> Dict[str, Any]:
-        
+
         nuscenes_data = {
             'scene_token': metadata.get('scene_token', 'default_scene'),
             'sample_token': metadata.get('sample_token', 'default_sample'),
             'annotations': []
         }
-        
+
         # Convert detections to nuScenes format
         for i, (bbox, score, label) in enumerate(zip(
-            detections['bboxes_3d'], 
-            detections['scores'], 
+            detections['bboxes_3d'],
+            detections['scores'],
             detections['labels']
         )):
             annotation = {
@@ -3256,11 +3257,11 @@ class NuScenesFormatExporter:
                 'score': float(score)
             }
             nuscenes_data['annotations'].append(annotation)
-        
+
         # Write to file
         with open(output_path, 'w') as f:
             json.dump(nuscenes_data, f, indent=2)
-        
+
         return {
             'format_version': '1.0',
             'annotations_count': len(nuscenes_data['annotations'])
@@ -3268,26 +3269,26 @@ class NuScenesFormatExporter:
 
 class CarlaObjectsExporter:
     """Export to CARLA simulation format"""
-    
+
     def export(self, detections: Dict[str, Any], output_path: str,
                metadata: Dict[str, Any] = None) -> Dict[str, Any]:
-        
+
         carla_actors = []
-        
+
         for i, (bbox, score, label, track_id) in enumerate(zip(
             detections['bboxes_3d'],
-            detections['scores'], 
+            detections['scores'],
             detections['labels'],
             detections.get('track_ids', range(len(detections['bboxes_3d'])))
         )):
-            
+
             actor = {
                 'id': int(track_id),
                 'type_id': self._map_label_to_carla_blueprint(label),
                 'transform': {
                     'location': {
                         'x': float(bbox[0]),
-                        'y': float(bbox[1]), 
+                        'y': float(bbox[1]),
                         'z': float(bbox[2])
                     },
                     'rotation': {
@@ -3311,9 +3312,9 @@ class CarlaObjectsExporter:
                 'confidence': float(score),
                 'timestamp': metadata.get('timestamp', time.time())
             }
-            
+
             carla_actors.append(actor)
-        
+
         carla_scene = {
             'frame_id': metadata.get('frame_id', 0),
             'timestamp': metadata.get('timestamp', time.time()),
@@ -3321,11 +3322,11 @@ class CarlaObjectsExporter:
             'actors': carla_actors,
             'weather': metadata.get('weather', {'sun_azimuth': 0.0, 'sun_altitude': 45.0})
         }
-        
+
         # Save as JSON for CARLA import
         with open(output_path, 'w') as f:
             json.dump(carla_scene, f, indent=2)
-        
+
         return {
             'actors_count': len(carla_actors),
             'carla_version': '0.9.15'
@@ -3333,56 +3334,56 @@ class CarlaObjectsExporter:
 
 class OmniverseUSDExporter:
     """Export to NVIDIA Omniverse USD format"""
-    
+
     def export(self, detections: Dict[str, Any], output_path: str,
                metadata: Dict[str, Any] = None) -> Dict[str, Any]:
-        
+
         try:
             from pxr import Usd, UsdGeom, Gf, Sdf
         except ImportError:
             raise ImportError("USD Python bindings not available. Install with: pip install usd-core")
-        
+
         # Create USD stage
         stage = Usd.Stage.CreateNew(output_path)
-        
+
         # Set up scene hierarchy
         root_prim = UsdGeom.Xform.Define(stage, '/DetectedObjects')
         stage.SetDefaultPrim(root_prim.GetPrim())
-        
+
         # Add metadata
         stage.SetMetadata('comment', f'Sparse4D detections exported at {time.time()}')
         stage.SetFramesPerSecond(metadata.get('fps', 20))
-        
+
         # Export each detection as USD geometry
         for i, (bbox, score, label) in enumerate(zip(
             detections['bboxes_3d'],
             detections['scores'],
             detections['labels']
         )):
-            
+
             # Create cube geometry for bounding box
             cube_path = f'/DetectedObjects/Detection_{i}'
             cube = UsdGeom.Cube.Define(stage, cube_path)
-            
+
             # Set transform
             xform = UsdGeom.Xformable(cube)
             xform.AddTranslateOp().Set(Gf.Vec3d(bbox[0], bbox[1], bbox[2]))
             xform.AddRotateXYZOp().Set(Gf.Vec3f(0, 0, np.degrees(bbox[6])))
             xform.AddScaleOp().Set(Gf.Vec3f(bbox[3], bbox[4], bbox[5]))
-            
+
             # Add custom attributes
             cube.GetPrim().CreateAttribute('detection:score', Sdf.ValueTypeNames.Float).Set(float(score))
             cube.GetPrim().CreateAttribute('detection:label', Sdf.ValueTypeNames.String).Set(str(label))
             cube.GetPrim().CreateAttribute('detection:confidence', Sdf.ValueTypeNames.Float).Set(float(score))
-            
+
             # Set material based on class
             material_path = f'/Materials/Class_{label}'
             material = UsdShade.Material.Define(stage, material_path)
             cube.GetPrim().GetRelationship('material:binding').SetTargets([material.GetPath()])
-        
+
         # Save stage
         stage.Save()
-        
+
         return {
             'usd_format': 'USD',
             'objects_count': len(detections['bboxes_3d']),
@@ -3399,50 +3400,50 @@ class OmniverseUSDExporter:
 ```python
 class ISO26262ComplianceFramework:
     """Complete ISO 26262 safety compliance framework for automotive AI"""
-    
+
     def __init__(self, asil_level: str = "ASIL-B"):
         self.asil_level = asil_level
         self.safety_requirements = self._load_safety_requirements()
         self.hazard_analysis = HazardAnalysisEngine()
-        self.fmea_analyzer = FMEAAnalyzer() 
+        self.fmea_analyzer = FMEAAnalyzer()
         self.verification_tests = VerificationTestSuite()
-        
+
         # Safety monitoring components
         self.runtime_monitor = RuntimeSafetyMonitor()
         self.watchdog_timer = WatchdogTimer(timeout_ms=100)
         self.redundancy_checker = RedundancyChecker()
         self.fail_safe_handler = FailSafeHandler()
-        
+
         # Compliance tracking
         self.compliance_history = []
         self.safety_metrics = SafetyMetrics()
-        
-    def validate_system_safety(self, model: nn.Module, 
+
+    def validate_system_safety(self, model: nn.Module,
                               test_data: Dict[str, Any]) -> Dict[str, Any]:
         """Comprehensive system safety validation"""
-        
+
         validation_start = time.perf_counter()
-        
+
         # 1. Hazard Analysis and Risk Assessment (HARA)
         hazard_assessment = self.hazard_analysis.assess_system_hazards(model, test_data)
-        
+
         # 2. Failure Mode and Effects Analysis (FMEA)
         fmea_results = self.fmea_analyzer.analyze_failure_modes(model)
-        
+
         # 3. Safety Requirements Verification
         requirements_verification = self.verification_tests.verify_safety_requirements(
             model, test_data, self.safety_requirements
         )
-        
+
         # 4. Runtime Safety Monitoring
         runtime_safety = self.runtime_monitor.assess_runtime_safety(model, test_data)
-        
+
         # 5. Redundancy and Fail-Safe Validation
         redundancy_validation = self.redundancy_checker.validate_redundancy(model)
         fail_safe_validation = self.fail_safe_handler.validate_fail_safe_mechanisms(model)
-        
+
         validation_time = time.perf_counter() - validation_start
-        
+
         # Compile comprehensive safety report
         safety_validation = {
             'asil_level': self.asil_level,
@@ -3459,15 +3460,15 @@ class ISO26262ComplianceFramework:
             'validation_time': validation_time,
             'timestamp': time.time()
         }
-        
+
         # Store compliance history
         self.compliance_history.append(safety_validation)
-        
+
         return safety_validation
 
 class HazardAnalysisEngine:
     """Hazard Analysis and Risk Assessment (HARA) for automotive AI systems"""
-    
+
     def __init__(self):
         self.hazard_categories = {
             'perception_failure': {
@@ -3477,7 +3478,7 @@ class HazardAnalysisEngine:
             },
             'false_positive_detection': {
                 'severity': 'S2',  # Moderate to serious injuries
-                'exposure': 'E3',   # Medium probability  
+                'exposure': 'E3',   # Medium probability
                 'controllability': 'C2'  # Normally controllable
             },
             'tracking_loss': {
@@ -3491,29 +3492,29 @@ class HazardAnalysisEngine:
                 'controllability': 'C2'  # Normally controllable
             }
         }
-        
-    def assess_system_hazards(self, model: nn.Module, 
+
+    def assess_system_hazards(self, model: nn.Module,
                             test_data: Dict[str, Any]) -> Dict[str, Any]:
         """Comprehensive hazard analysis following ISO 26262"""
-        
+
         hazard_results = {}
-        
+
         for hazard_type, risk_params in self.hazard_categories.items():
             # Assess hazard probability
             hazard_probability = self._assess_hazard_probability(
                 model, test_data, hazard_type
             )
-            
+
             # Calculate ASIL rating
             asil_rating = self._calculate_asil_rating(
                 risk_params['severity'],
-                risk_params['exposure'], 
+                risk_params['exposure'],
                 risk_params['controllability']
             )
-            
+
             # Determine required safety measures
             safety_measures = self._determine_safety_measures(asil_rating)
-            
+
             hazard_results[hazard_type] = {
                 'probability': hazard_probability,
                 'severity': risk_params['severity'],
@@ -3523,7 +3524,7 @@ class HazardAnalysisEngine:
                 'safety_measures': safety_measures,
                 'risk_acceptable': hazard_probability < 0.01  # 1% threshold
             }
-        
+
         return {
             'hazard_analysis': hazard_results,
             'overall_risk_level': self._calculate_overall_risk(hazard_results),
@@ -3532,7 +3533,7 @@ class HazardAnalysisEngine:
 
 class RuntimeSafetyMonitor:
     """Real-time safety monitoring during system operation"""
-    
+
     def __init__(self):
         self.safety_thresholds = {
             'detection_confidence': 0.3,
@@ -3542,16 +3543,16 @@ class RuntimeSafetyMonitor:
             'processing_latency_ms': 100,
             'memory_usage_mb': 4000
         }
-        
+
         self.violation_history = []
         self.alert_callbacks = []
-        
+
     def monitor_real_time(self, predictions: Dict[str, Any],
                          system_metrics: Dict[str, Any]) -> Dict[str, Any]:
         """Real-time safety monitoring during inference"""
-        
+
         safety_violations = []
-        
+
         # 1. Detection confidence monitoring
         if 'scores' in predictions:
             low_confidence_count = sum(1 for score in predictions['scores'] if score < self.safety_thresholds['detection_confidence'])
@@ -3561,17 +3562,17 @@ class RuntimeSafetyMonitor:
                     'severity': 'medium',
                     'details': f'{low_confidence_count} low confidence detections'
                 })
-        
+
         # 2. Tracking consistency monitoring
         if 'track_ids' in predictions:
             track_consistency = self._assess_tracking_consistency(predictions['track_ids'])
             if track_consistency < self.safety_thresholds['tracking_consistency']:
                 safety_violations.append({
-                    'type': 'tracking_inconsistency', 
+                    'type': 'tracking_inconsistency',
                     'severity': 'high',
                     'details': f'Tracking consistency: {track_consistency:.3f}'
                 })
-        
+
         # 3. System performance monitoring
         if system_metrics.get('latency_ms', 0) > self.safety_thresholds['processing_latency_ms']:
             safety_violations.append({
@@ -3579,15 +3580,15 @@ class RuntimeSafetyMonitor:
                 'severity': 'critical',
                 'details': f"Latency: {system_metrics['latency_ms']:.1f}ms"
             })
-        
+
         # 4. Memory usage monitoring
         if system_metrics.get('memory_usage_mb', 0) > self.safety_thresholds['memory_usage_mb']:
             safety_violations.append({
                 'type': 'memory_violation',
-                'severity': 'high', 
+                'severity': 'high',
                 'details': f"Memory usage: {system_metrics['memory_usage_mb']:.1f}MB"
             })
-        
+
         # Record violations
         if safety_violations:
             violation_record = {
@@ -3596,11 +3597,11 @@ class RuntimeSafetyMonitor:
                 'system_state': system_metrics.copy()
             }
             self.violation_history.append(violation_record)
-            
+
             # Trigger alerts
             for callback in self.alert_callbacks:
                 callback(violation_record)
-        
+
         return {
             'safety_violations': safety_violations,
             'safety_status': 'safe' if not safety_violations else 'unsafe',
@@ -3610,7 +3611,7 @@ class RuntimeSafetyMonitor:
 
 class FailSafeHandler:
     """Fail-safe mechanisms and graceful degradation"""
-    
+
     def __init__(self):
         self.degradation_levels = {
             'normal': {'confidence_threshold': 0.3, 'max_detections': 200},
@@ -3618,14 +3619,14 @@ class FailSafeHandler:
             'safe_mode': {'confidence_threshold': 0.7, 'max_detections': 50},
             'emergency_stop': {'confidence_threshold': 0.9, 'max_detections': 10}
         }
-        
+
         self.current_mode = 'normal'
         self.mode_history = []
-        
-    def activate_safe_mode(self, trigger_reason: str, 
+
+    def activate_safe_mode(self, trigger_reason: str,
                           severity: str = 'medium') -> Dict[str, Any]:
         """Activate fail-safe mode based on trigger conditions"""
-        
+
         # Determine appropriate degradation level
         if severity == 'critical':
             target_mode = 'emergency_stop'
@@ -3635,11 +3636,11 @@ class FailSafeHandler:
             target_mode = 'conservative'
         else:
             target_mode = 'normal'
-        
+
         # Update system mode
         previous_mode = self.current_mode
         self.current_mode = target_mode
-        
+
         # Record mode change
         mode_change = {
             'timestamp': time.time(),
@@ -3648,25 +3649,25 @@ class FailSafeHandler:
             'trigger_reason': trigger_reason,
             'severity': severity
         }
-        
+
         self.mode_history.append(mode_change)
-        
+
         return {
             'safe_mode_activated': True,
             'current_mode': self.current_mode,
             'mode_change': mode_change,
             'system_constraints': self.degradation_levels[self.current_mode]
         }
-    
+
     def apply_safe_mode_constraints(self, predictions: Dict[str, Any]) -> Dict[str, Any]:
         """Apply current safe mode constraints to predictions"""
-        
+
         constraints = self.degradation_levels[self.current_mode]
-        
+
         if 'scores' in predictions:
             # Apply confidence threshold
             valid_mask = predictions['scores'] >= constraints['confidence_threshold']
-            
+
             # Apply maximum detections limit
             if valid_mask.sum() > constraints['max_detections']:
                 # Keep only highest confidence detections
@@ -3674,7 +3675,7 @@ class FailSafeHandler:
                 keep_indices = sorted_indices[:constraints['max_detections']]
                 valid_mask = torch.zeros_like(predictions['scores'], dtype=torch.bool)
                 valid_mask[keep_indices] = True
-            
+
             # Filter all prediction components
             filtered_predictions = {}
             for key, value in predictions.items():
@@ -3682,14 +3683,14 @@ class FailSafeHandler:
                     filtered_predictions[key] = value[valid_mask]
                 else:
                     filtered_predictions[key] = value
-            
+
             filtered_predictions['safe_mode_applied'] = True
             filtered_predictions['current_mode'] = self.current_mode
             filtered_predictions['original_detections'] = len(predictions['scores'])
             filtered_predictions['filtered_detections'] = valid_mask.sum().item()
-            
+
             return filtered_predictions
-        
+
         return predictions
 ```
 
@@ -3709,7 +3710,7 @@ import torch
 
 class TestSparse4DComprehensive:
     """Comprehensive test suite for Enhanced Sparse4D system"""
-    
+
     @pytest.fixture
     def enhanced_config(self):
         """Enhanced configuration for comprehensive testing"""
@@ -3753,8 +3754,8 @@ class TestSparse4DComprehensive:
                 'performance_monitoring': True
             }
         })
-    
-    @pytest.fixture 
+
+    @pytest.fixture
     def comprehensive_batch(self):
         """Comprehensive batch data with all required components"""
         return {
@@ -3771,86 +3772,86 @@ class TestSparse4DComprehensive:
             'depth_maps': torch.randn(2, 6, 1, 224, 224),
             'temporal_samples': [torch.randn(2, 60, 256) for _ in range(3)]
         }
-    
+
     def test_end_to_end_pipeline(self, enhanced_config, comprehensive_batch):
         """Test complete end-to-end pipeline with all components"""
-        
+
         # Build comprehensive model
         model = build_component(enhanced_config.model)
-        
+
         # Validate model structure
         assert hasattr(model, 'instance_bank')
         assert hasattr(model, 'performance_tracker')
         assert hasattr(model, 'instance_denoising')
-        
+
         # Test forward pass
         model.eval()
         with torch.no_grad():
             predictions = model(comprehensive_batch)
-        
+
         # Validate prediction structure
         expected_keys = [
-            'cls_logits', 'bbox_preds', 'velocity_preds', 
+            'cls_logits', 'bbox_preds', 'velocity_preds',
             'depth_preds', 'quality_scores', 'instance_embeddings'
         ]
-        
+
         for key in expected_keys:
             assert key in predictions, f"Missing prediction key: {key}"
-        
+
         # Validate prediction shapes
         batch_size, total_queries = 2, 100
         assert predictions['cls_logits'].shape == (batch_size, total_queries, 11)
         assert predictions['bbox_preds'].shape == (batch_size, total_queries, 9)
         assert predictions['quality_scores'].shape == (batch_size, total_queries, 2)
-        
+
         # Test performance monitoring
         if hasattr(model, 'performance_tracker'):
             perf_summary = model.get_performance_summary()
             assert 'model_performance' in perf_summary
             assert 'instance_bank_stats' in perf_summary
-    
+
     def test_instance_bank_temporal_propagation(self, enhanced_config, comprehensive_batch):
         """Test comprehensive instance bank functionality"""
-        
+
         model = build_component(enhanced_config.model)
-        
+
         # Test temporal propagation across multiple frames
         sequence_length = 5
         for frame_idx in range(sequence_length):
             # Update frame index
             comprehensive_batch['frame_idx'] = torch.tensor([frame_idx, frame_idx + 1])
-            
+
             # Test instance bank update
             temporal_instances = model.instance_bank.propagate_instances(
                 comprehensive_batch['current_instances'],
                 comprehensive_batch['ego_motion'],
                 frame_idx
             )
-            
+
             assert temporal_instances is not None
             assert temporal_instances.shape[1] <= model.instance_bank.max_instances
-            
+
             # Verify motion compensation
             if frame_idx > 0:
                 bank_stats = model.instance_bank.get_statistics()
                 assert bank_stats.get('total_propagations', 0) > 0
                 assert bank_stats.get('motion_compensations', 0) > 0
-    
+
     def test_hr_compatible_attention_detailed(self, enhanced_config):
         """Test HR-compatible deformable attention in detail"""
-        
+
         attention = build_component(enhanced_config.model.attention_config)
-        
+
         # Verify HR compatibility
         assert attention.hr_compatible == True
         assert attention.sampling_points == 13
         assert attention.fixed_keypoints == 7
         assert attention.learnable_keypoints == 6
-        
+
         # Test keypoint layout
         assert hasattr(attention, 'hr_fixed_positions')
         assert attention.hr_fixed_positions.shape == (7, 2)
-        
+
         # Test attention forward pass with comprehensive inputs
         queries = torch.randn(2, 100, 256)
         features = [torch.randn(2, 256, 28, 28) for _ in range(6)]
@@ -3858,90 +3859,90 @@ class TestSparse4DComprehensive:
             'raw_intrinsics': torch.eye(3).unsqueeze(0).repeat(2, 6, 1, 1),
             'raw_extrinsics': torch.eye(4).unsqueeze(0).repeat(2, 6, 1, 1)
         }
-        
+
         result = attention(queries, features, camera_params)
-        
+
         # Validate output
         assert result.shape == queries.shape
         assert not torch.isnan(result).any()
         assert not torch.isinf(result).any()
-        
+
         # Test performance metrics
         if hasattr(attention, 'attention_metrics'):
             metrics = attention.attention_metrics
             assert hasattr(metrics, 'attention_weights_history')
-    
+
     def test_depth_estimation_integration(self, enhanced_config, comprehensive_batch):
         """Test comprehensive depth estimation functionality"""
-        
+
         model = build_component(enhanced_config.model)
-        
+
         # Test dense depth branch
         fpn_features = [torch.randn(2, 256, 56, 56), torch.randn(2, 512, 28, 28),
                        torch.randn(2, 1024, 14, 14), torch.randn(2, 2048, 7, 7)]
-        
+
         depth_branch = DenseDepthBranch()
         depth_predictions = depth_branch(fpn_features)
-        
+
         # Validate depth predictions
         assert depth_predictions.shape[0] == 2  # Batch size
         assert depth_predictions.shape[1] == 1  # Single depth channel
         assert 1.0 <= depth_predictions.min() <= depth_predictions.max() <= 60.0  # Depth range
-        
+
         # Test depth loss computation
         gt_depth = torch.randn_like(depth_predictions) * 10 + 30  # Random GT depth
         valid_mask = torch.ones_like(depth_predictions, dtype=torch.bool)
-        
+
         depth_loss = depth_branch.compute_depth_loss(depth_predictions, gt_depth, valid_mask)
         assert depth_loss.item() >= 0  # Loss should be non-negative
-        
+
         # Test instance-level depth reweighting
         instance_reweight = InstanceLevelDepthReweight()
         instance_features = torch.randn(2, 60, 256)
         keypoint_depths = torch.randn(2, 60, 13)
-        
+
         reweight_results = instance_reweight(instance_features, keypoint_depths)
-        
+
         assert 'reweighted_features' in reweight_results
         assert 'depth_confidence' in reweight_results
         assert reweight_results['reweighted_features'].shape == instance_features.shape
-    
+
     def test_quality_estimation_module(self, enhanced_config):
         """Test quality estimation with centerness and yawness metrics"""
-        
+
         quality_module = QualityEstimationModule()
-        
+
         # Test quality score prediction
         query_features = torch.randn(2, 100, 256)
         quality_scores = quality_module(query_features)
-        
+
         assert quality_scores.shape == (2, 100, 2)  # [centerness, yawness]
         assert 0 <= quality_scores.min() <= quality_scores.max() <= 1  # Sigmoid range
-        
+
         # Test quality metrics computation
         pred_boxes = torch.randn(50, 9)  # Random predicted boxes
         gt_boxes = torch.randn(50, 9)    # Random ground truth boxes
-        
+
         quality_metrics = compute_quality_metrics(pred_boxes, gt_boxes)
-        
+
         assert 'centerness' in quality_metrics
         assert 'yawness' in quality_metrics
         assert quality_metrics['centerness'].shape == (50,)
         assert quality_metrics['yawness'].shape == (50,)
-        
+
         # Verify metric ranges
         assert 0 <= quality_metrics['centerness'].min() <= quality_metrics['centerness'].max() <= 1
         assert -1 <= quality_metrics['yawness'].min() <= quality_metrics['yawness'].max() <= 1
-    
+
     def test_cross_dataset_harmonization(self):
         """Test comprehensive cross-dataset harmonization"""
-        
+
         harmonizer = CrossDatasetHarmonization(
             coordinate_systems={'nuscenes': 'standard', 'waymo': 'alternative'},
             class_mappings={'waymo': {'vehicle': 'car', 'pedestrian': 'person'}},
             normalization_params={'waymo': {'mean': [0.5, 0.5, 0.5], 'std': [0.2, 0.2, 0.2]}}
         )
-        
+
         # Test sample harmonization
         sample_data = {
             'annotations': [
@@ -3953,25 +3954,25 @@ class TestSparse4DComprehensive:
             'timestamp': 1234567890,
             'camera_params': {'intrinsics': np.eye(3), 'extrinsics': np.eye(4)}
         }
-        
+
         harmonized = harmonizer.harmonize_sample(sample_data, 'waymo')
-        
+
         # Verify class mapping
         assert harmonized['annotations'][0]['class_name'] == 'car'
-        
+
         # Verify normalization
         assert 'multi_view_images' in harmonized
-        
+
         # Verify statistics tracking
         stats = harmonizer.get_harmonization_stats()
         assert stats['samples_processed'] == 1
         assert stats['class_mappings_applied'] >= 1
-    
+
     def test_data_quality_assessment(self):
         """Test comprehensive data quality assessment"""
-        
+
         quality_assessor = DataQualityAssessment()
-        
+
         # Create comprehensive sample data
         sample_data = {
             'multi_view_images': {
@@ -3991,7 +3992,7 @@ class TestSparse4DComprehensive:
                 },
                 {
                     'bbox_3d': [10, 20, 30, 2, 3, 4, 0.5, 0, 0],
-                    'class_name': 'pedestrian', 
+                    'class_name': 'pedestrian',
                     'visibility': 1.0,
                     'track_id': 2
                 }
@@ -4010,63 +4011,63 @@ class TestSparse4DComprehensive:
                 {'timestamp': 1234567885, 'annotations': []}
             ]
         }
-        
+
         # Assess quality
         quality_scores = quality_assessor.assess_sample_quality(sample_data)
-        
+
         # Verify all quality metrics
         expected_metrics = [
             'image_quality', 'annotation_quality', 'temporal_consistency',
             'multi_view_consistency', 'completeness_score', 'metadata_quality',
             'overall_quality'
         ]
-        
+
         for metric in expected_metrics:
             assert metric in quality_scores
             assert 0 <= quality_scores[metric] <= 1
-        
+
         # Test multiple assessments for statistics
         for _ in range(5):
             quality_assessor.assess_sample_quality(sample_data)
-        
+
         stats = quality_assessor.get_quality_statistics()
         assert stats['total_assessments'] == 6  # Initial + 5 additional
         assert 'per_metric_stats' in stats
         assert 'high_quality_samples' in stats
-    
+
     @pytest.mark.parametrize("optimization_level", ["standard", "aggressive", "mobile"])
     def test_model_optimization(self, enhanced_config, optimization_level):
         """Test model optimization for different deployment scenarios"""
-        
+
         model = build_component(enhanced_config.model)
         optimizer = ProductionOptimizer()
-        
+
         try:
             # Test optimization
             optimized_model = optimizer.optimize_model_for_inference(
                 model, optimization_level, target_platform="gpu"
             )
-            
+
             assert optimized_model is not None
-            
+
             # Test optimization history tracking
             history = optimizer.optimization_history
             assert len(history) > 0
-            
+
             latest_optimization = history[-1]
             assert latest_optimization['optimization_level'] == optimization_level
             assert 'optimization_time' in latest_optimization
             assert 'optimizations_applied' in latest_optimization
-            
+
         except Exception as e:
             pytest.skip(f"Optimization {optimization_level} not available: {e}")
-    
+
     def test_safety_compliance_framework(self, enhanced_config):
         """Test comprehensive ISO 26262 safety compliance"""
-        
+
         model = build_component(enhanced_config.model)
         safety_framework = ISO26262ComplianceFramework(asil_level="ASIL-B")
-        
+
         # Create test data for safety validation
         test_data = {
             'multi_view_images': torch.randn(1, 6, 3, 224, 224),
@@ -4075,45 +4076,45 @@ class TestSparse4DComprehensive:
                 'extrinsics': torch.eye(4).unsqueeze(0).repeat(1, 6, 1, 1)
             }
         }
-        
+
         # Perform safety validation
         safety_validation = safety_framework.validate_system_safety(model, test_data)
-        
+
         # Verify safety validation structure
         expected_components = [
             'asil_level', 'overall_compliance', 'hazard_assessment',
             'fmea_results', 'requirements_verification', 'runtime_safety'
         ]
-        
+
         for component in expected_components:
             assert component in safety_validation
-        
+
         # Test runtime safety monitoring
         predictions = {
             'scores': torch.tensor([0.8, 0.6, 0.4, 0.2]),
             'track_ids': torch.tensor([1, 2, 3, 4])
         }
-        
+
         system_metrics = {
             'latency_ms': 50,
             'memory_usage_mb': 2000
         }
-        
+
         runtime_monitor = safety_framework.runtime_monitor
         safety_status = runtime_monitor.monitor_real_time(predictions, system_metrics)
-        
+
         assert 'safety_violations' in safety_status
         assert 'safety_status' in safety_status
         assert safety_status['safety_status'] in ['safe', 'unsafe']
-    
+
     def test_production_server_comprehensive(self):
         """Test comprehensive production server functionality"""
-        
+
         # Create temporary model for testing
         with tempfile.NamedTemporaryFile(suffix='.pt', delete=False) as temp_model:
             dummy_model = nn.Sequential(nn.Linear(256, 10))
             torch.save(dummy_model, temp_model.name)
-            
+
             try:
                 config = OmegaConf.create({
                     'optimization_level': 'standard',
@@ -4124,65 +4125,65 @@ class TestSparse4DComprehensive:
                     'alert_config': {},
                     'safety_config': {}
                 })
-                
+
                 server = ProductionServer(temp_model.name, config)
-                
+
                 # Test server components
                 assert hasattr(server, 'load_balancer')
                 assert hasattr(server, 'cache_manager')
                 assert hasattr(server, 'health_monitor')
                 assert hasattr(server, 'rate_limiter')
                 assert hasattr(server, 'safety_monitor')
-                
+
                 # Test health monitoring
                 health_status = server.health_monitor.get_comprehensive_status()
                 assert 'status' in health_status
                 assert 'health_checks' in health_status
-                
+
                 # Test rate limiting
                 rate_limiter = server.rate_limiter
                 assert rate_limiter.allow_request() == True  # Should allow first request
-                
+
                 # Test cache functionality
                 cache_manager = server.cache_manager
                 cache_manager.set('test_key', 'test_value')
                 assert cache_manager.get('test_key') == 'test_value'
-                
+
                 # Test server statistics
                 stats = server.get_server_stats()
                 expected_stats = [
                     'model_metadata', 'performance_summary', 'health_status',
                     'cache_stats', 'load_balancer_stats', 'rate_limiter_stats'
                 ]
-                
+
                 for stat in expected_stats:
                     assert stat in stats
-                
+
             finally:
                 os.unlink(temp_model.name)
 
 # Performance and regression tests
 class TestPerformanceRegression:
     """Performance regression and benchmarking tests"""
-    
+
     def test_inference_latency_regression(self, enhanced_config, comprehensive_batch):
         """Test for inference latency regression"""
-        
+
         model = build_component(enhanced_config.model)
         model.eval()
-        
+
         # Baseline latency thresholds (adjust based on hardware)
         LATENCY_THRESHOLDS = {
             'avg_latency_ms': 200,    # Average latency
             'p95_latency_ms': 400,    # 95th percentile
             'p99_latency_ms': 600     # 99th percentile
         }
-        
+
         # Warm up
         for _ in range(10):
             with torch.no_grad():
                 _ = model(comprehensive_batch)
-        
+
         # Benchmark
         latencies = []
         for _ in range(100):
@@ -4190,63 +4191,63 @@ class TestPerformanceRegression:
             with torch.no_grad():
                 _ = model(comprehensive_batch)
             latencies.append((time.perf_counter() - start) * 1000)
-        
+
         # Calculate statistics
         avg_latency = np.mean(latencies)
         p95_latency = np.percentile(latencies, 95)
         p99_latency = np.percentile(latencies, 99)
-        
+
         # Check against thresholds
         assert avg_latency < LATENCY_THRESHOLDS['avg_latency_ms'], \
             f"Average latency regression: {avg_latency:.2f}ms > {LATENCY_THRESHOLDS['avg_latency_ms']}ms"
-        
+
         assert p95_latency < LATENCY_THRESHOLDS['p95_latency_ms'], \
             f"P95 latency regression: {p95_latency:.2f}ms > {LATENCY_THRESHOLDS['p95_latency_ms']}ms"
-        
+
         print(f"✅ Latency benchmark - Avg: {avg_latency:.2f}ms, P95: {p95_latency:.2f}ms, P99: {p99_latency:.2f}ms")
-    
+
     def test_memory_usage_regression(self, enhanced_config, comprehensive_batch):
         """Test for memory usage regression"""
-        
+
         model = build_component(enhanced_config.model)
-        
+
         MEMORY_THRESHOLDS = {
             'peak_memory_mb': 6000,   # Peak GPU memory usage
             'avg_memory_mb': 4000     # Average GPU memory usage
         }
-        
+
         if torch.cuda.is_available():
             model = model.cuda()
             comprehensive_batch = {
-                k: v.cuda() if isinstance(v, torch.Tensor) else v 
+                k: v.cuda() if isinstance(v, torch.Tensor) else v
                 for k, v in comprehensive_batch.items()
             }
-            
+
             torch.cuda.empty_cache()
             torch.cuda.reset_peak_memory_stats()
-            
+
             # Measure memory usage
             memory_usages = []
             for _ in range(10):
                 torch.cuda.empty_cache()
                 start_memory = torch.cuda.memory_allocated() / 1024 / 1024
-                
+
                 with torch.no_grad():
                     _ = model(comprehensive_batch)
-                
+
                 peak_memory = torch.cuda.max_memory_allocated() / 1024 / 1024
                 memory_usages.append(peak_memory)
                 torch.cuda.reset_peak_memory_stats()
-            
+
             avg_memory = np.mean(memory_usages)
             peak_memory = np.max(memory_usages)
-            
+
             assert peak_memory < MEMORY_THRESHOLDS['peak_memory_mb'], \
                 f"Peak memory regression: {peak_memory:.2f}MB > {MEMORY_THRESHOLDS['peak_memory_mb']}MB"
-            
+
             assert avg_memory < MEMORY_THRESHOLDS['avg_memory_mb'], \
                 f"Average memory regression: {avg_memory:.2f}MB > {MEMORY_THRESHOLDS['avg_memory_mb']}MB"
-            
+
             print(f"✅ Memory benchmark - Avg: {avg_memory:.2f}MB, Peak: {peak_memory:.2f}MB")
 
 # Run comprehensive tests
@@ -4465,7 +4466,7 @@ The synchronized ADNet implementation represents a **comprehensive 4D spatio-tem
 
 1. **Complete Architecture Implementation**: Full HR ADNet compatibility with exact technical specifications
 2. **Production-Ready Infrastructure**: Horizon Journey 5 optimization, safety compliance, comprehensive testing
-3. **Cross-Dataset Harmonization**: Advanced multi-dataset training and validation framework  
+3. **Cross-Dataset Harmonization**: Advanced multi-dataset training and validation framework
 4. **Comprehensive Visualization**: Multi-platform export supporting nuScenes, CARLA, Omniverse, RViz, and more
 5. **Safety & Compliance**: Complete ISO 26262 framework with ASIL-B certification readiness
 
@@ -4484,7 +4485,7 @@ The synchronized ADNet implementation represents a **comprehensive 4D spatio-tem
 - [ ] Deploy instance bank temporal memory system
 - [ ] Integrate depth estimation capabilities
 
-**Phase 2 (Q2-Q3)**: Advanced features & optimization  
+**Phase 2 (Q2-Q3)**: Advanced features & optimization
 - [ ] Deploy Journey 5 hardware acceleration
 - [ ] Implement comprehensive safety framework
 - [ ] Complete cross-platform visualization export

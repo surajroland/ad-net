@@ -8,14 +8,20 @@
 .PHONY: health quick-test full-train ci-build ci-test ci-deploy env-info research viz
 .PHONY: logs-dev logs-train clean-system
 
+# Load environment variables from .env file
+include .env
+export
+
 # Default environment variables
 DOCKER_REGISTRY ?= ghcr.io/$(shell git remote get-url origin | sed 's/.*github.com[:/]\([^/]*\).*/\1/' | tr '[:upper:]' '[:lower:]')
-VERSION ?= latest
-COMPOSE_FILE ?= docker-compose.yml
-SERVICE_DEV = adnet-dev
-SERVICE_TRAIN = adnet-train
-SERVICE_API = adnet-api
-SERVICE_VIZ = adnet-viz
+VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "latest")
+BUILD_DATE ?= $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+VCS_REF ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+COMPOSE_FILE ?= docker/docker-compose.yml
+SERVICE_DEV = dev
+SERVICE_TRAIN = training
+SERVICE_API = production
+SERVICE_VIZ = viz
 
 # Colors for output
 RED := \033[0;31m
@@ -142,17 +148,17 @@ build: build-dev build-api build-train
 
 build-dev:
 	@echo "$(BLUE)🔨 Building development image...$(NC)"
-	DOCKER_BUILDKIT=1 docker-compose -f $(COMPOSE_FILE) build adnet-dev
+	DOCKER_BUILDKIT=1 docker-compose -f $(COMPOSE_FILE) build dev
 	@echo "$(GREEN)✅ Development image built: $(DOCKER_REGISTRY)/adnet-dev:$(VERSION)$(NC)"
 
 build-api:
 	@echo "$(BLUE)🔨 Building API image...$(NC)"
-	DOCKER_BUILDKIT=1 docker-compose -f $(COMPOSE_FILE) build adnet-api
+	DOCKER_BUILDKIT=1 docker-compose -f $(COMPOSE_FILE) build production
 	@echo "$(GREEN)✅ API image built: $(DOCKER_REGISTRY)/adnet-api:$(VERSION)$(NC)"
 
 build-train:
 	@echo "$(BLUE)🔨 Building training image...$(NC)"
-	DOCKER_BUILDKIT=1 docker-compose -f $(COMPOSE_FILE) build adnet-train
+	DOCKER_BUILDKIT=1 docker-compose -f $(COMPOSE_FILE) build training
 	@echo "$(GREEN)✅ Training image built: $(DOCKER_REGISTRY)/adnet-train:$(VERSION)$(NC)"
 
 # Service management
@@ -199,7 +205,7 @@ api:
 
 research:
 	@echo "$(BLUE)🔬 Starting research environment...$(NC)"
-	docker-compose -f $(COMPOSE_FILE) --profile research up -d adnet-research
+	docker-compose -f $(COMPOSE_FILE) --profile research up -d research
 	@echo "$(GREEN)✅ Jupyter Lab available at http://localhost:8888$(NC)"
 
 viz:

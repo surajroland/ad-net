@@ -9,6 +9,21 @@
 # ==============================================================================
 FROM ubuntu:24.04 AS base
 
+# Build arguments for version management
+ARG VERSION=latest
+ARG BUILD_DATE
+ARG VCS_REF
+
+# Image metadata for proper naming and versioning
+LABEL org.opencontainers.image.title="adnet-base"
+LABEL org.opencontainers.image.description="Autonomous Driving Neural Network Framework"
+LABEL org.opencontainers.image.version="${VERSION}"
+LABEL org.opencontainers.image.created="${BUILD_DATE}"
+LABEL org.opencontainers.image.revision="${VCS_REF}"
+LABEL org.opencontainers.image.vendor="ADNet Project"
+LABEL org.opencontainers.image.authors="ADNet Development Team"
+LABEL maintainer="adnet-dev@example.com"
+
 # System setup - Core environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
     TZ=Europe/Berlin \
@@ -148,6 +163,11 @@ RUN echo "Installing project..." && \
 # ==============================================================================
 FROM base AS development
 
+# Stage-specific labels
+LABEL org.opencontainers.image.title="adnet-dev"
+LABEL org.opencontainers.image.version="${VERSION}"
+LABEL stage="dev"
+
 # Install development dependencies
 COPY requirements/dev.txt requirements/dev.txt
 RUN echo "Installing development dependencies..." && \
@@ -183,6 +203,11 @@ CMD ["bash"]
 # ==============================================================================
 FROM base AS training
 
+# Stage-specific labels
+LABEL org.opencontainers.image.title="adnet-training"
+LABEL org.opencontainers.image.version="${VERSION}"
+LABEL stage="training"
+
 # Install training dependencies
 COPY requirements/training.txt requirements/training.txt
 RUN echo "Installing training dependencies..." && \
@@ -198,6 +223,11 @@ CMD ["python", "scripts/training/train.py"]
 # PRODUCTION STAGE - Minimal deployment image for API serving
 # ==============================================================================
 FROM base AS production
+
+# Stage-specific labels
+LABEL org.opencontainers.image.title="adnet-production"
+LABEL org.opencontainers.image.version="${VERSION}"
+LABEL stage="production"
 
 # Install API dependencies
 COPY requirements/api.txt requirements/api.txt
