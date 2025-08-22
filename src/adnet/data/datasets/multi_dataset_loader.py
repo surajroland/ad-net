@@ -93,6 +93,7 @@ class UnifiedTaxonomy:
     }
 
     def __init__(self):
+        """Initialize unified taxonomy."""
         self.unified_to_id = {
             name: idx for idx, name in enumerate(self.UNIFIED_CLASSES)
         }
@@ -100,7 +101,7 @@ class UnifiedTaxonomy:
         self.num_classes = len(self.UNIFIED_CLASSES)
 
     def map_class(self, dataset_name: str, original_class: str) -> Optional[int]:
-        """Map dataset-specific class to unified class ID"""
+        """Map dataset-specific class to unified class ID."""
         if dataset_name not in self.DATASET_MAPPINGS:
             return None
 
@@ -112,7 +113,7 @@ class UnifiedTaxonomy:
         return self.unified_to_id.get(unified_class)
 
     def get_unified_class_name(self, class_id: int) -> str:
-        """Get unified class name from ID"""
+        """Get unified class name from ID."""
         return self.id_to_unified.get(class_id, "unknown")
 
 
@@ -158,10 +159,11 @@ class CoordinateHarmonizer:
     STANDARD_SYSTEM = {"x_forward": True, "y_left": True, "z_up": True}
 
     def __init__(self):
+        """Initialize unified taxonomy."""
         self._build_transformation_matrices()
 
     def _build_transformation_matrices(self):
-        """Build transformation matrices for each dataset"""
+        """Build transformation matrices for each dataset."""
         self.transforms = {}
 
         for dataset, system in self.COORDINATE_SYSTEMS.items():
@@ -192,7 +194,7 @@ class CoordinateHarmonizer:
             self.transforms[dataset] = transform
 
     def harmonize_pose(self, dataset_name: str, pose: np.ndarray) -> np.ndarray:
-        """Harmonize pose to standard coordinate system"""
+        """Harmonize pose to standard coordinate system."""
         if dataset_name not in self.transforms:
             return pose  # No transformation available
 
@@ -203,7 +205,7 @@ class CoordinateHarmonizer:
         return harmonized_pose
 
     def harmonize_box_3d(self, dataset_name: str, box_3d: np.ndarray) -> np.ndarray:
-        """Harmonize 3D bounding box to standard coordinate system"""
+        """Harmonize 3D bounding box to standard coordinate system."""
         if dataset_name not in self.transforms:
             return box_3d
 
@@ -536,7 +538,7 @@ class CrossDatasetValidator:
         self.dataset_names = [d.__class__.__name__ for d in datasets]
 
     def create_cross_validation_splits(self) -> List[Tuple[List[int], List[int]]]:
-        """Create cross-dataset validation splits"""
+        """Create cross-dataset validation splits."""
         splits = []
 
         for train_idx in range(len(self.datasets)):
@@ -551,7 +553,7 @@ class CrossDatasetValidator:
     def evaluate_domain_gap(
         self, dataset_a: BaseDataset, dataset_b: BaseDataset
     ) -> Dict[str, float]:
-        """Evaluate domain gap between two datasets"""
+        """Evaluate domain gap between two datasets."""
         gap_metrics = {}
 
         # Class distribution similarity
@@ -574,21 +576,21 @@ class CrossDatasetValidator:
     def _compute_class_distribution_kl(
         self, dataset_a: BaseDataset, dataset_b: BaseDataset
     ) -> float:
-        """Compute KL divergence between class distributions"""
+        """Compute KL divergence between class distributions."""
         # Simplified implementation
         return 0.5  # Placeholder
 
     def _compute_camera_similarity(
         self, dataset_a: BaseDataset, dataset_b: BaseDataset
     ) -> float:
-        """Compute camera setup similarity"""
+        """Compute camera setup similarity."""
         # Compare number of cameras, resolutions, etc.
         return 0.8  # Placeholder
 
     def _compute_scene_diversity(
         self, dataset_a: BaseDataset, dataset_b: BaseDataset
     ) -> float:
-        """Compute scene diversity ratio"""
+        """Compute scene diversity ratio."""
         # Compare environments, weather conditions, etc.
         return 0.6  # Placeholder
 

@@ -89,6 +89,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
             sequence_length: Number of frames in temporal sequences
             temporal_stride: Stride between frames in sequence
             load_interval: Interval for loading frames
+            **kwargs: Additional keyword arguments passed to parent classes
 
         """
         self.version = version
@@ -112,7 +113,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
             self._build_temporal_sequences()
 
     def _load_dataset_info(self) -> None:
-        """Load nuScenes-specific dataset information"""
+        """Load nuScenes-specific dataset information."""
         self.class_names = self.CLASS_NAMES
         self.camera_names = self.CAMERA_NAMES
         self.num_classes = len(self.CLASS_NAMES)
@@ -122,7 +123,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
         self.class_to_id = {name: idx for idx, name in enumerate(self.CLASS_NAMES)}
 
     def _load_nuscenes_db(self) -> None:
-        """Load nuScenes database files"""
+        """Load nuScenes database files."""
         db_path = os.path.join(self.data_root, self.version)
 
         # Load all database tables
@@ -161,7 +162,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
                 }
 
     def _load_annotations(self) -> None:
-        """Load and parse nuScenes annotations"""
+        """Load and parse nuScenes annotations."""
         # Filter samples by split
         if self.split == "train":
             scene_splits = self._get_train_scenes()
@@ -192,7 +193,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
         print(f"Loaded {len(self._sample_tokens)} samples for {self.split} split")
 
     def _get_train_scenes(self) -> List[str]:
-        """Get scene tokens for training split"""
+        """Get scene tokens for training split."""
         # Load splits file
         splits_path = os.path.join(self.data_root, self.version, "train.txt")
         if os.path.exists(splits_path):
@@ -210,7 +211,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
         ]
 
     def _get_val_scenes(self) -> List[str]:
-        """Get scene tokens for validation split"""
+        """Get scene tokens for validation split."""
         splits_path = os.path.join(self.data_root, self.version, "val.txt")
         if os.path.exists(splits_path):
             with open(splits_path, "r") as f:
@@ -229,7 +230,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
         ]
 
     def _get_test_scenes(self) -> List[str]:
-        """Get scene tokens for test split"""
+        """Get scene tokens for test split."""
         splits_path = os.path.join(self.data_root, self.version, "test.txt")
         if os.path.exists(splits_path):
             with open(splits_path, "r") as f:
@@ -537,7 +538,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
         return dict(tracks)
 
     def _load_lidar_data(self, sample_token: str) -> Optional[npt.NDArray[np.float32]]:
-        """Load LiDAR point cloud data"""
+        """Load LiDAR point cloud data."""
         if not self.load_lidar:
             return None
 
@@ -553,7 +554,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
         return points[:, :4]
 
     def _load_radar_data(self, sample_token: str) -> Optional[npt.NDArray[np.float32]]:
-        """Load radar point data"""
+        """Load radar point data."""
         if not self.load_radar:
             return None
 
@@ -589,7 +590,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
     def _load_depth_data(
         self, sample_token: str
     ) -> Optional[Dict[str, npt.NDArray[np.float32]]]:
-        """Load depth maps for all cameras"""
+        """Load depth maps for all cameras."""
         if not self.load_depth:
             return None
 
@@ -598,19 +599,19 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
         return None
 
     def _get_sample_location(self, sample: Dict[str, Any]) -> str:
-        """Get sample location information"""
+        """Get sample location information."""
         scene = self.db["scene"][sample["scene_token"]]
         log = self.db["log"][scene["log_token"]]
         return log["location"]
 
     def _get_sample_weather(self, sample: Dict[str, Any]) -> str:
-        """Get sample weather information"""
+        """Get sample weather information."""
         # nuScenes doesn't have explicit weather labels
         # This could be inferred from scene description or external data
         return "clear"
 
     def _get_sample_time(self, sample: Dict[str, Any]) -> str:
-        """Get sample time of day"""
+        """Get sample time of day."""
         scene = self.db["scene"][sample["scene_token"]]
         description = scene["description"].lower()
 

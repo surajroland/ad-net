@@ -26,13 +26,15 @@ class DomainGapMetrics:
     """Container for domain gap analysis metrics.
 
     Attributes:
-        class_distribution_divergence: Jensen-Shannon divergence between class distributions.
+        class_distribution_divergence: Jensen-Shannon divergence between class
+            distributions.
         spatial_distribution_divergence: Divergence in spatial object distributions.
         camera_setup_similarity: Similarity score for camera configurations.
         temporal_characteristics_similarity: Similarity in temporal patterns.
         scene_complexity_ratio: Ratio of scene complexity metrics.
         weather_distribution_divergence: Divergence in weather conditions.
-        overall_domain_gap_score: Combined domain gap score (0-1, higher = more different).
+        overall_domain_gap_score: Combined domain gap score (0-1, higher =
+            more different).
 
     """
 
@@ -77,6 +79,7 @@ class DatasetStatisticsAnalyzer:
     """
 
     def __init__(self, unified_taxonomy: Optional[UnifiedTaxonomy] = None) -> None:
+        """Initialize cross-dataset validator."""
         self.unified_taxonomy = unified_taxonomy or UnifiedTaxonomy()
 
     def analyze_dataset(self, dataset: BaseDataset) -> Dict[str, Any]:
@@ -86,7 +89,8 @@ class DatasetStatisticsAnalyzer:
             dataset: The dataset to analyze.
 
         Returns:
-            Dictionary containing detailed analysis results including class distributions,
+            Dictionary containing detailed analysis results including class
+            distributions,
             spatial patterns, temporal characteristics, and scene complexity metrics.
 
         """
@@ -113,7 +117,8 @@ class DatasetStatisticsAnalyzer:
             dataset: The dataset to analyze.
 
         Returns:
-            Dictionary containing class counts, probabilities, and distribution statistics.
+            Dictionary containing class counts, probabilities, and distribution
+            statistics.
 
         """
         class_counts = Counter()
@@ -168,7 +173,7 @@ class DatasetStatisticsAnalyzer:
         }
 
     def _analyze_spatial_distribution(self, dataset: BaseDataset) -> Dict[str, Any]:
-        """Analyze spatial distribution of objects"""
+        """Analyze spatial distribution of objects."""
         spatial_stats = {
             "x_positions": [],
             "y_positions": [],
@@ -218,7 +223,7 @@ class DatasetStatisticsAnalyzer:
         return summary
 
     def _analyze_temporal_characteristics(self, dataset: BaseDataset) -> Dict[str, Any]:
-        """Analyze temporal characteristics"""
+        """Analyze temporal characteristics."""
         temporal_stats = {
             "sequence_lengths": [],
             "frame_rates": [],
@@ -263,7 +268,7 @@ class DatasetStatisticsAnalyzer:
         return summary
 
     def _analyze_scene_complexity(self, dataset: BaseDataset) -> Dict[str, Any]:
-        """Analyze scene complexity metrics"""
+        """Analyze scene complexity metrics."""
         complexity_stats = {
             "objects_per_frame": [],
             "unique_classes_per_frame": [],
@@ -311,7 +316,7 @@ class DatasetStatisticsAnalyzer:
         return summary
 
     def _analyze_camera_characteristics(self, dataset: BaseDataset) -> Dict[str, Any]:
-        """Analyze camera setup characteristics"""
+        """Analyze camera setup characteristics."""
         camera_stats = {
             "num_cameras": 0,
             "camera_names": [],
@@ -952,13 +957,23 @@ class CrossDatasetValidator:
                 "source_dataset": result.source_dataset,
                 "target_dataset": result.target_dataset,
                 "domain_gap_metrics": {
-                    "class_distribution_divergence": result.domain_gap_metrics.class_distribution_divergence,
-                    "spatial_distribution_divergence": result.domain_gap_metrics.spatial_distribution_divergence,
+                    "class_distribution_divergence": (
+                        result.domain_gap_metrics.class_distribution_divergence
+                    ),
+                    "spatial_distribution_divergence": (
+                        result.domain_gap_metrics.spatial_distribution_divergence
+                    ),
                     "camera_setup_similarity": result.domain_gap_metrics.camera_setup_similarity,
-                    "temporal_characteristics_similarity": result.domain_gap_metrics.temporal_characteristics_similarity,
+                    "temporal_characteristics_similarity": (
+                        result.domain_gap_metrics.temporal_characteristics_similarity
+                    ),
                     "scene_complexity_ratio": result.domain_gap_metrics.scene_complexity_ratio,
-                    "weather_distribution_divergence": result.domain_gap_metrics.weather_distribution_divergence,
-                    "overall_domain_gap_score": result.domain_gap_metrics.overall_domain_gap_score,
+                    "weather_distribution_divergence": (
+                        result.domain_gap_metrics.weather_distribution_divergence
+                    ),
+                    "overall_domain_gap_score": (
+                        result.domain_gap_metrics.overall_domain_gap_score
+                    ),
                 },
                 "performance_metrics": result.performance_metrics,
                 "class_specific_performance": result.class_specific_performance,
@@ -972,7 +987,7 @@ class CrossDatasetValidator:
         print(f"Validation results saved to {self.output_dir}")
 
     def generate_visualization_report(self, results: List[CrossDatasetResults]) -> None:
-        """Generate visualization report for cross-dataset validation"""
+        """Generate visualization report for cross-dataset validation."""
         if not self.output_dir:
             print("No output directory specified for visualizations")
             return
@@ -987,7 +1002,7 @@ class CrossDatasetValidator:
         self._create_recommendation_summary(results)
 
     def _create_domain_gap_heatmap(self, results: List[CrossDatasetResults]) -> None:
-        """Create heatmap of domain gaps between datasets"""
+        """Create heatmap of domain gaps between datasets."""
         # Collect data for heatmap
         datasets = set()
         for result in results:
@@ -1022,12 +1037,12 @@ class CrossDatasetValidator:
         plt.close()
 
     def _create_performance_plots(self, results: List[CrossDatasetResults]) -> None:
-        """Create performance comparison plots"""
+        """Create performance comparison plots."""
         # Implementation would create various performance visualizations
         pass
 
     def _create_recommendation_summary(self, results: List[CrossDatasetResults]) -> str:
-        """Create summary of recommendations across all dataset pairs"""
+        """Create summary of recommendations across all dataset pairs."""
         all_recommendations = []
         for result in results:
             all_recommendations.extend(result.recommendations)
