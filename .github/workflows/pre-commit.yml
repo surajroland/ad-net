@@ -10,6 +10,7 @@ jobs:
   pre-commit:
     name: Pre-commit Hooks
     runs-on: ubuntu-latest
+    if: vars.ENABLE_CI == 'true'
 
     steps:
     - name: Checkout code

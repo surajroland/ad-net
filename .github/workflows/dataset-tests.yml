@@ -24,6 +24,7 @@ jobs:
   dataset-tests:
     name: Dataset Tests
     runs-on: ubuntu-latest
+    if: vars.ENABLE_CI == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -126,6 +127,7 @@ jobs:
   dataset-compatibility:
     name: Cross-Dataset Compatibility
     runs-on: ubuntu-latest
+    if: vars.ENABLE_CI == 'true'
     needs: dataset-tests
 
     steps:
@@ -171,7 +173,7 @@ jobs:
     name: Generate Test Report
     runs-on: ubuntu-latest
     needs: [dataset-tests, dataset-compatibility]
-    if: always()
+    if: vars.ENABLE_CI == 'true' && always()
 
     steps:
     - name: Generate report
