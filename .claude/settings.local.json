@@ -72,7 +72,8 @@
       "Bash(do mv \"$file\" \"$file.disabled\")",
       "Bash(done)",
       "Bash(for:*)",
-      "Bash(do mv \"$file\" \"$file%.disabled\")"
+      "Bash(do mv \"$file\" \"$file%.disabled\")",
+      "Bash(gh api:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

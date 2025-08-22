@@ -18,7 +18,6 @@ jobs:
   validate-release:
     name: Validate Release
     runs-on: ubuntu-latest
-    if: vars.ENABLE_CI == 'true'
 
     steps:
     - name: Checkout code
@@ -59,7 +58,6 @@ jobs:
   build-package:
     name: Build Package
     runs-on: ubuntu-latest
-    if: vars.ENABLE_CI == 'true'
     needs: validate-release
 
     steps:
@@ -96,7 +94,6 @@ jobs:
   build-docker:
     name: Build Docker Images
     runs-on: ubuntu-latest
-    if: vars.ENABLE_CI == 'true'
     needs: validate-release
 
     steps:
@@ -140,7 +137,7 @@ jobs:
     name: Create GitHub Release
     runs-on: ubuntu-latest
     needs: [build-package, build-docker]
-    if: vars.ENABLE_CI == 'true' && github.event_name == 'push'
+    if: github.event_name == 'push'
 
     steps:
     - name: Checkout code
@@ -219,7 +216,7 @@ jobs:
     name: Publish to PyPI
     runs-on: ubuntu-latest
     needs: create-release
-    if: vars.ENABLE_CI == 'true' && github.event_name == 'push'
+    if: github.event_name == 'push'
     environment: production
 
     steps:
@@ -239,7 +236,7 @@ jobs:
     name: Post-Release Notifications
     runs-on: ubuntu-latest
     needs: [create-release, publish-pypi]
-    if: vars.ENABLE_CI == 'true' && always()
+    if: always()
 
     steps:
     - name: Notify success
