@@ -248,11 +248,11 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
 
     @property
     def sample_ids(self) -> List[str]:
-        """List of all sample tokens in dataset"""
+        """List of all sample tokens in dataset."""
         return self._sample_tokens
 
     def _load_sample_data(self, index: int) -> Sample:
-        """Load complete sample data for given index"""
+        """Load complete sample data for given index."""
         sample_token = self._sample_tokens[index]
         sample = self._sample_data[sample_token]
 
@@ -336,7 +336,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
     def _build_extrinsic_matrix(
         self, translation: List[float], rotation: List[float]
     ) -> npt.NDArray[np.float64]:
-        """Build 4x4 extrinsic matrix from translation and rotation"""
+        """Build 4x4 extrinsic matrix from translation and rotation."""
         from scipy.spatial.transform import Rotation
 
         # Convert quaternion to rotation matrix
@@ -351,7 +351,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
         return extrinsic
 
     def _load_sample_annotations(self, sample_token: str) -> List[InstanceAnnotation]:
-        """Load 3D annotations for sample"""
+        """Load 3D annotations for sample."""
         sample = self.db["sample"][sample_token]
         instances = []
 
@@ -418,7 +418,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
         return instances
 
     def _get_ego_pose(self, ego_pose_token: str) -> npt.NDArray[np.float64]:
-        """Get 4x4 ego pose matrix"""
+        """Get 4x4 ego pose matrix."""
         ego_pose = self.db["ego_pose"][ego_pose_token]
 
         translation = ego_pose["translation"]
@@ -427,7 +427,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
         return self._build_extrinsic_matrix(translation, rotation)
 
     def get_camera_calibration(self, sample_token: str) -> CameraParams:
-        """Get camera calibration parameters for sample"""
+        """Get camera calibration parameters for sample."""
         sample = self._sample_data[sample_token]
 
         camera_intrinsics = []
@@ -457,7 +457,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
         )
 
     def get_temporal_sequence(self, sample_token: str) -> TemporalSequence:
-        """Get temporal sequence information for sample"""
+        """Get temporal sequence information for sample."""
         sample = self._sample_data[sample_token]
         scene_token = sample["scene_token"]
         scene = self.db["scene"][scene_token]
@@ -502,7 +502,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
     def _compute_ego_motion(
         self, prev_pose: npt.NDArray[np.float64], curr_pose: npt.NDArray[np.float64]
     ) -> npt.NDArray[np.float64]:
-        """Compute ego motion between two poses"""
+        """Compute ego motion between two poses."""
         # Compute relative transformation
         relative_transform = np.linalg.inv(prev_pose) @ curr_pose
 
@@ -523,7 +523,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
     def _track_instances(
         self, sequence: TemporalSequence
     ) -> Dict[int, List[InstanceAnnotation]]:
-        """Track instances across temporal sequence"""
+        """Track instances across temporal sequence."""
         # This is a simplified version - full implementation would use
         # nuScenes instance tokens for perfect tracking
         tracks = defaultdict(list)
@@ -602,7 +602,7 @@ class NuScenesDataset(TemporalDataset, MultiModalDataset):
         """Get sample location information."""
         scene = self.db["scene"][sample["scene_token"]]
         log = self.db["log"][scene["log_token"]]
-        return log["location"]
+        return str(log["location"])
 
     def _get_sample_weather(self, sample: Dict[str, Any]) -> str:
         """Get sample weather information."""

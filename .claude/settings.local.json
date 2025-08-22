@@ -76,10 +76,6 @@
       "Bash(gh api:*)"
     ],
     "deny": [],
-    "defaultMode": "acceptEdits",
-    "additionalDirectories": [
-      "/mnt/c/Users/suraj",
-      "/mnt/c"
-    ]
+    "defaultMode": "acceptEdits"
   }
 }

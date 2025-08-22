@@ -9,7 +9,7 @@ import json
 import os
 from collections import Counter
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -218,7 +218,13 @@ class DatasetStatisticsAnalyzer:
                     "percentiles": np.percentile(values, [25, 50, 75, 95]),
                 }
             else:
-                summary[key] = {"mean": 0, "std": 0, "median": 0, "min": 0, "max": 0}
+                summary[key] = {
+                    "mean": 0.0,
+                    "std": 0.0,
+                    "median": 0.0,
+                    "min": 0.0,
+                    "max": 0.0,
+                }
 
         return summary
 
@@ -358,7 +364,7 @@ class DatasetStatisticsAnalyzer:
         return camera_stats
 
     def _analyze_weather_distribution(self, dataset: BaseDataset) -> Dict[str, Any]:
-        """Analyze weather and environmental conditions"""
+        """Analyze weather and environmental conditions."""
         weather_counts = Counter()
         time_counts = Counter()
         location_counts = Counter()
@@ -390,7 +396,7 @@ class DatasetStatisticsAnalyzer:
         }
 
     def _analyze_instance_tracking(self, dataset: BaseDataset) -> Dict[str, Any]:
-        """Analyze instance tracking characteristics"""
+        """Analyze instance tracking characteristics."""
         # TODO: Implement temporal sequence analysis
         # This would require analyzing instance tracking across temporal frames
 
@@ -405,7 +411,7 @@ class DatasetStatisticsAnalyzer:
     def _get_analysis_sample_indices(
         self, dataset: BaseDataset, max_samples: int = 1000
     ) -> List[int]:
-        """Get sample indices for analysis (random sampling if dataset is large)"""
+        """Get sample indices for analysis (random sampling if dataset is large)."""
         total_samples = len(dataset)
 
         if total_samples <= max_samples:
@@ -430,6 +436,7 @@ class DomainGapAnalyzer:
     """
 
     def __init__(self) -> None:
+        """Initialize domain gap analyzer."""
         self.statistics_analyzer = DatasetStatisticsAnalyzer()
 
     def compute_domain_gap(
@@ -499,7 +506,7 @@ class DomainGapAnalyzer:
     def _compute_class_distribution_divergence(
         self, source_dist: Dict, target_dist: Dict
     ) -> float:
-        """Compute Jensen-Shannon divergence between class distributions"""
+        """Compute Jensen-Shannon divergence between class distributions."""
         try:
             # Get union of all classes
             all_classes = set(source_dist["class_probabilities"].keys()) | set(
@@ -528,7 +535,7 @@ class DomainGapAnalyzer:
     def _compute_spatial_distribution_divergence(
         self, source_spatial: Dict, target_spatial: Dict
     ) -> float:
-        """Compute divergence in spatial distributions"""
+        """Compute divergence in spatial distributions."""
         try:
             divergences = []
 
@@ -563,7 +570,7 @@ class DomainGapAnalyzer:
     def _compute_camera_setup_similarity(
         self, source_cameras: Dict, target_cameras: Dict
     ) -> float:
-        """Compute similarity in camera setups"""
+        """Compute similarity in camera setups."""
         try:
             similarity_score = 0.0
 
@@ -606,7 +613,7 @@ class DomainGapAnalyzer:
     def _compute_temporal_characteristics_similarity(
         self, source_temporal: Dict, target_temporal: Dict
     ) -> float:
-        """Compute similarity in temporal characteristics"""
+        """Compute similarity in temporal characteristics."""
         try:
             similarity_score = 0.0
 
@@ -639,7 +646,7 @@ class DomainGapAnalyzer:
     def _compute_scene_complexity_ratio(
         self, source_complexity: Dict, target_complexity: Dict
     ) -> float:
-        """Compute ratio of scene complexities"""
+        """Compute ratio of scene complexities."""
         try:
             source_objects = source_complexity.get("objects_per_frame", {}).get(
                 "mean", 1
@@ -660,7 +667,7 @@ class DomainGapAnalyzer:
     def _compute_weather_distribution_divergence(
         self, source_weather: Dict, target_weather: Dict
     ) -> float:
-        """Compute divergence in weather distributions"""
+        """Compute divergence in weather distributions."""
         try:
             source_dist = source_weather.get("weather_distribution", {})
             target_dist = target_weather.get("weather_distribution", {})
@@ -690,7 +697,7 @@ class DomainGapAnalyzer:
         complexity_ratio: float,
         weather_div: float,
     ) -> float:
-        """Compute weighted overall domain gap score"""
+        """Compute weighted overall domain gap score."""
         # Weights for different aspects
         weights = {
             "class": 0.25,
@@ -727,6 +734,7 @@ class CrossDatasetValidator:
     """
 
     def __init__(self, output_dir: Optional[str] = None) -> None:
+        """Initialize cross-dataset validator."""
         self.output_dir = output_dir
         self.domain_gap_analyzer = DomainGapAnalyzer()
         self.results_history = []
@@ -738,7 +746,7 @@ class CrossDatasetValidator:
         self,
         source_datasets: List[BaseDataset],
         target_datasets: List[BaseDataset],
-        model_performance_fn: Optional[callable] = None,
+        model_performance_fn: Optional[Callable] = None,
     ) -> List[CrossDatasetResults]:
         """Perform comprehensive cross-dataset validation.
 
@@ -759,7 +767,8 @@ class CrossDatasetValidator:
                     continue  # Skip same dataset
 
                 print(
-                    f"Analyzing transfer: {source_dataset.__class__.__name__} → {target_dataset.__class__.__name__}"
+                    f"Analyzing transfer: {source_dataset.__class__.__name__} → "
+                    f"{target_dataset.__class__.__name__}"
                 )
 
                 # Compute domain gap
@@ -811,7 +820,7 @@ class CrossDatasetValidator:
         target_dataset: BaseDataset,
         domain_gap: DomainGapMetrics,
     ) -> Dict[str, Any]:
-        """Analyze potential failure modes in cross-dataset transfer"""
+        """Analyze potential failure modes in cross-dataset transfer."""
         failure_analysis = {
             "high_risk_classes": [],
             "spatial_bias_risk": "low",
@@ -857,13 +866,14 @@ class CrossDatasetValidator:
     def _generate_recommendations(
         self, domain_gap: DomainGapMetrics, performance_metrics: Dict[str, float]
     ) -> List[str]:
-        """Generate actionable recommendations for improving cross-dataset transfer"""
+        """Generate actionable recommendations for improving cross-dataset transfer."""
         recommendations = []
 
         # Class imbalance recommendations
         if domain_gap.class_distribution_divergence > 0.4:
             recommendations.append(
-                "Apply class rebalancing or data augmentation for underrepresented classes"
+                "Apply class rebalancing or data augmentation for "
+                "underrepresented classes"
             )
             recommendations.append(
                 "Consider focal loss or class-weighted loss functions"
@@ -872,7 +882,8 @@ class CrossDatasetValidator:
         # Spatial domain adaptation
         if domain_gap.spatial_distribution_divergence > 0.3:
             recommendations.append(
-                "Use domain adaptation techniques (DANN, CORAL) for spatial distributions"
+                "Use domain adaptation techniques (DANN, CORAL) for spatial "
+                "distributions"
             )
             recommendations.append("Apply spatial data augmentation during training")
 
@@ -897,7 +908,8 @@ class CrossDatasetValidator:
         # Scene complexity adaptation
         if domain_gap.scene_complexity_ratio < 0.7:
             recommendations.append(
-                "Gradually increase scene complexity during training (curriculum learning)"
+                "Gradually increase scene complexity during training "
+                "(curriculum learning)"
             )
             recommendations.append(
                 "Use progressive training from simple to complex scenes"
@@ -909,7 +921,8 @@ class CrossDatasetValidator:
                 "Apply weather-specific data augmentation (photometric, atmospheric)"
             )
             recommendations.append(
-                "Use domain-specific batch normalization for different weather conditions"
+                "Use domain-specific batch normalization for different "
+                "weather conditions"
             )
 
         # General recommendations based on overall gap
@@ -924,7 +937,7 @@ class CrossDatasetValidator:
         return recommendations
 
     def _save_validation_results(self, results: List[CrossDatasetResults]) -> None:
-        """Save validation results to files"""
+        """Save validation results to files."""
         # Save summary report
         summary_path = os.path.join(
             self.output_dir, "cross_dataset_validation_summary.json"
@@ -939,7 +952,9 @@ class CrossDatasetValidator:
             result_data = {
                 "source_dataset": result.source_dataset,
                 "target_dataset": result.target_dataset,
-                "overall_domain_gap": result.domain_gap_metrics.overall_domain_gap_score,
+                "overall_domain_gap": (
+                    result.domain_gap_metrics.overall_domain_gap_score
+                ),
                 "performance_metrics": result.performance_metrics,
                 "num_recommendations": len(result.recommendations),
             }
@@ -963,11 +978,15 @@ class CrossDatasetValidator:
                     "spatial_distribution_divergence": (
                         result.domain_gap_metrics.spatial_distribution_divergence
                     ),
-                    "camera_setup_similarity": result.domain_gap_metrics.camera_setup_similarity,
+                    "camera_setup_similarity": (
+                        result.domain_gap_metrics.camera_setup_similarity
+                    ),
                     "temporal_characteristics_similarity": (
                         result.domain_gap_metrics.temporal_characteristics_similarity
                     ),
-                    "scene_complexity_ratio": result.domain_gap_metrics.scene_complexity_ratio,
+                    "scene_complexity_ratio": (
+                        result.domain_gap_metrics.scene_complexity_ratio
+                    ),
                     "weather_distribution_divergence": (
                         result.domain_gap_metrics.weather_distribution_divergence
                     ),

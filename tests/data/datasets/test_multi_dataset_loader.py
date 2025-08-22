@@ -1,5 +1,4 @@
-"""
-Test suite for multi-dataset loader implementation.
+"""Test suite for multi-dataset loader implementation.
 
 Tests for multi-dataset harmonization including:
 - Unified taxonomy mapping
@@ -11,7 +10,7 @@ Tests for multi-dataset harmonization including:
 
 import os
 import sys
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import numpy as np
 import pytest
@@ -19,14 +18,14 @@ import pytest
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "src"))
 
-from adnet.interfaces.data.dataset import CameraParams, InstanceAnnotation, Sample
+from adnet.interfaces.data.dataset import Sample
 
 
 class TestUnifiedTaxonomy:
-    """Test unified taxonomy mapping functionality"""
+    """Test unified taxonomy mapping functionality."""
 
     def setup_method(self):
-        """Setup test fixtures"""
+        """Set up test fixtures."""
         try:
             from adnet.data.datasets.multi_dataset_loader import UnifiedTaxonomy
 
@@ -35,7 +34,7 @@ class TestUnifiedTaxonomy:
             pytest.skip("UnifiedTaxonomy not available")
 
     def test_unified_class_names(self):
-        """Test unified class taxonomy structure"""
+        """Test unified class taxonomy structure."""
         expected_classes = [
             "vehicle.car",
             "vehicle.truck",
@@ -63,7 +62,7 @@ class TestUnifiedTaxonomy:
             )
 
     def test_nuscenes_mapping(self):
-        """Test nuScenes to unified taxonomy mapping"""
+        """Test nuScenes to unified taxonomy mapping."""
         nuscenes_mappings = {
             "car": "vehicle.car",
             "truck": "vehicle.truck",
@@ -82,7 +81,7 @@ class TestUnifiedTaxonomy:
                 assert unified_name == expected_unified
 
     def test_waymo_mapping(self):
-        """Test Waymo to unified taxonomy mapping"""
+        """Test Waymo to unified taxonomy mapping."""
         waymo_mappings = {
             "TYPE_VEHICLE": "vehicle.car",
             "TYPE_PEDESTRIAN": "human.pedestrian",
@@ -97,7 +96,7 @@ class TestUnifiedTaxonomy:
                 assert unified_name == expected_unified
 
     def test_unknown_class_handling(self):
-        """Test handling of unknown classes"""
+        """Test handling of unknown classes."""
         unknown_classes = ["unknown_class", "invalid_type", "not_mapped"]
 
         for unknown_class in unknown_classes:
@@ -105,7 +104,7 @@ class TestUnifiedTaxonomy:
             assert unified_id is None
 
     def test_unsupported_dataset_handling(self):
-        """Test handling of unsupported datasets"""
+        """Test handling of unsupported datasets."""
         unsupported_datasets = ["unsupported_dataset", "random_name"]
 
         for dataset in unsupported_datasets:
@@ -114,10 +113,10 @@ class TestUnifiedTaxonomy:
 
 
 class TestCoordinateHarmonizer:
-    """Test coordinate system harmonization functionality"""
+    """Test coordinate system harmonization functionality."""
 
     def setup_method(self):
-        """Setup test fixtures"""
+        """Set up test fixtures."""
         try:
             from adnet.data.datasets.multi_dataset_loader import CoordinateHarmonizer
 
@@ -126,7 +125,7 @@ class TestCoordinateHarmonizer:
             pytest.skip("CoordinateHarmonizer not available")
 
     def test_pose_harmonization(self):
-        """Test ego pose harmonization"""
+        """Test ego pose harmonization."""
         # Test pose in different coordinate systems
         test_poses = {
             "nuscenes": np.array(
@@ -150,7 +149,7 @@ class TestCoordinateHarmonizer:
             assert abs(det - 1.0) < 1e-6  # Proper rotation matrix
 
     def test_box_3d_harmonization(self):
-        """Test 3D bounding box harmonization"""
+        """Test 3D bounding box harmonization."""
         # Test boxes in different formats
         test_boxes = {
             "nuscenes": np.array(
@@ -174,7 +173,7 @@ class TestCoordinateHarmonizer:
             assert abs(cos_yaw**2 + sin_yaw**2 - 1.0) < 1e-6
 
     def test_coordinate_system_consistency(self):
-        """Test coordinate system consistency across datasets"""
+        """Test coordinate system consistency across datasets."""
         # Test that harmonization is consistent
         reference_pose = np.eye(4)
         reference_pose[:3, 3] = [10, 20, 2]
@@ -193,10 +192,10 @@ class TestCoordinateHarmonizer:
 
 
 class TestMultiDatasetConfiguration:
-    """Test multi-dataset configuration functionality"""
+    """Test multi-dataset configuration functionality."""
 
     def test_dataset_config_creation(self):
-        """Test creation of multi-dataset configurations"""
+        """Test creation of multi-dataset configurations."""
         try:
             from adnet.data.datasets.multi_dataset_loader import (
                 create_multi_dataset_config,
@@ -230,7 +229,7 @@ class TestMultiDatasetConfiguration:
             pytest.skip("create_multi_dataset_config not available")
 
     def test_weight_normalization(self):
-        """Test dataset weight normalization"""
+        """Test dataset weight normalization."""
         weights = {"dataset1": 2.0, "dataset2": 3.0, "dataset3": 1.0}
         total_weight = sum(weights.values())
 
@@ -242,7 +241,7 @@ class TestMultiDatasetConfiguration:
         assert all(0 <= w <= 1 for w in normalized_weights.values())
 
     def test_sampling_strategy_validation(self):
-        """Test sampling strategy validation"""
+        """Test sampling strategy validation."""
         valid_strategies = ["balanced", "weighted", "sequential", "random"]
         invalid_strategies = ["invalid", "unknown", "custom"]
 
@@ -254,10 +253,10 @@ class TestMultiDatasetConfiguration:
 
 
 class TestMultiDatasetLoader:
-    """Test multi-dataset loader functionality"""
+    """Test multi-dataset loader functionality."""
 
     def setup_method(self):
-        """Setup test fixtures"""
+        """Set up test fixtures."""
         self.mock_configs = [
             {
                 "name": "dataset1",
@@ -273,7 +272,7 @@ class TestMultiDatasetLoader:
 
     @patch("adnet.data.datasets.multi_dataset_loader.DatasetRegistry.get")
     def test_multi_dataset_initialization(self, mock_registry_get):
-        """Test multi-dataset loader initialization"""
+        """Test multi-dataset loader initialization."""
         try:
             from adnet.data.datasets.multi_dataset_loader import MultiDatasetLoader
 
@@ -290,15 +289,15 @@ class TestMultiDatasetLoader:
             )
 
             # Validate loader properties
-            assert loader.harmonize_coordinates == True
-            assert loader.harmonize_classes == True
+            assert loader.harmonize_coordinates
+            assert loader.harmonize_classes
             assert loader.sampling_strategy == "balanced"
 
         except ImportError:
             pytest.skip("MultiDatasetLoader not available")
 
     def test_dataset_sampling_weights(self):
-        """Test dataset sampling weight calculation"""
+        """Test dataset sampling weight calculation."""
         # Calculate expected sampling weights
         total_weight = sum(config["weight"] for config in self.mock_configs)
         expected_weights = [
@@ -311,7 +310,7 @@ class TestMultiDatasetLoader:
         assert expected_weights[1] == pytest.approx(1 / 3, rel=1e-3)  # 0.5 / 1.5
 
     def test_cross_dataset_sample_harmonization(self):
-        """Test sample harmonization across datasets"""
+        """Test sample harmonization across datasets."""
         # Mock samples from different datasets
         sample1 = Sample(
             sample_id="sample1",

@@ -9,10 +9,11 @@ This module provides comprehensive data transformation pipelines including:
 """
 
 import random
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import cv2
 import numpy as np
+import numpy.typing as npt
 from PIL import Image
 
 from ...interfaces.data.dataset import CameraParams, Sample
@@ -30,40 +31,48 @@ class Transform:
     """
 
     def __init__(self, probability: float = 1.0) -> None:
+        """Initialize transform."""
         self.probability = probability
 
     def __call__(self, sample: Sample) -> Sample:
+        """Apply transform with probability."""
         if random.random() < self.probability:
             return self.apply(sample)
         return sample
 
     def apply(self, sample: Sample) -> Sample:
+        """Apply transformation to sample."""
         raise NotImplementedError
 
 
 class Compose:
-    """Compose multiple transforms together"""
+    """Compose multiple transforms together."""
 
     def __init__(self, transforms: List[Transform]) -> None:
+        """Initialize transform."""
         self.transforms = transforms
 
     def __call__(self, sample: Sample) -> Sample:
+        """Apply transform with probability."""
         for transform in self.transforms:
             sample = transform(sample)
         return sample
 
 
 class MultiViewImageTransform(Transform):
-    """Base class for multi-view image transformations"""
+    """Base class for multi-view image transformations."""
 
-    def apply_to_images(self, images: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
-        """Apply transformation to all camera images"""
+    def apply_to_images(
+        self, images: Dict[str, npt.NDArray[Any]]
+    ) -> Dict[str, npt.NDArray[Any]]:
+        """Apply transformation to all camera images."""
         transformed_images = {}
         for camera_name, image in images.items():
             transformed_images[camera_name] = self.apply_to_single_image(image)
         return transformed_images
 
-    def apply_to_single_image(self, image: np.ndarray) -> np.ndarray:
+    def apply_to_single_image(self, image: npt.NDArray[Any]) -> npt.NDArray[Any]:
+        """Apply transformation to single image."""
         raise NotImplementedError
 
 
@@ -90,7 +99,8 @@ class PhotometricAugmentation(MultiViewImageTransform):
         hue_range: Tuple[float, float] = (-0.1, 0.1),
         probability: float = 0.5,
         consistent_across_views: bool = True,
-    ):
+    ) -> None:
+        """Initialize transform."""
         super().__init__(probability)
         self.brightness_range = brightness_range
         self.contrast_range = contrast_range
@@ -99,6 +109,8 @@ class PhotometricAugmentation(MultiViewImageTransform):
         self.consistent_across_views = consistent_across_views
 
     def apply(self, sample: Sample) -> Sample:
+        """Apply transformation to sample."""
+        params: Optional[Dict[str, float]] = None
         if self.consistent_across_views:
             # Use same parameters for all camera views
             brightness_factor = random.uniform(*self.brightness_range)
@@ -112,8 +124,6 @@ class PhotometricAugmentation(MultiViewImageTransform):
                 "saturation": saturation_factor,
                 "hue": hue_factor,
             }
-        else:
-            params = None
 
         transformed_images = {}
         for camera_name, image in sample.images.items():
@@ -125,15 +135,16 @@ class PhotometricAugmentation(MultiViewImageTransform):
                     "hue": random.uniform(*self.hue_range),
                 }
 
-            transformed_images[camera_name] = self._apply_photometric(image, params)
+            if params is not None:
+                transformed_images[camera_name] = self._apply_photometric(image, params)
 
         sample.images = transformed_images
         return sample
 
     def _apply_photometric(
-        self, image: np.ndarray, params: Dict[str, float]
-    ) -> np.ndarray:
-        """Apply photometric transformations to single image"""
+        self, image: npt.NDArray[Any], params: Dict[str, float]
+    ) -> npt.NDArray[Any]:
+        """Apply photometric transformations to single image."""
         # Convert to PIL for easy manipulation
         if image.dtype == np.uint8:
             pil_image = Image.fromarray(image)
@@ -145,22 +156,22 @@ class PhotometricAugmentation(MultiViewImageTransform):
         h, s, v = hsv_image.split()
 
         # Adjust brightness (value channel)
-        v = np.array(v, dtype=np.float32)
-        v = v * params["brightness"]
-        v = np.clip(v, 0, 255).astype(np.uint8)
-        v = Image.fromarray(v, mode="L")
+        v_array = np.array(v, dtype=np.float32)
+        v_array = v_array * params["brightness"]
+        v_array = np.clip(v_array, 0, 255).astype(np.uint8)
+        v = Image.fromarray(v_array, mode="L")
 
         # Adjust saturation
-        s = np.array(s, dtype=np.float32)
-        s = s * params["saturation"]
-        s = np.clip(s, 0, 255).astype(np.uint8)
-        s = Image.fromarray(s, mode="L")
+        s_array = np.array(s, dtype=np.float32)
+        s_array = s_array * params["saturation"]
+        s_array = np.clip(s_array, 0, 255).astype(np.uint8)
+        s = Image.fromarray(s_array, mode="L")
 
         # Adjust hue
-        h = np.array(h, dtype=np.float32)
-        h = h + params["hue"] * 255
-        h = np.clip(h, 0, 255).astype(np.uint8)
-        h = Image.fromarray(h, mode="L")
+        h_array = np.array(h, dtype=np.float32)
+        h_array = h_array + params["hue"] * 255
+        h_array = np.clip(h_array, 0, 255).astype(np.uint8)
+        h = Image.fromarray(h_array, mode="L")
 
         # Recombine HSV
         hsv_adjusted = Image.merge("HSV", (h, s, v))
@@ -186,15 +197,20 @@ class MultiViewResize(MultiViewImageTransform):
     """
 
     def __init__(self, target_size: Tuple[int, int], probability: float = 1.0) -> None:
+        """Initialize transform."""
         super().__init__(probability)
         self.target_size = target_size  # (height, width)
 
     def apply(self, sample: Sample) -> Sample:
+        """Apply transformation to sample."""
         original_sizes = {}
         transformed_images = {}
 
         for camera_name, image in sample.images.items():
-            original_sizes[camera_name] = (image.shape[0], image.shape[1])  # (H, W)
+            original_sizes[camera_name] = (
+                image.shape[0],
+                image.shape[1],
+            )  # (H, W)
 
             # Resize image
             resized_image = cv2.resize(
@@ -216,7 +232,7 @@ class MultiViewResize(MultiViewImageTransform):
         original_sizes: Dict[str, Tuple[int, int]],
         target_size: Tuple[int, int],
     ) -> CameraParams:
-        """Update camera intrinsics after resize"""
+        """Update camera intrinsics after resize."""
         updated_intrinsics = []
 
         for i, camera_name in enumerate(
@@ -261,17 +277,22 @@ class SpatialAugmentation3D(Transform):
 
     def __init__(
         self,
-        rotation_range: Tuple[float, float] = (-np.pi / 4, np.pi / 4),  # radians
+        rotation_range: Tuple[float, float] = (
+            -np.pi / 4,
+            np.pi / 4,
+        ),  # radians
         translation_range: Tuple[float, float] = (-2.0, 2.0),  # meters
         scaling_range: Tuple[float, float] = (0.9, 1.1),
         probability: float = 0.5,
-    ):
+    ) -> None:
+        """Initialize transform."""
         super().__init__(probability)
         self.rotation_range = rotation_range
         self.translation_range = translation_range
         self.scaling_range = scaling_range
 
     def apply(self, sample: Sample) -> Sample:
+        """Apply transformation to sample."""
         # Generate transformation parameters
         rotation_angle = random.uniform(*self.rotation_range)
         translation_x = random.uniform(*self.translation_range)
@@ -293,8 +314,8 @@ class SpatialAugmentation3D(Transform):
 
     def _build_transform_matrix(
         self, rotation: float, tx: float, ty: float, scale: float
-    ) -> np.ndarray:
-        """Build 4x4 transformation matrix"""
+    ) -> npt.NDArray[Any]:
+        """Build 4x4 transformation matrix."""
         # Rotation matrix (around Z-axis)
         cos_r, sin_r = np.cos(rotation), np.sin(rotation)
         rotation_matrix = np.array([[cos_r, -sin_r, 0], [sin_r, cos_r, 0], [0, 0, 1]])
@@ -307,8 +328,10 @@ class SpatialAugmentation3D(Transform):
 
         return transform
 
-    def _transform_ego_pose(self, sample: Sample, transform: np.ndarray) -> Sample:
-        """Transform ego pose"""
+    def _transform_ego_pose(
+        self, sample: Sample, transform: npt.NDArray[Any]
+    ) -> Sample:
+        """Transform ego pose."""
         sample.ego_pose = transform @ sample.ego_pose
 
         # Transform sequence poses
@@ -319,8 +342,10 @@ class SpatialAugmentation3D(Transform):
 
         return sample
 
-    def _transform_instances(self, sample: Sample, transform: np.ndarray) -> Sample:
-        """Transform 3D bounding boxes"""
+    def _transform_instances(
+        self, sample: Sample, transform: npt.NDArray[Any]
+    ) -> Sample:
+        """Transform 3D bounding boxes."""
         transformed_instances = []
 
         for instance in sample.instances:
@@ -352,8 +377,10 @@ class SpatialAugmentation3D(Transform):
         sample.instances = transformed_instances
         return sample
 
-    def _transform_camera_params(self, sample: Sample, transform: np.ndarray) -> Sample:
-        """Transform camera extrinsics"""
+    def _transform_camera_params(
+        self, sample: Sample, transform: npt.NDArray[Any]
+    ) -> Sample:
+        """Transform camera extrinsics."""
         transformed_extrinsics = []
 
         for extrinsic in sample.camera_params.extrinsics:
@@ -364,8 +391,10 @@ class SpatialAugmentation3D(Transform):
         sample.camera_params.extrinsics = np.array(transformed_extrinsics)
         return sample
 
-    def _transform_point_clouds(self, sample: Sample, transform: np.ndarray) -> Sample:
-        """Transform point clouds (LiDAR/radar)"""
+    def _transform_point_clouds(
+        self, sample: Sample, transform: npt.NDArray[Any]
+    ) -> Sample:
+        """Transform point clouds (LiDAR/radar)."""
         if sample.lidar_points is not None:
             points = sample.lidar_points
             # Transform xyz coordinates
@@ -403,7 +432,8 @@ class TemporalAugmentation(Transform):
         frame_rate_simulation: bool = True,
         target_fps: float = 2.0,
         probability: float = 0.3,
-    ):
+    ) -> None:
+        """Initialize transform."""
         super().__init__(probability)
         self.dropout_probability = dropout_probability
         self.max_temporal_gap = max_temporal_gap
@@ -411,6 +441,7 @@ class TemporalAugmentation(Transform):
         self.target_fps = target_fps
 
     def apply(self, sample: Sample) -> Sample:
+        """Apply transformation to sample."""
         # Apply temporal dropout
         if random.random() < self.dropout_probability:
             sample = self._apply_temporal_dropout(sample)
@@ -422,7 +453,7 @@ class TemporalAugmentation(Transform):
         return sample
 
     def _apply_temporal_dropout(self, sample: Sample) -> Sample:
-        """Randomly drop frames from temporal sequence"""
+        """Randomly drop frames from temporal sequence."""
         sequence_info = sample.sequence_info
 
         if len(sequence_info.frame_indices) <= 1:
@@ -448,7 +479,7 @@ class TemporalAugmentation(Transform):
         return sample
 
     def _simulate_frame_rate(self, sample: Sample) -> Sample:
-        """Simulate different frame rates by temporal subsampling"""
+        """Simulate different frame rates by temporal subsampling."""
         sequence_info = sample.sequence_info
         timestamps = sequence_info.timestamps
 
@@ -492,17 +523,19 @@ class CutMix3D(Transform):
         mix_probability: float = 0.5,
         area_ratio_range: Tuple[float, float] = (0.1, 0.3),
         probability: float = 0.3,
-    ):
+    ) -> None:
+        """Initialize transform."""
         super().__init__(probability)
         self.mix_probability = mix_probability
         self.area_ratio_range = area_ratio_range
-        self._mix_sample = None
+        self._mix_sample: Optional[Sample] = None
 
     def set_mix_sample(self, mix_sample: Sample) -> None:
-        """Set the sample to mix with"""
+        """Set the sample to mix with."""
         self._mix_sample = mix_sample
 
     def apply(self, sample: Sample) -> Sample:
+        """Apply transformation to sample."""
         if self._mix_sample is None:
             return sample
 
@@ -516,8 +549,8 @@ class CutMix3D(Transform):
 
         return sample
 
-    def _generate_mix_region(self, sample: Sample) -> np.ndarray:
-        """Generate random 3D region for mixing"""
+    def _generate_mix_region(self, sample: Sample) -> npt.NDArray[Any]:
+        """Generate random 3D region for mixing."""
         # Get scene bounds from existing instances
         if sample.instances:
             centers = np.array([inst.box_3d[:3] for inst in sample.instances])
@@ -537,21 +570,21 @@ class CutMix3D(Transform):
         region_center = min_bounds + (max_bounds - min_bounds) * np.random.random(3)
 
         # Build region box [x, y, z, w, l, h]
-        mix_box = np.concatenate([region_center, region_size])
+        mix_box: npt.NDArray[Any] = np.concatenate([region_center, region_size])
         return mix_box
 
     def _mix_images(
-        self, sample: Sample, mix_sample: Sample, mix_box: np.ndarray
+        self, sample: Sample, mix_sample: Sample, mix_box: npt.NDArray[Any]
     ) -> Sample:
-        """Mix images based on 3D region projection"""
+        """Mix images based on 3D region projection."""
         # This would require projecting the 3D region to each camera view
         # and performing 2D mixing - simplified implementation
         return sample
 
     def _mix_instances(
-        self, sample: Sample, mix_sample: Sample, mix_box: np.ndarray
+        self, sample: Sample, mix_sample: Sample, mix_box: npt.NDArray[Any]
     ) -> Sample:
-        """Mix instances within the 3D region"""
+        """Mix instances within the 3D region."""
         # Remove instances in mix region
         filtered_instances = []
         for instance in sample.instances:
@@ -567,9 +600,9 @@ class CutMix3D(Transform):
         return sample
 
     def _mix_point_clouds(
-        self, sample: Sample, mix_sample: Sample, mix_box: np.ndarray
+        self, sample: Sample, mix_sample: Sample, mix_box: npt.NDArray[Any]
     ) -> Sample:
-        """Mix point clouds within the 3D region"""
+        """Mix point clouds within the 3D region."""
         if sample.lidar_points is not None and mix_sample.lidar_points is not None:
             # Filter points outside mix region
             keep_mask = ~self._points_in_region(sample.lidar_points[:, :3], mix_box)
@@ -584,8 +617,10 @@ class CutMix3D(Transform):
 
         return sample
 
-    def _box_overlaps_region(self, box_3d: np.ndarray, region: np.ndarray) -> bool:
-        """Check if 3D box overlaps with mix region"""
+    def _box_overlaps_region(
+        self, box_3d: npt.NDArray[Any], region: npt.NDArray[Any]
+    ) -> bool:
+        """Check if 3D box overlaps with mix region."""
         box_center = box_3d[:3]
         box_size = box_3d[3:6]
 
@@ -598,10 +633,12 @@ class CutMix3D(Transform):
         region_min = region_center - region_size / 2
         region_max = region_center + region_size / 2
 
-        return (box_min <= region_max).all() and (region_min <= box_max).all()
+        return bool((box_min <= region_max).all() and (region_min <= box_max).all())
 
-    def _points_in_region(self, points: np.ndarray, region: np.ndarray) -> np.ndarray:
-        """Check which points are within the mix region"""
+    def _points_in_region(
+        self, points: npt.NDArray[Any], region: npt.NDArray[Any]
+    ) -> npt.NDArray[Any]:
+        """Check which points are within the mix region."""
         region_center = region[:3]
         region_size = region[3:6]
 
@@ -614,28 +651,32 @@ class CutMix3D(Transform):
 
 
 class Normalize(Transform):
-    """Normalize images with dataset statistics"""
+    """Normalize images with dataset statistics."""
 
     def __init__(
         self,
         mean: Tuple[float, float, float] = (0.485, 0.456, 0.406),
         std: Tuple[float, float, float] = (0.229, 0.224, 0.225),
         probability: float = 1.0,
-    ):
+    ) -> None:
+        """Initialize transform."""
         super().__init__(probability)
         self.mean = np.array(mean)
         self.std = np.array(std)
 
     def apply(self, sample: Sample) -> Sample:
+        """Apply transformation to sample."""
         normalized_images = {}
 
         for camera_name, image in sample.images.items():
             # Convert to float and normalize to [0, 1]
             if image.dtype == np.uint8:
-                image = image.astype(np.float32) / 255.0
+                image_float = image.astype(np.float32) / 255.0
+            else:
+                image_float = image.astype(np.float32)
 
             # Apply normalization
-            normalized_image = (image - self.mean) / self.std
+            normalized_image = (image_float - self.mean) / self.std
             normalized_images[camera_name] = normalized_image
 
         sample.images = normalized_images
@@ -649,8 +690,8 @@ def create_training_transform_pipeline(
     enable_temporal: bool = True,
     enable_cutmix: bool = False,
 ) -> Compose:
-    """Create training transformation pipeline"""
-    transforms = []
+    """Create training transformation pipeline."""
+    transforms: List[Transform] = []
 
     # Resize images
     transforms.append(MultiViewResize(target_image_size))
@@ -680,7 +721,7 @@ def create_training_transform_pipeline(
 def create_validation_transform_pipeline(
     target_image_size: Tuple[int, int] = (448, 800)
 ) -> Compose:
-    """Create validation transformation pipeline (no augmentations)"""
-    transforms = [MultiViewResize(target_image_size), Normalize()]
+    """Create validation transformation pipeline (no augmentations)."""
+    transforms: List[Transform] = [MultiViewResize(target_image_size), Normalize()]
 
     return Compose(transforms)

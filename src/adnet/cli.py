@@ -1,11 +1,11 @@
-"""ADNet Command Line Interface"""
+"""ADNet Command Line Interface."""
 
 import click
 
 
 @click.group()
 def main() -> None:
-    """ADNet: Advanced 4D Spatio-Temporal Object Detection Framework"""
+    """ADNet: Advanced 4D Spatio-Temporal Object Detection Framework."""
     pass
 
 

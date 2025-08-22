@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Setup script for ADNet package"""
+"""Setup script for ADNet package."""
 
 import tomllib
 from pathlib import Path
@@ -19,8 +19,7 @@ except FileNotFoundError:
 
 # Read metadata from pyproject.toml
 def get_project_metadata() -> Dict[str, str]:
-    """Read project metadata from pyproject.toml"""
-
+    """Read project metadata from pyproject.toml."""
     with open("pyproject.toml", "rb") as f:
         pyproject = tomllib.load(f)
 
@@ -46,7 +45,7 @@ def get_project_metadata() -> Dict[str, str]:
 
 # Helper function to read requirements files
 def read_requirements(filename: str) -> List[str]:
-    """Read requirements from requirements/ directory"""
+    """Read requirements from requirements/ directory."""
     requirements_path = this_directory / "requirements" / filename
     if requirements_path.exists():
         lines = requirements_path.read_text().strip().split("\n")

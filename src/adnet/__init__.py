@@ -1,4 +1,4 @@
-"""ADNet: Advanced 4D Spatio-Temporal Object Detection Framework"""
+"""ADNet: Advanced 4D Spatio-Temporal Object Detection Framework."""
 
 __version__ = "0.1.0"
 __author__ = "ADNet Team"

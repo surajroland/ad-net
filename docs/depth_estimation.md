@@ -8,7 +8,7 @@ ADNet implements a **dense depth branch** as auxiliary supervision during traini
 
 The technical implementation processes multiple Feature Pyramid Network (FPN) levels with input channels [256, 512, 1024, 2048] from the backbone, producing multi-scale depth estimates. During training, the system applies vanilla L1 loss for depth supervision, while the depth branch is deactivated during inference for computational efficiency. The depth supervision strategy uses PNG/HDF5 format depth maps at 3×1080×1920 resolution, with LiDAR point clouds providing auxiliary supervision throughout the training process.
 
-## Instance-level depth reweighting addresses fundamental 3D projection challenges  
+## Instance-level depth reweighting addresses fundamental 3D projection challenges
 
 Beyond dense supervision, ADNet inherits the **instance-level depth reweight module** first introduced in v1. This sophisticated mechanism alleviates ill-posed issues in 3D-to-2D projection by reweighting instance features using depth confidence sampled from predicted depth distributions. The module integrates seamlessly into the deformable aggregation process, where 13 keypoints (7 fixed + 6 learnable) sample features across multiple views, scales, and timestamps.
 

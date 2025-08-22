@@ -1,5 +1,4 @@
-"""
-Test suite for cross-dataset validator implementation.
+"""Test suite for cross-dataset validator implementation.
 
 Tests for cross-dataset validation including:
 - Dataset statistics analysis
@@ -11,7 +10,6 @@ Tests for cross-dataset validation including:
 
 import os
 import sys
-from unittest.mock import MagicMock, Mock, patch
 
 import numpy as np
 import pytest
@@ -23,9 +21,10 @@ from adnet.interfaces.data.dataset import BaseDataset, InstanceAnnotation, Sampl
 
 
 class MockDataset(BaseDataset):
-    """Mock dataset for testing cross-dataset validation"""
+    """Mock dataset for testing cross-dataset validation."""
 
     def __init__(self, num_samples=10, dataset_name="mock_dataset"):
+        """Initialize mock dataset."""
         self.num_samples = num_samples
         self.dataset_name = dataset_name
         self._sample_ids = [f"sample_{i:03d}" for i in range(num_samples)]
@@ -38,19 +37,19 @@ class MockDataset(BaseDataset):
         self.split = "train"
 
     def _load_dataset_info(self):
-        """Mock implementation"""
+        """Mock implementation."""
         pass
 
     def _load_annotations(self):
-        """Mock implementation"""
+        """Mock implementation."""
         pass
 
     def _load_sample_data(self, index):
-        """Mock implementation"""
+        """Mock implementation."""
         return self._create_mock_sample(index)
 
     def get_camera_calibration(self, sample_id):
-        """Mock implementation"""
+        """Mock implementation."""
         from adnet.interfaces.data.dataset import CameraParams
 
         return CameraParams(
@@ -60,7 +59,7 @@ class MockDataset(BaseDataset):
         )
 
     def get_temporal_sequence(self, sample_id):
-        """Mock implementation"""
+        """Mock implementation."""
         from adnet.interfaces.data.dataset import TemporalSequence
 
         return TemporalSequence(
@@ -72,17 +71,17 @@ class MockDataset(BaseDataset):
         )
 
     def __len__(self):
+        """Return dataset length."""
         return self.num_samples
 
     def __getitem__(self, index):
+        """Get sample by index."""
         return self._load_sample_data(index)
 
     def _create_mock_sample(self, index):
-        """Create a mock sample for testing"""
+        """Create a mock sample for testing."""
         from adnet.interfaces.data.dataset import (
             CameraParams,
-            InstanceAnnotation,
-            Sample,
             TemporalSequence,
         )
 
@@ -134,14 +133,15 @@ class MockDataset(BaseDataset):
 
     @property
     def sample_ids(self):
+        """Get sample IDs."""
         return self._sample_ids
 
 
 class TestDatasetStatisticsAnalyzer:
-    """Test dataset statistics analysis functionality"""
+    """Test dataset statistics analysis functionality."""
 
     def setup_method(self):
-        """Setup test fixtures"""
+        """Set up test fixtures."""
         try:
             from adnet.data.datasets.cross_dataset_validator import (
                 DatasetStatisticsAnalyzer,
@@ -153,7 +153,7 @@ class TestDatasetStatisticsAnalyzer:
             pytest.skip("DatasetStatisticsAnalyzer not available")
 
     def test_dataset_analysis_structure(self):
-        """Test dataset analysis output structure"""
+        """Test dataset analysis output structure."""
         stats = self.analyzer.analyze_dataset(self.mock_dataset)
 
         # Validate analysis structure
@@ -177,7 +177,7 @@ class TestDatasetStatisticsAnalyzer:
         assert stats["dataset_name"] == "MockDataset"
 
     def test_class_distribution_analysis(self):
-        """Test class distribution analysis"""
+        """Test class distribution analysis."""
         stats = self.analyzer.analyze_dataset(self.mock_dataset)
         class_dist = stats["class_distribution"]
 
@@ -193,7 +193,7 @@ class TestDatasetStatisticsAnalyzer:
             assert abs(prob_sum - 1.0) < 1e-6
 
     def test_spatial_distribution_analysis(self):
-        """Test spatial distribution analysis"""
+        """Test spatial distribution analysis."""
         stats = self.analyzer.analyze_dataset(self.mock_dataset)
         spatial_dist = stats["spatial_distribution"]
 
@@ -216,7 +216,7 @@ class TestDatasetStatisticsAnalyzer:
                 assert "max" in metric_stats
 
     def test_scene_complexity_analysis(self):
-        """Test scene complexity analysis"""
+        """Test scene complexity analysis."""
         stats = self.analyzer.analyze_dataset(self.mock_dataset)
         complexity = stats["scene_complexity"]
 
@@ -236,7 +236,7 @@ class TestDatasetStatisticsAnalyzer:
                 assert "median" in metric_stats
 
     def test_weather_distribution_analysis(self):
-        """Test weather distribution analysis"""
+        """Test weather distribution analysis."""
         stats = self.analyzer.analyze_dataset(self.mock_dataset)
         weather_dist = stats["weather_distribution"]
 
@@ -250,10 +250,10 @@ class TestDatasetStatisticsAnalyzer:
 
 
 class TestDomainGapAnalyzer:
-    """Test domain gap analysis functionality"""
+    """Test domain gap analysis functionality."""
 
     def setup_method(self):
-        """Setup test fixtures"""
+        """Set up test fixtures."""
         try:
             from adnet.data.datasets.cross_dataset_validator import DomainGapAnalyzer
 
@@ -264,7 +264,7 @@ class TestDomainGapAnalyzer:
             pytest.skip("DomainGapAnalyzer not available")
 
     def test_domain_gap_computation(self):
-        """Test domain gap computation between datasets"""
+        """Test domain gap computation between datasets."""
         domain_gap = self.analyzer.compute_domain_gap(self.dataset1, self.dataset2)
 
         # Validate domain gap metrics structure
@@ -286,7 +286,7 @@ class TestDomainGapAnalyzer:
         assert 0 <= domain_gap.overall_domain_gap_score <= 1
 
     def test_class_distribution_divergence(self):
-        """Test class distribution divergence computation"""
+        """Test class distribution divergence computation."""
         # Mock class distributions
         source_dist = {
             "class_probabilities": {"car": 0.6, "pedestrian": 0.3, "bicycle": 0.1},
@@ -307,7 +307,7 @@ class TestDomainGapAnalyzer:
         assert isinstance(divergence, float)
 
     def test_spatial_distribution_divergence(self):
-        """Test spatial distribution divergence computation"""
+        """Test spatial distribution divergence computation."""
         # Mock spatial distributions
         source_spatial = {
             "distances_from_ego": {"mean": 20.0, "std": 5.0},
@@ -332,7 +332,7 @@ class TestDomainGapAnalyzer:
         assert isinstance(divergence, float)
 
     def test_camera_setup_similarity(self):
-        """Test camera setup similarity computation"""
+        """Test camera setup similarity computation."""
         # Mock camera characteristics
         source_cameras = {
             "num_cameras": 6,
@@ -355,7 +355,7 @@ class TestDomainGapAnalyzer:
         assert isinstance(similarity, float)
 
     def test_overall_domain_gap_calculation(self):
-        """Test overall domain gap score calculation"""
+        """Test overall domain gap score calculation."""
         # Mock individual gap metrics
         class_div = 0.3
         spatial_div = 0.2
@@ -379,10 +379,10 @@ class TestDomainGapAnalyzer:
 
 
 class TestCrossDatasetValidator:
-    """Test cross-dataset validation framework"""
+    """Test cross-dataset validation framework."""
 
     def setup_method(self):
-        """Setup test fixtures"""
+        """Set up test fixtures."""
         try:
             from adnet.data.datasets.cross_dataset_validator import (
                 CrossDatasetValidator,
@@ -395,7 +395,7 @@ class TestCrossDatasetValidator:
             pytest.skip("CrossDatasetValidator not available")
 
     def test_cross_dataset_validation_structure(self):
-        """Test cross-dataset validation result structure"""
+        """Test cross-dataset validation result structure."""
 
         # Mock performance function
         def mock_performance_fn(source_dataset, target_dataset):
@@ -422,7 +422,7 @@ class TestCrossDatasetValidator:
             assert hasattr(result, "recommendations")
 
     def test_failure_mode_analysis(self):
-        """Test failure mode analysis"""
+        """Test failure mode analysis."""
         # Mock domain gap metrics
         from adnet.data.datasets.cross_dataset_validator import DomainGapMetrics
 
@@ -453,7 +453,7 @@ class TestCrossDatasetValidator:
         assert isinstance(failure_analysis["camera_adaptation_required"], bool)
 
     def test_recommendation_generation(self):
-        """Test recommendation generation"""
+        """Test recommendation generation."""
         # Mock domain gap and performance metrics
         from adnet.data.datasets.cross_dataset_validator import DomainGapMetrics
 
@@ -482,7 +482,7 @@ class TestCrossDatasetValidator:
             assert len(recommendation) > 0
 
     def test_validation_without_performance_function(self):
-        """Test validation when no performance function is provided"""
+        """Test validation when no performance function is provided."""
         results = self.validator.validate_cross_dataset_transfer(
             source_datasets=self.source_datasets,
             target_datasets=self.target_datasets,

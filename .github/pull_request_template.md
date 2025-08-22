@@ -79,13 +79,13 @@ None / Add relevant visuals
 <!-- Provide technical details about your implementation -->
 
 ### Key Changes:
-- 
-- 
-- 
+-
+-
+-
 
 ### Architecture Decisions:
-- 
-- 
+-
+-
 
 ## 🔍 Review Focus Areas
 <!-- Highlight specific areas you'd like reviewers to focus on -->

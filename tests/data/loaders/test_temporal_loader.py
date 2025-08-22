@@ -35,7 +35,7 @@ from adnet.interfaces.data.dataset import (
 )
 
 
-class MockTemporalDataset(BaseDataset):  # type: ignore[misc]
+class MockTemporalDataset(BaseDataset):
     """Mock dataset with temporal sequences for testing."""
 
     def __init__(self, num_samples: int = 20, sequence_length: int = 4) -> None:
@@ -293,7 +293,7 @@ class TestTemporalSequenceBuilder:
             assert sequence.sequence_length >= 1
         # Or return None if truly insufficient
 
-    @pytest.mark.parametrize("sequence_length", [2, 4, 6, 8])  # type: ignore[misc]
+    @pytest.mark.parametrize("sequence_length", [2, 4, 6, 8])
     def test_different_sequence_lengths(self, sequence_length: int) -> None:
         """Test different temporal sequence lengths."""
         builder = TemporalSequenceBuilder(

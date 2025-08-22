@@ -11,6 +11,7 @@ import random
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
+import numpy.typing as npt
 from torch.utils.data import Dataset
 
 from ...interfaces.data.dataset import BaseDataset, DatasetRegistry, Sample
@@ -92,7 +93,7 @@ class UnifiedTaxonomy:
         },
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize unified taxonomy."""
         self.unified_to_id = {
             name: idx for idx, name in enumerate(self.UNIFIED_CLASSES)
@@ -158,11 +159,11 @@ class CoordinateHarmonizer:
     # Standard ego coordinate system (nuScenes style)
     STANDARD_SYSTEM = {"x_forward": True, "y_left": True, "z_up": True}
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize unified taxonomy."""
         self._build_transformation_matrices()
 
-    def _build_transformation_matrices(self):
+    def _build_transformation_matrices(self) -> None:
         """Build transformation matrices for each dataset."""
         self.transforms = {}
 
@@ -193,7 +194,7 @@ class CoordinateHarmonizer:
 
             self.transforms[dataset] = transform
 
-    def harmonize_pose(self, dataset_name: str, pose: np.ndarray) -> np.ndarray:
+    def harmonize_pose(self, dataset_name: str, pose: npt.NDArray[Any]) -> np.ndarray:
         """Harmonize pose to standard coordinate system."""
         if dataset_name not in self.transforms:
             return pose  # No transformation available
@@ -204,7 +205,9 @@ class CoordinateHarmonizer:
         harmonized_pose = transform @ pose @ np.linalg.inv(transform)
         return harmonized_pose
 
-    def harmonize_box_3d(self, dataset_name: str, box_3d: np.ndarray) -> np.ndarray:
+    def harmonize_box_3d(
+        self, dataset_name: str, box_3d: npt.NDArray[Any]
+    ) -> np.ndarray:
         """Harmonize 3D bounding box to standard coordinate system."""
         if dataset_name not in self.transforms:
             return box_3d
@@ -270,6 +273,7 @@ class MultiDatasetLoader(Dataset):
             harmonize_classes: Enable class harmonization
             sampling_strategy: Strategy for sampling across datasets
             temporal_alignment: Enable temporal sequence alignment
+            **kwargs: Additional keyword arguments
 
         """
         self.dataset_configs = dataset_configs
@@ -280,7 +284,7 @@ class MultiDatasetLoader(Dataset):
 
         # Initialize harmonizers
         if self.harmonize_classes:
-            self.taxonomy = UnifiedTaxonomy()
+            self.taxonomy: Any = UnifiedTaxonomy()
         else:
             self.taxonomy = None
 
@@ -304,11 +308,12 @@ class MultiDatasetLoader(Dataset):
         self._build_sampling_indices()
 
         print(
-            f"Loaded {len(self.datasets)} datasets with {len(self.sample_indices)} total samples"
+            f"Loaded {len(self.datasets)} datasets with "
+            f"{len(self.sample_indices)} total samples"
         )
 
     def _load_dataset(self, config: Dict[str, Any]) -> BaseDataset:
-        """Load individual dataset from configuration"""
+        """Load individual dataset from configuration."""
         dataset_name = config["name"]
         dataset_class = DatasetRegistry.get(dataset_name)
 
@@ -317,8 +322,8 @@ class MultiDatasetLoader(Dataset):
 
         return dataset
 
-    def _build_sampling_indices(self):
-        """Build sampling indices based on strategy"""
+    def _build_sampling_indices(self) -> None:
+        """Build sampling indices based on strategy."""
         self.sample_indices = []
 
         if self.sampling_strategy == "sequential":
@@ -369,11 +374,11 @@ class MultiDatasetLoader(Dataset):
         random.shuffle(self.sample_indices)
 
     def __len__(self) -> int:
-        """Return total number of samples"""
+        """Return total number of samples."""
         return len(self.sample_indices)
 
     def __getitem__(self, index: int) -> Sample:
-        """Get harmonized sample by index"""
+        """Get harmonized sample by index."""
         dataset_idx, sample_idx = self.sample_indices[index]
         dataset = self.datasets[dataset_idx]
         dataset_name = self.dataset_names[dataset_idx]
@@ -387,7 +392,7 @@ class MultiDatasetLoader(Dataset):
         return harmonized_sample
 
     def _harmonize_sample(self, sample: Sample, dataset_name: str) -> Sample:
-        """Apply all harmonization steps to sample"""
+        """Apply all harmonization steps to sample."""
         # Coordinate harmonization
         if self.harmonize_coordinates and self.coord_harmonizer:
             sample = self._harmonize_coordinates(sample, dataset_name)
@@ -403,7 +408,7 @@ class MultiDatasetLoader(Dataset):
         return sample
 
     def _harmonize_coordinates(self, sample: Sample, dataset_name: str) -> Sample:
-        """Harmonize coordinate systems"""
+        """Harmonize coordinate systems."""
         # Harmonize ego pose
         sample.ego_pose = self.coord_harmonizer.harmonize_pose(
             dataset_name, sample.ego_pose
@@ -430,14 +435,17 @@ class MultiDatasetLoader(Dataset):
         return sample
 
     def _harmonize_classes(self, sample: Sample, dataset_name: str) -> Sample:
-        """Harmonize class taxonomies"""
+        """Harmonize class taxonomies."""
         harmonized_instances = []
 
         for instance in sample.instances:
             # Get original class name from dataset
             original_dataset = None
             for dataset in self.datasets:
-                if dataset.dataset_name == dataset_name:
+                if (
+                    getattr(dataset, "dataset_name", type(dataset).__name__)
+                    == dataset_name
+                ):
                     original_dataset = dataset
                     break
 
@@ -457,14 +465,14 @@ class MultiDatasetLoader(Dataset):
         return sample
 
     def _align_temporal_data(self, sample: Sample, dataset_name: str) -> Sample:
-        """Align temporal data across datasets"""
+        """Align temporal data across datasets."""
         # Ensure consistent temporal sampling rates
         # This is a simplified version - full implementation would handle
         # different fps rates and temporal alignment
         return sample
 
     def get_unified_class_names(self) -> List[str]:
-        """Get unified class names"""
+        """Get unified class names."""
         if self.taxonomy:
             return self.taxonomy.UNIFIED_CLASSES
         else:
@@ -475,7 +483,7 @@ class MultiDatasetLoader(Dataset):
             return sorted(list(all_classes))
 
     def get_dataset_statistics(self) -> Dict[str, Any]:
-        """Get comprehensive dataset statistics"""
+        """Get comprehensive dataset statistics."""
         stats = {
             "total_samples": len(self),
             "num_datasets": len(self.datasets),
@@ -497,7 +505,7 @@ class MultiDatasetLoader(Dataset):
         return stats
 
     def save_harmonized_dataset(self, output_path: str):
-        """Save harmonized dataset for future use"""
+        """Save harmonized dataset for future use."""
         os.makedirs(output_path, exist_ok=True)
 
         # Save configuration
@@ -534,6 +542,7 @@ class CrossDatasetValidator:
     """
 
     def __init__(self, datasets: List[BaseDataset]):
+        """Initialize cross dataset evaluator."""
         self.datasets = datasets
         self.dataset_names = [d.__class__.__name__ for d in datasets]
 

@@ -1,5 +1,4 @@
-"""
-Test suite for data transforms implementation.
+"""Test suite for data transforms implementation.
 
 Tests for data transformation pipeline including:
 - Multi-view image augmentations
@@ -11,7 +10,6 @@ Tests for data transformation pipeline including:
 
 import os
 import sys
-from unittest.mock import MagicMock, Mock, patch
 
 import numpy as np
 import pytest
@@ -28,7 +26,7 @@ from adnet.interfaces.data.dataset import (
 
 
 def create_mock_sample():
-    """Create a mock sample for testing transforms"""
+    """Create a mock sample for testing transforms."""
     # Mock images (using nuScenes 6-camera setup)
     images = {
         "CAM_FRONT": np.random.randint(0, 255, (480, 640, 3), dtype=np.uint8),
@@ -97,10 +95,10 @@ def create_mock_sample():
 
 
 class TestBaseTransform:
-    """Test base transform functionality"""
+    """Test base transform functionality."""
 
     def setup_method(self):
-        """Setup test fixtures"""
+        """Set up test fixtures."""
         try:
             from adnet.data.transforms.transforms import Transform
 
@@ -109,7 +107,7 @@ class TestBaseTransform:
             pytest.skip("Transform not available")
 
     def test_transform_probability(self):
-        """Test transform probability mechanism"""
+        """Test transform probability mechanism."""
 
         class TestTransform(self.transform_class):
             def apply(self, sample):
@@ -127,14 +125,14 @@ class TestBaseTransform:
         sample = create_mock_sample()
         result = transform_always(sample)
         assert hasattr(result, "test_applied")
-        assert result.test_applied == True
+        assert result.test_applied
 
 
 class TestPhotometricAugmentation:
-    """Test photometric augmentation functionality"""
+    """Test photometric augmentation functionality."""
 
     def setup_method(self):
-        """Setup test fixtures"""
+        """Set up test fixtures."""
         try:
             from adnet.data.transforms.transforms import PhotometricAugmentation
 
@@ -150,7 +148,7 @@ class TestPhotometricAugmentation:
             pytest.skip("PhotometricAugmentation not available")
 
     def test_photometric_transform_structure(self):
-        """Test photometric transform preserves sample structure"""
+        """Test photometric transform preserves sample structure."""
         sample = create_mock_sample()
         original_image_keys = set(sample.images.keys())
 
@@ -166,7 +164,7 @@ class TestPhotometricAugmentation:
             assert transformed_shape == original_shape
 
     def test_photometric_consistent_across_views(self):
-        """Test photometric consistency across camera views"""
+        """Test photometric consistency across camera views."""
         self.transform.consistent_across_views = True
         sample = create_mock_sample()
 
@@ -176,7 +174,8 @@ class TestPhotometricAugmentation:
         transformed_sample = self.transform(sample)
 
         # With consistent=True, all cameras should have same transformation
-        # Check that all images changed in similar way (not identical due to different content)
+        # Check that all images changed in similar way (not identical
+        # due to different content)
         for camera_name in sample.images.keys():
             original = original_images[camera_name]
             transformed = transformed_sample.images[camera_name]
@@ -188,7 +187,12 @@ class TestPhotometricAugmentation:
                 assert transformed.max() <= 255 or transformed.dtype != np.uint8
 
     def test_photometric_parameter_ranges(self):
-        """Test photometric parameter validation"""
+        """Test photometric parameter validation."""
+        try:
+            from adnet.data.transforms.transforms import PhotometricAugmentation
+        except ImportError:
+            pytest.skip("PhotometricAugmentation not available")
+
         # Test valid parameter ranges
         valid_transform = PhotometricAugmentation(
             brightness_range=(0.5, 1.5),
@@ -207,10 +211,10 @@ class TestPhotometricAugmentation:
 
 
 class TestMultiViewResize:
-    """Test multi-view resize functionality"""
+    """Test multi-view resize functionality."""
 
     def setup_method(self):
-        """Setup test fixtures"""
+        """Set up test fixtures."""
         try:
             from adnet.data.transforms.transforms import MultiViewResize
 
@@ -220,7 +224,7 @@ class TestMultiViewResize:
             pytest.skip("MultiViewResize not available")
 
     def test_image_resize(self):
-        """Test image resizing functionality"""
+        """Test image resizing functionality."""
         sample = create_mock_sample()
         transformed_sample = self.transform(sample)
 
@@ -230,7 +234,7 @@ class TestMultiViewResize:
             assert image.shape[2] == 3  # RGB channels preserved
 
     def test_camera_intrinsics_update(self):
-        """Test camera intrinsics update after resize"""
+        """Test camera intrinsics update after resize."""
         sample = create_mock_sample()
         original_intrinsics = sample.camera_params.intrinsics.copy()
 
@@ -249,12 +253,12 @@ class TestMultiViewResize:
             assert np.allclose(updated_intrinsics[i][2, :], [0, 0, 1])
 
     def test_resize_scale_factors(self):
-        """Test resize scale factor computation"""
+        """Test resize scale factor computation."""
         sample = create_mock_sample()
         original_size = sample.images["CAM_FRONT"].shape[:2]  # (H, W)
 
         # Calculate expected scale factors
-        expected_scale_y = self.target_size[0] / original_size[0]
+        self.target_size[0] / original_size[0]
         expected_scale_x = self.target_size[1] / original_size[1]
 
         transformed_sample = self.transform(sample)
@@ -268,10 +272,10 @@ class TestMultiViewResize:
 
 
 class TestSpatialAugmentation3D:
-    """Test 3D spatial augmentation functionality"""
+    """Test 3D spatial augmentation functionality."""
 
     def setup_method(self):
-        """Setup test fixtures"""
+        """Set up test fixtures."""
         try:
             from adnet.data.transforms.transforms import SpatialAugmentation3D
 
@@ -285,7 +289,7 @@ class TestSpatialAugmentation3D:
             pytest.skip("SpatialAugmentation3D not available")
 
     def test_ego_pose_transformation(self):
-        """Test ego pose transformation"""
+        """Test ego pose transformation."""
         sample = create_mock_sample()
         original_ego_pose = sample.ego_pose.copy()
 
@@ -299,7 +303,7 @@ class TestSpatialAugmentation3D:
         assert np.allclose(transformed_sample.ego_pose[3, :], [0, 0, 0, 1])
 
     def test_instance_transformation(self):
-        """Test 3D bounding box transformation"""
+        """Test 3D bounding box transformation."""
         sample = create_mock_sample()
         original_instances = [inst.box_3d.copy() for inst in sample.instances]
 
@@ -307,7 +311,7 @@ class TestSpatialAugmentation3D:
 
         # Instance positions should be transformed
         for i, instance in enumerate(transformed_sample.instances):
-            original_box = original_instances[i]
+            original_instances[i]
             transformed_box = instance.box_3d
 
             # Box should still have correct format
@@ -323,7 +327,7 @@ class TestSpatialAugmentation3D:
             assert abs(cos_yaw**2 + sin_yaw**2 - 1.0) < 1e-6
 
     def test_camera_extrinsics_transformation(self):
-        """Test camera extrinsics transformation"""
+        """Test camera extrinsics transformation."""
         sample = create_mock_sample()
         original_extrinsics = sample.camera_params.extrinsics.copy()
 
@@ -339,7 +343,7 @@ class TestSpatialAugmentation3D:
             assert np.allclose(extrinsic[3, :], [0, 0, 0, 1])
 
     def test_geometric_consistency(self):
-        """Test geometric consistency after transformation"""
+        """Test geometric consistency after transformation."""
         sample = create_mock_sample()
         transformed_sample = self.transform(sample)
 
@@ -360,10 +364,10 @@ class TestSpatialAugmentation3D:
 
 
 class TestTemporalAugmentation:
-    """Test temporal augmentation functionality"""
+    """Test temporal augmentation functionality."""
 
     def setup_method(self):
-        """Setup test fixtures"""
+        """Set up test fixtures."""
         try:
             from adnet.data.transforms.transforms import TemporalAugmentation
 
@@ -377,7 +381,7 @@ class TestTemporalAugmentation:
             pytest.skip("TemporalAugmentation not available")
 
     def test_temporal_transform_structure(self):
-        """Test temporal transform preserves sample structure"""
+        """Test temporal transform preserves sample structure."""
         sample = create_mock_sample()
         transformed_sample = self.transform(sample)
 
@@ -387,7 +391,7 @@ class TestTemporalAugmentation:
         assert hasattr(transformed_sample, "sequence_info")
 
     def test_frame_rate_simulation(self):
-        """Test frame rate simulation"""
+        """Test frame rate simulation."""
         self.transform.frame_rate_simulation = True
         sample = create_mock_sample()
 
@@ -403,11 +407,11 @@ class TestTemporalAugmentation:
         assert hasattr(transformed_sample.sequence_info, "frame_indices")
 
     def test_temporal_dropout_disabled(self):
-        """Test temporal dropout when disabled"""
+        """Test temporal dropout when disabled."""
         self.transform.dropout_probability = 0.0
         sample = create_mock_sample()
 
-        original_frame_count = len(sample.sequence_info.frame_indices)
+        len(sample.sequence_info.frame_indices)
         transformed_sample = self.transform(sample)
 
         # With dropout disabled, frame count should be preserved
@@ -417,10 +421,10 @@ class TestTemporalAugmentation:
 
 
 class TestNormalization:
-    """Test normalization functionality"""
+    """Test normalization functionality."""
 
     def setup_method(self):
-        """Setup test fixtures"""
+        """Set up test fixtures."""
         try:
             from adnet.data.transforms.transforms import Normalize
 
@@ -431,7 +435,7 @@ class TestNormalization:
             pytest.skip("Normalize not available")
 
     def test_normalization_output_range(self):
-        """Test normalization output value range"""
+        """Test normalization output value range."""
         sample = create_mock_sample()
         transformed_sample = self.transform(sample)
 
@@ -445,7 +449,7 @@ class TestNormalization:
             assert image.max() > 0
 
     def test_normalization_statistics(self):
-        """Test normalization statistics"""
+        """Test normalization statistics."""
         sample = create_mock_sample()
         transformed_sample = self.transform(sample)
 
@@ -457,7 +461,7 @@ class TestNormalization:
             assert not np.isnan(image).any()
 
     def test_normalization_preserves_structure(self):
-        """Test normalization preserves image structure"""
+        """Test normalization preserves image structure."""
         sample = create_mock_sample()
         original_shapes = {k: v.shape for k, v in sample.images.items()}
 
@@ -473,10 +477,10 @@ class TestNormalization:
 
 
 class TestTransformComposition:
-    """Test transform composition and pipelines"""
+    """Test transform composition and pipelines."""
 
     def setup_method(self):
-        """Setup test fixtures"""
+        """Set up test fixtures."""
         try:
             from adnet.data.transforms.transforms import (
                 Compose,
@@ -494,7 +498,7 @@ class TestTransformComposition:
             pytest.skip("Transform composition not available")
 
     def test_pipeline_execution(self):
-        """Test pipeline execution order"""
+        """Test pipeline execution order."""
         sample = create_mock_sample()
         transformed_sample = self.pipeline(sample)
 
@@ -509,7 +513,7 @@ class TestTransformComposition:
             assert image.min() < 0
 
     def test_pipeline_structure_preservation(self):
-        """Test pipeline preserves sample structure"""
+        """Test pipeline preserves sample structure."""
         sample = create_mock_sample()
         transformed_sample = self.pipeline(sample)
 
@@ -521,10 +525,10 @@ class TestTransformComposition:
 
 
 class TestTransformPipelineFactory:
-    """Test transform pipeline factory functions"""
+    """Test transform pipeline factory functions."""
 
     def test_training_pipeline_creation(self):
-        """Test training pipeline factory"""
+        """Test training pipeline factory."""
         try:
             from adnet.data.transforms.transforms import (
                 create_training_transform_pipeline,
@@ -553,7 +557,7 @@ class TestTransformPipelineFactory:
             pytest.skip("create_training_transform_pipeline not available")
 
     def test_validation_pipeline_creation(self):
-        """Test validation pipeline factory"""
+        """Test validation pipeline factory."""
         try:
             from adnet.data.transforms.transforms import (
                 create_validation_transform_pipeline,

@@ -9,6 +9,7 @@ from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
 import numpy as np
+import numpy.typing as npt
 import torch
 from torch.utils.data import DataLoader, Dataset
 
@@ -35,10 +36,11 @@ class TemporalSequenceSample:
         self,
         frames: List[Sample],
         sequence_length: int,
-        ego_motions: np.ndarray,
+        ego_motions: npt.NDArray[Any],
         instance_tracks: Dict[str, List[InstanceAnnotation]],
-        temporal_weights: np.ndarray,
+        temporal_weights: npt.NDArray[Any],
     ):
+        """Initialize temporal sequence sample."""
         self.frames = frames
         self.sequence_length = sequence_length
         self.ego_motions = ego_motions  # [T-1, 6] - relative motions between frames
@@ -54,25 +56,25 @@ class TemporalSequenceSample:
         self.timestamps = np.array([f.sequence_info.timestamps[-1] for f in frames])
 
     def get_current_frame(self) -> Sample:
-        """Get the current (last) frame in sequence"""
+        """Get the current (last) frame in sequence."""
         return self.current_frame
 
     def get_temporal_frames(self) -> List[Sample]:
-        """Get all frames in temporal order (oldest to newest)"""
+        """Get all frames in temporal order (oldest to newest)."""
         return self.frames
 
     def get_ego_motion_at(self, frame_idx: int) -> np.ndarray:
-        """Get ego motion from frame_idx to frame_idx+1"""
+        """Get ego motion from frame_idx to frame_idx+1."""
         if frame_idx >= len(self.ego_motions):
             return np.zeros(6)  # [dx, dy, dz, roll, pitch, yaw]
         return self.ego_motions[frame_idx]
 
     def get_instance_track(self, instance_id: str) -> List[InstanceAnnotation]:
-        """Get tracking history for specific instance"""
+        """Get tracking history for specific instance."""
         return self.instance_tracks.get(instance_id, [])
 
     def get_temporal_statistics(self) -> Dict[str, Any]:
-        """Get temporal sequence statistics"""
+        """Get temporal sequence statistics."""
         return {
             "sequence_id": self.sequence_id,
             "sequence_length": self.sequence_length,
@@ -103,6 +105,7 @@ class TemporalSequenceBuilder:
         ego_motion_threshold: float = 1.0,  # meters
         instance_tracking: bool = True,
     ):
+        """Initialize temporal sequence builder."""
         self.sequence_length = sequence_length
         self.temporal_stride = temporal_stride
         self.sampling_strategy = sampling_strategy
@@ -161,7 +164,7 @@ class TemporalSequenceBuilder:
         )
 
     def _get_sequence_indices(self, dataset: BaseDataset, center_idx: int) -> List[int]:
-        """Get frame indices for temporal sequence"""
+        """Get frame indices for temporal sequence."""
         if self.sampling_strategy == "uniform":
             return self._uniform_sampling(dataset, center_idx)
         elif self.sampling_strategy == "key_frame":
@@ -172,7 +175,7 @@ class TemporalSequenceBuilder:
             raise ValueError(f"Unknown sampling strategy: {self.sampling_strategy}")
 
     def _uniform_sampling(self, dataset: BaseDataset, center_idx: int) -> List[int]:
-        """Uniform temporal sampling"""
+        """Uniform temporal sampling."""
         indices = []
 
         # Sample backwards from center
@@ -184,7 +187,7 @@ class TemporalSequenceBuilder:
         return indices
 
     def _key_frame_sampling(self, dataset: BaseDataset, center_idx: int) -> List[int]:
-        """Key frame sampling based on ego motion"""
+        """Key frame sampling based on ego motion."""
         indices = [center_idx]  # Always include center frame
 
         # Look backwards for frames with significant ego motion
@@ -216,7 +219,7 @@ class TemporalSequenceBuilder:
         return indices
 
     def _adaptive_sampling(self, dataset: BaseDataset, center_idx: int) -> List[int]:
-        """Adaptive sampling based on scene dynamics"""
+        """Adaptive sampling based on scene dynamics."""
         # Get all possible frames within temporal window
         max_lookback = self.sequence_length * self.temporal_stride * 2
         candidate_indices = []
@@ -249,7 +252,7 @@ class TemporalSequenceBuilder:
     def _compute_frame_importance(
         self, dataset: BaseDataset, frame_idx: int, center_idx: int
     ) -> float:
-        """Compute importance score for frame selection"""
+        """Compute importance score for frame selection."""
         try:
             frame = dataset[frame_idx]
             center_frame = dataset[center_idx]
@@ -287,7 +290,7 @@ class TemporalSequenceBuilder:
         return score
 
     def _compute_ego_motions(self, frames: List[Sample]) -> np.ndarray:
-        """Compute ego motions between consecutive frames"""
+        """Compute ego motions between consecutive frames."""
         ego_motions = []
 
         for i in range(len(frames) - 1):
@@ -316,7 +319,7 @@ class TemporalSequenceBuilder:
     def _compute_ego_motion_between_frames(
         self, dataset: BaseDataset, frame1_idx: int, frame2_idx: int
     ) -> np.ndarray:
-        """Compute ego motion between two specific frames"""
+        """Compute ego motion between two specific frames."""
         try:
             frame1 = dataset[frame1_idx]
             frame2 = dataset[frame2_idx]
@@ -345,7 +348,7 @@ class TemporalSequenceBuilder:
     def _track_instances(
         self, frames: List[Sample]
     ) -> Dict[str, List[InstanceAnnotation]]:
-        """Track instances across frames in sequence"""
+        """Track instances across frames in sequence."""
         tracks = defaultdict(list)
 
         for frame in frames:
@@ -361,7 +364,7 @@ class TemporalSequenceBuilder:
         return filtered_tracks
 
     def _compute_temporal_weights(self, frames: List[Sample]) -> np.ndarray:
-        """Compute importance weights for each frame in sequence"""
+        """Compute importance weights for each frame in sequence."""
         weights = np.ones(len(frames))
 
         # Give higher weight to more recent frames
@@ -376,7 +379,7 @@ class TemporalSequenceBuilder:
         return weights
 
 
-class TemporalDataLoader(DataLoader):
+class TemporalDataLoader(DataLoader[Any]):
     """Specialized DataLoader for temporal sequences.
 
     Handles batch collation for temporal data and provides
@@ -393,6 +396,7 @@ class TemporalDataLoader(DataLoader):
         transform: Optional[Transform] = None,
         **kwargs,
     ):
+        """Initialize temporal data loader."""
         self.sequence_builder = sequence_builder
         self.transform = transform
 
@@ -525,7 +529,7 @@ class TemporalDataLoader(DataLoader):
 
 
 class TemporalDatasetWrapper(Dataset):
-    """Wrapper to convert regular dataset to temporal sequence dataset"""
+    """Wrapper to convert regular dataset to temporal sequence dataset."""
 
     def __init__(
         self,
@@ -533,6 +537,7 @@ class TemporalDatasetWrapper(Dataset):
         sequence_builder: TemporalSequenceBuilder,
         transform: Optional[Transform] = None,
     ):
+        """Initialize temporal dataset wrapper."""
         self.base_dataset = base_dataset
         self.sequence_builder = sequence_builder
         self.transform = transform
@@ -541,7 +546,7 @@ class TemporalDatasetWrapper(Dataset):
         self.valid_indices = self._build_valid_indices()
 
     def _build_valid_indices(self) -> List[int]:
-        """Build list of valid center frame indices for temporal sequences"""
+        """Build list of valid center frame indices for temporal sequences."""
         valid_indices = []
 
         for i in range(len(self.base_dataset)):
@@ -553,9 +558,11 @@ class TemporalDatasetWrapper(Dataset):
         return valid_indices
 
     def __len__(self) -> int:
+        """Return number of valid temporal sequences."""
         return len(self.valid_indices)
 
     def __getitem__(self, index: int) -> TemporalSequenceSample:
+        """Get temporal sequence sample by index."""
         center_frame_idx = self.valid_indices[index]
 
         # Build temporal sequence
@@ -587,7 +594,7 @@ def create_temporal_dataloader(
     transform: Optional[Transform] = None,
     **kwargs,
 ) -> TemporalDataLoader:
-    """Factory function to create temporal data loader.
+    """Create temporal data loader factory.
 
     Args:
         dataset: Base dataset
@@ -598,6 +605,7 @@ def create_temporal_dataloader(
         shuffle: Whether to shuffle data
         num_workers: Number of worker processes
         transform: Optional transforms to apply
+        **kwargs: Additional keyword arguments
 
     Returns:
         Configured TemporalDataLoader

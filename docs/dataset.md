@@ -8,7 +8,7 @@
 
 ### **Waymo Open Dataset** (2019) - Multiple US cities
 - **Cameras**: 5 cameras (front + 4 side)
-- **Temporal**: 10Hz, ~20s sequences  
+- **Temporal**: 10Hz, ~20s sequences
 - **Annotations**: 3D boxes, tracking, motion labels
 - **Access**: Free with terms acceptance
 
@@ -19,7 +19,7 @@
 - **Access**: Free download
 
 ### **Argoverse 2.0** (2021) - 6 cities worldwide
-- **Cameras**: 7 surround cameras  
+- **Cameras**: 7 surround cameras
 - **Temporal**: 10Hz, longer sequences
 - **Annotations**: Improved 3D boxes, sensor suite
 - **Access**: Free registration
@@ -32,7 +32,7 @@
 - **Annotations**: 3D detection + tracking
 - **Access**: Free registration
 
-### **Zenseact Open Dataset (ZOD)** (2022) - Europe  
+### **Zenseact Open Dataset (ZOD)** (2022) - Europe
 - **Cameras**: 8 cameras
 - **Temporal**: Variable Hz, long sequences
 - **Annotations**: Dense 3D annotations
@@ -40,7 +40,7 @@
 
 ### **KITTI-360** (2021) - Germany
 - **Cameras**: 2 stereo pairs
-- **Temporal**: Continuous sequences  
+- **Temporal**: Continuous sequences
 - **Annotations**: 3D semantic segmentation
 - **Access**: Free download
 
@@ -59,7 +59,7 @@
 - **Access**: Free registration
 
 ### **Lyft Level 5** (2020) - Palo Alto
-- **Cameras**: 7 cameras  
+- **Cameras**: 7 cameras
 - **Temporal**: 10Hz sequences
 - **Annotations**: Similar to nuScenes format
 - **Access**: Free (archived but available)
@@ -81,7 +81,7 @@
 ### **H3D** (2019) - Honda Research
 - **Cameras**: 3 front cameras
 - **Temporal**: Highway driving sequences
-- **Annotations**: 3D boxes, occlusion labels  
+- **Annotations**: 3D boxes, occlusion labels
 - **Access**: Research license
 
 ### **DAIR-V2X** (2022) - V2X Cooperative
@@ -110,7 +110,7 @@
 - **Annotations**: Perfect ground truth
 - **Access**: Open source
 
-### **AirSim** (2017) - Microsoft Simulator  
+### **AirSim** (2017) - Microsoft Simulator
 - **Cameras**: Configurable cameras
 - **Temporal**: Configurable sequences
 - **Annotations**: Synthetic ground truth
@@ -126,7 +126,7 @@
 
 ### **Shifts** (2022) - Distribution Shift Evaluation
 - **Cameras**: Various camera configurations
-- **Temporal**: Cross-domain sequences  
+- **Temporal**: Cross-domain sequences
 - **Annotations**: 3D detection across domains
 - **Access**: Competition/research
 

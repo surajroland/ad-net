@@ -1,5 +1,4 @@
-"""
-Test suite for nuScenes dataset implementation.
+"""Test suite for nuScenes dataset implementation.
 
 Tests for the nuScenes dataset loader including:
 - Dataset initialization and metadata loading
@@ -11,7 +10,6 @@ Tests for the nuScenes dataset loader including:
 
 import os
 import sys
-from unittest.mock import MagicMock, Mock, patch
 
 import numpy as np
 import pytest
@@ -28,27 +26,28 @@ from adnet.interfaces.data.dataset import (
 
 
 class TestNuScenesDataset:
-    """Test suite for nuScenes dataset implementation"""
+    """Test suite for nuScenes dataset implementation."""
 
     def setup_method(self):
-        """Setup test fixtures"""
+        """Set up test fixtures."""
         self.mock_data_root = "/mock/nuscenes"
         self.mock_version = "v1.0-mini"
         self.mock_split = "train"
 
     def test_dataset_initialization(self):
-        """Test dataset initialization with mock data"""
+        """Test dataset initialization with mock data."""
         # This would test actual NuScenesDataset initialization
         # For now, test that we can import the module
         try:
             from adnet.data.datasets.nuscenes_dataset import NuScenesDataset
 
-            assert True, "NuScenesDataset imported successfully"
+            # Use the import to avoid unused import warning
+            assert NuScenesDataset is not None, "NuScenesDataset imported successfully"
         except ImportError as e:
             pytest.skip(f"NuScenesDataset not available: {e}")
 
     def test_sample_loading(self):
-        """Test sample data loading"""
+        """Test sample data loading."""
         # Mock sample data structure
         mock_sample = Sample(
             sample_id="sample_001",
@@ -91,7 +90,7 @@ class TestNuScenesDataset:
         assert mock_sample.camera_params.intrinsics.shape[0] == 2
 
     def test_camera_calibration(self):
-        """Test camera calibration parameter handling"""
+        """Test camera calibration parameter handling."""
         intrinsics = np.array(
             [
                 [[1266.4, 0, 816.2], [0, 1266.4, 491.5], [0, 0, 1]],  # CAM_FRONT
@@ -118,7 +117,7 @@ class TestNuScenesDataset:
         assert fy == pytest.approx(1266.4, rel=1e-3)
 
     def test_temporal_sequence_construction(self):
-        """Test temporal sequence metadata construction"""
+        """Test temporal sequence metadata construction."""
         sequence_info = TemporalSequence(
             sequence_id="scene_001_frame_010",
             frame_indices=[8, 9, 10, 11],
@@ -140,7 +139,7 @@ class TestNuScenesDataset:
         assert np.allclose(time_diffs, expected_diff)
 
     def test_instance_annotation_validation(self):
-        """Test 3D bounding box annotation validation"""
+        """Test 3D bounding box annotation validation."""
         # Valid nuScenes 3D box format: [x, y, z, w, l, h, cos(yaw), sin(yaw), velocity]
         box_3d = np.array([10.5, -5.2, 1.8, 1.8, 4.2, 1.6, 0.866, 0.5, 2.3])
 
@@ -159,18 +158,18 @@ class TestNuScenesDataset:
         assert "moving" in instance.attributes
 
         # Validate 3D box components
-        x, y, z = box_3d[0], box_3d[1], box_3d[2]
-        w, l, h = box_3d[3], box_3d[4], box_3d[5]
+        x, _y, z = box_3d[0], box_3d[1], box_3d[2]
+        w, _length, h = box_3d[3], box_3d[4], box_3d[5]
         cos_yaw, sin_yaw = box_3d[6], box_3d[7]
-        velocity = box_3d[8]
+        box_3d[8]
 
         assert x == pytest.approx(10.5, rel=1e-3)
         assert z == pytest.approx(1.8, rel=1e-3)  # Height above ground
-        assert w > 0 and l > 0 and h > 0  # Positive dimensions
+        assert w > 0 and _length > 0 and h > 0  # Positive dimensions
         assert abs(cos_yaw**2 + sin_yaw**2 - 1.0) < 1e-6  # Unit vector constraint
 
     def test_class_mapping(self):
-        """Test nuScenes class name mapping"""
+        """Test nuScenes class name mapping."""
         # nuScenes detection classes
         nuscenes_classes = [
             "car",
@@ -196,7 +195,7 @@ class TestNuScenesDataset:
             assert 0 <= category_id < len(nuscenes_classes)
 
     def test_split_validation(self):
-        """Test dataset split validation"""
+        """Test dataset split validation."""
         valid_splits = ["train", "val", "test", "mini_train", "mini_val"]
 
         for split in valid_splits:
@@ -210,7 +209,7 @@ class TestNuScenesDataset:
 
     @pytest.mark.parametrize("sequence_length", [1, 2, 4, 8])
     def test_sequence_length_handling(self, sequence_length):
-        """Test different temporal sequence lengths"""
+        """Test different temporal sequence lengths."""
         frame_indices = list(range(sequence_length))
         timestamps = np.array([i * 500000 for i in range(sequence_length)])
         ego_poses = np.array([np.eye(4)] * sequence_length)

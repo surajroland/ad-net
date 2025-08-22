@@ -183,7 +183,7 @@ class BaseDataset(Dataset[Sample], ABC):
 
 
 class MultiModalDataset(BaseDataset):
-    """Extended base class for multi-modal datasets (camera + LiDAR + radar).
+    """Extended base class for multi-modal datasets (camera + LiDAR + radar)..
 
     Handles loading and synchronization of multiple sensor modalities
     with proper temporal alignment.
