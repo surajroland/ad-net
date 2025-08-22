@@ -73,9 +73,14 @@
       "Bash(done)",
       "Bash(for:*)",
       "Bash(do mv \"$file\" \"$file%.disabled\")",
-      "Bash(gh api:*)"
+      "Bash(gh api:*)",
+      "Bash(git rebase:*)"
     ],
     "deny": [],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": [
+      "/mnt/c/Users/suraj",
+      "/mnt/c"
+    ]
   }
 }
