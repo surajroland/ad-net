@@ -6,6 +6,7 @@ Tests for temporal sequence handling including:
 - Ego motion computation
 - Instance tracking across time
 - Batch collation for 4D detection
+- Performance optimization
 """
 
 import os
