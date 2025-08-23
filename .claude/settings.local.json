@@ -76,7 +76,8 @@
       "Bash(gh api:*)",
       "Bash(git rebase:*)",
       "Bash(pre-commit run:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(mypy:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
