@@ -11,15 +11,15 @@ services:
   dev:
     build:
       context: ..                   # Build context is parent directory (project root)
-      dockerfile: docker/Dockerfile # Specify Dockerfile location
+      dockerfile: docker/Dockerfile # Use original Dockerfile with conditional CUDA
       target: development           # Multi-stage build target
       cache_from:
-        - adnet-dev:${VERSION:-latest}
-        - adnet-dev:latest
+        - ubuntu:24.04
       args:
         VERSION: ${VERSION:-latest}
         BUILD_DATE: ${BUILD_DATE}
         VCS_REF: ${VCS_REF}
+        INSTALL_CUDA: ${INSTALL_CUDA:-false}
     image: adnet-dev:${VERSION:-latest}
     container_name: adnet-dev
     env_file: ../.env               # Load environment variables from project root
@@ -27,14 +27,14 @@ services:
     # Volume mounts for development workflow
     volumes:
       - ..:/workspace                             # Mount project directory
-      - ~/.ssh:/root/.ssh:ro                      # SSH keys (read-only)
-      - ~/.gitconfig:/root/.gitconfig:ro          # Git configuration
-      - bash-history:/root                        # Persist bash history
+      - ~/.ssh:/home/adnet/.ssh:ro                # SSH keys (read-only)
+      - ~/.gitconfig:/home/adnet/.gitconfig:ro    # Git configuration
+      - bash-history:/home/adnet                  # Persist bash history
       - data:/workspace/data             # Project data
       - logs:/workspace/logs             # Application logs
       - models:/workspace/models         # ML models
-      - cache:/root/.cache               # Cache directory
-      - vscode-server:/root/.vscode-server        # VS Code server files
+      - cache:/home/adnet/.cache         # Cache directory
+      - vscode-server:/home/adnet/.vscode-server  # VS Code server files
       - /var/run/docker.sock:/var/run/docker.sock # Docker-in-Docker
 
     # Port mappings for development services
@@ -67,7 +67,7 @@ services:
         echo '🔍 Wandb: http://localhost:${WANDB_PORT:-8097}'
         echo '🎥 3D Viz: http://localhost:${VISUALIZATION_PORT:-8080}'
         echo ''
-        jupyter lab --ip=0.0.0.0 --port=${JUPYTER_PORT:-8888} --no-browser --allow-root &
+        jupyter lab --ip=0.0.0.0 --port=${JUPYTER_PORT:-8888} --no-browser &
         tensorboard --logdir=outputs/logs --host=0.0.0.0 --port=${TENSORBOARD_PORT:-6006} &
         exec bash
       "
@@ -135,7 +135,7 @@ services:
       - "${JUPYTER_PORT:-8888}:8888"
 
     # Jupyter-only command
-    command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root
+    command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser
     profiles: ["research"]              # Only start with --profile research
 
   # ==============================================================================

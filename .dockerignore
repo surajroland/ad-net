@@ -1,0 +1,51 @@
+# Development files
+.git/
+.vscode/
+.devcontainer/
+.claude/
+.github/workflows/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Output directories
+outputs/
+multirun/
+.hydra/
+wandb/
+logs/
+data/raw/
+data/processed/
+models/
+
+# Node modules
+node_modules/
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+*.log

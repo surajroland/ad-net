@@ -216,6 +216,6 @@
     "source=${localWorkspaceFolder}/.git,target=/workspace/.git,type=bind,consistency=cached"
   ],
   "privileged": false,
-  "remoteUser": "root",
+  "remoteUser": "adnet",
   "updateRemoteUserUID": false
 }

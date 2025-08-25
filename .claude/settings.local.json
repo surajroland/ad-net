@@ -77,7 +77,12 @@
       "Bash(git rebase:*)",
       "Bash(pre-commit run:*)",
       "Bash(grep:*)",
-      "Bash(mypy:*)"
+      "Bash(mypy:*)",
+      "Read(//home/**)",
+      "Bash(nvidia-smi:*)",
+      "Bash(sudo touch:*)",
+      "Bash(sudo rm:*)",
+      "Bash(docker start:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

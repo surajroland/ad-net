@@ -297,7 +297,7 @@ monitor:
 
 jupyter:
 	@echo "$(BLUE)📊 Starting Jupyter Lab...$(NC)"
-	docker-compose -f $(COMPOSE_FILE) exec $(SERVICE_DEV) jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root
+	docker-compose -f $(COMPOSE_FILE) exec $(SERVICE_DEV) jupyter lab --ip=0.0.0.0 --port=8888 --no-browser
 
 tensorboard:
 	@echo "$(BLUE)📈 Starting TensorBoard...$(NC)"

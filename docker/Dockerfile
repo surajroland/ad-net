@@ -78,19 +78,20 @@ RUN echo "Installing system packages..." && \
     libeigen3-dev \
     libopencv-dev \
     libboost-all-dev \
-    libgtest-dev \
-    libnvidia-compute-575 \
-    libnvidia-decode-575 \
-    libnvidia-encode-575 && \
+    libgtest-dev && \
     eval "$CLEANUP_CMD"
 
-# Install CUDA toolkit
-RUN echo "Installing CUDA toolkit..." && \
-    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb && \
-    dpkg -i cuda-keyring_1.1-1_all.deb && \
-    apt-get update && \
-    apt-get install -y cuda-toolkit-12-9 && \
-    eval "$CLEANUP_CMD"
+# Install CUDA toolkit (optional - skip for faster builds)
+RUN if [ "${INSTALL_CUDA:-true}" = "true" ]; then \
+        echo "Installing CUDA toolkit..." && \
+        wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb && \
+        dpkg -i cuda-keyring_1.1-1_all.deb && \
+        apt-get update && \
+        apt-get install -y cuda-toolkit-12-9 && \
+        eval "$CLEANUP_CMD"; \
+    else \
+        echo "Skipping CUDA installation for faster build"; \
+    fi
 
 # Set CUDA environment
 ENV PATH=/usr/local/cuda/bin:$PATH \
@@ -123,40 +124,67 @@ RUN pip install --upgrade pip setuptools wheel
 # Install starship prompt
 RUN echo "Installing Starship prompt..." && \
     curl -sS https://starship.rs/install.sh | sh -s -- --yes && \
-    echo '' >> ~/.bashrc && \
-    echo '# Initialize Starship prompt' >> ~/.bashrc && \
-    echo 'eval "$(starship init bash)"' >> ~/.bashrc && \
     eval "$CLEANUP_CMD"
+
+# Create non-root user with proper home directory
+RUN useradd -m -s /bin/bash adnet && \
+    echo "adnet ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
+    chmod 755 /home/adnet && \
+    chown -R adnet:adnet /home/adnet
 
 # Set working directory
 WORKDIR /workspace
 
-# Install PyTorch with CUDA support
+# Change ownership to adnet user
+RUN chown -R adnet:adnet /workspace /opt/venv
+
+# Switch to adnet user
+USER adnet
+
+# Configure shell for adnet user
+RUN echo '' >> ~/.bashrc && \
+    echo '# Initialize Starship prompt' >> ~/.bashrc && \
+    echo 'eval "$(starship init bash)"' >> ~/.bashrc
+
+# Configure git safe directory for workspace
+RUN git config --global --add safe.directory /workspace
+
+# Install PyTorch (with conditional CUDA support)
 RUN echo "Installing PyTorch..." && \
-    pip install --no-cache-dir --break-system-packages \
-    torch==2.8.0 \
-    torchvision==0.23.0 \
-    torchaudio==2.8.0 \
-    --index-url https://download.pytorch.org/whl/cu129 && \
-    eval "$CLEANUP_CMD"
+    if [ "${INSTALL_CUDA:-true}" = "true" ]; then \
+        echo "Installing PyTorch with CUDA support..." && \
+        pip install --no-cache-dir --break-system-packages \
+        torch==2.8.0 \
+        torchvision==0.23.0 \
+        torchaudio==2.8.0 \
+        --index-url https://download.pytorch.org/whl/cu129; \
+    else \
+        echo "Installing PyTorch CPU version for faster build..." && \
+        pip install --no-cache-dir --break-system-packages \
+        torch==2.8.0 \
+        torchvision==0.23.0 \
+        torchaudio==2.8.0 \
+        --index-url https://download.pytorch.org/whl/cpu; \
+    fi && \
+    sudo bash -c "$CLEANUP_CMD"
 
 # Install build dependencies
 RUN echo "Installing build dependencies..." && \
     pip install --no-cache-dir --break-system-packages \
     packaging wheel setuptools cython numpy scipy && \
-    eval "$CLEANUP_CMD"
+    sudo bash -c "$CLEANUP_CMD"
 
 # Install base dependencies
-COPY requirements/base.txt requirements/base.txt
+COPY --chown=adnet:adnet requirements/base.txt requirements/base.txt
 RUN echo "Installing base dependencies..." && \
     pip install --no-cache-dir --break-system-packages -r requirements/base.txt && \
-    eval "$CLEANUP_CMD"
+    sudo bash -c "$CLEANUP_CMD"
 
 # Copy and install project
-COPY . .
+COPY --chown=adnet:adnet . .
 RUN echo "Installing project..." && \
     pip install --break-system-packages -e . && \
-    eval "$CLEANUP_CMD"
+    sudo bash -c "$CLEANUP_CMD"
 
 # ==============================================================================
 # DEVELOPMENT STAGE - Full development environment with Jupyter, testing tools
@@ -169,27 +197,26 @@ LABEL org.opencontainers.image.version="${VERSION}"
 LABEL stage="dev"
 
 # Install development dependencies
-COPY requirements/dev.txt requirements/dev.txt
+COPY --chown=adnet:adnet requirements/dev.txt requirements/dev.txt
 RUN echo "Installing development dependencies..." && \
     pip install --no-cache-dir --break-system-packages -r requirements/dev.txt && \
-    eval "$CLEANUP_CMD"
+    sudo bash -c "$CLEANUP_CMD"
 
 # Install visualization and UI dependencies
-COPY requirements/visualization.txt requirements/visualization.txt
+COPY --chown=adnet:adnet requirements/visualization.txt requirements/visualization.txt
 RUN echo "Installing visualization dependencies..." && \
     pip install --no-cache-dir --break-system-packages -r requirements/visualization.txt && \
-    eval "$CLEANUP_CMD"
+    sudo bash -c "$CLEANUP_CMD"
 
 # Install Claude Code CLI
 RUN echo "Installing Claude Code..." && \
-    npm install -g @anthropic-ai/claude-code && \
-    eval "$CLEANUP_CMD"
+    sudo npm install -g @anthropic-ai/claude-code && \
+    sudo bash -c "$CLEANUP_CMD"
 
 # Configure Jupyter to work with the virtual environment
 RUN echo "Configuring Jupyter..." && \
    jupyter notebook --generate-config && \
    echo "c.NotebookApp.ip = '0.0.0.0'" >> ~/.jupyter/jupyter_notebook_config.py && \
-   echo "c.NotebookApp.allow_root = True" >> ~/.jupyter/jupyter_notebook_config.py && \
    echo "c.NotebookApp.token = ''" >> ~/.jupyter/jupyter_notebook_config.py && \
    echo "c.NotebookApp.password = ''" >> ~/.jupyter/jupyter_notebook_config.py
 
@@ -212,7 +239,7 @@ LABEL stage="training"
 COPY requirements/training.txt requirements/training.txt
 RUN echo "Installing training dependencies..." && \
     pip install --no-cache-dir --break-system-packages -r requirements/training.txt && \
-    eval "$CLEANUP_CMD"
+    sudo bash -c "$CLEANUP_CMD"
 
 # Training-specific optimizations
 ENV TORCH_CUDNN_BENCHMARK=1
@@ -233,14 +260,8 @@ LABEL stage="production"
 COPY requirements/api.txt requirements/api.txt
 RUN echo "Installing API dependencies..." && \
     pip install --no-cache-dir --break-system-packages -r requirements/api.txt && \
-    eval "$CLEANUP_CMD"
+    sudo bash -c "$CLEANUP_CMD"
 
-# Create non-root user for production
-RUN useradd -m -s /bin/bash adnet && \
-   chown -R adnet:adnet /workspace /opt/venv
-
-# Switch to non-root user
-USER adnet
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
