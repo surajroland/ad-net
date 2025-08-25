@@ -19,7 +19,11 @@ services:
         VERSION: ${VERSION:-latest}
         BUILD_DATE: ${BUILD_DATE}
         VCS_REF: ${VCS_REF}
+        USER_UID: ${USER_UID:-1000}
+        USER_GID: ${USER_GID:-1000}
         INSTALL_CUDA: ${INSTALL_CUDA:-false}
+        USER_UID: ${USER_UID:-1000}
+        USER_GID: ${USER_GID:-1000}
     image: adnet-dev:${VERSION:-latest}
     container_name: adnet-dev
     env_file: ../.env               # Load environment variables from project root
@@ -27,7 +31,7 @@ services:
     # Volume mounts for development workflow
     volumes:
       - ..:/workspace                             # Mount project directory
-      - ~/.ssh:/home/adnet/.ssh:ro                # SSH keys (read-only)
+      - ~/.ssh:/home/adnet/.ssh                    # SSH keys
       - ~/.gitconfig:/home/adnet/.gitconfig:ro    # Git configuration
       - bash-history:/home/adnet                  # Persist bash history
       - data:/workspace/data             # Project data
@@ -105,6 +109,8 @@ services:
         VERSION: ${VERSION:-latest}
         BUILD_DATE: ${BUILD_DATE}
         VCS_REF: ${VCS_REF}
+        USER_UID: ${USER_UID:-1000}
+        USER_GID: ${USER_GID:-1000}
     image: adnet-training:${VERSION:-latest}
     container_name: adnet-training
     extends: dev               # Inherit from dev service
@@ -150,6 +156,8 @@ services:
         VERSION: ${VERSION:-latest}
         BUILD_DATE: ${BUILD_DATE}
         VCS_REF: ${VCS_REF}
+        USER_UID: ${USER_UID:-1000}
+        USER_GID: ${USER_GID:-1000}
     image: adnet-production:${VERSION:-latest}
     container_name: adnet-production
     extends: dev               # Inherit base configuration
@@ -183,6 +191,8 @@ services:
         VERSION: ${VERSION:-latest}
         BUILD_DATE: ${BUILD_DATE}
         VCS_REF: ${VCS_REF}
+        USER_UID: ${USER_UID:-1000}
+        USER_GID: ${USER_GID:-1000}
     image: adnet-dev:${VERSION:-latest}
     container_name: adnet-viz
     extends: dev
