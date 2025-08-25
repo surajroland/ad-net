@@ -126,16 +126,9 @@ RUN echo "Installing Starship prompt..." && \
     curl -sS https://starship.rs/install.sh | sh -s -- --yes && \
     eval "$CLEANUP_CMD"
 
-# Build arguments for user creation (default to 1000 if not provided)
-ARG USER_UID=1000
-ARG USER_GID=1000
-
-# Create non-root user with matching host UID/GID
-RUN groupadd -g ${USER_GID} adnet || true && \
-    useradd -m -u ${USER_UID} -g ${USER_GID} -s /bin/bash adnet && \
-    echo "adnet ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
-    chmod 755 /home/adnet && \
-    chown -R adnet:adnet /home/adnet
+# Create "adnet" user with UID 0 (root privileges but different name)
+RUN useradd -o -u 0 -g 0 -m -s /bin/bash adnet && \
+    chmod 755 /home/adnet
 
 # Set working directory
 WORKDIR /workspace
