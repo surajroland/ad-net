@@ -38,7 +38,7 @@ toml>=0.10.2
 # Deep Learning Framework
 torch==2.8.0
 torchaudio==2.8.0
-torchvision==0.23.0
+torchvision==0.24.0
 
 # Utilities
 tqdm>=4.65.0
